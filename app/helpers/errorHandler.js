@@ -19,7 +19,6 @@ const customError = (err, req, res, next) => {
             responseStatus: error.status,
         });
     }
-    next();
 };
 exports.customError = customError;
 // 404 Not Found Error

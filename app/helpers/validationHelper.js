@@ -6,7 +6,6 @@ const { validationResult } = require('express-validator');
 // Check Validation For Requests
 const checkValidation = (req) => {
     const errors = validationResult(req);
-    console.log('errors: ', errors);
     if (!errors.isEmpty()) {
         const validationError = {
             status: 400,
