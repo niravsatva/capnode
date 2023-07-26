@@ -13,7 +13,7 @@ const customError = (err, req, res, next) => {
         });
     }
     else {
-        return res.status(200).json({
+        return res.status(error.status).json({
             error: err,
             message: error.message,
             responseStatus: error.status,

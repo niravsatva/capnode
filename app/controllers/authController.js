@@ -67,7 +67,6 @@ class AuthController {
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 (0, validationHelper_1.checkValidation)(req);
-                console.log('req: ', req);
                 const { email, password } = req.body;
                 const { accessToken, refreshToken, user } = yield authServices_1.default.login(email.toLowerCase(), password);
                 req.session.accessToken = accessToken;
@@ -76,7 +75,6 @@ class AuthController {
                 return (0, defaultResponseHelper_1.DefaultResponse)(res, 200, 'User logged in successfully', finalUser);
             }
             catch (err) {
-                console.log('err: ', err);
                 next(err);
             }
         });
