@@ -26,6 +26,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 /* eslint-disable no-mixed-spaces-and-tabs */
 const config_1 = __importDefault(require("../../config"));
 const emailHelper_1 = __importDefault(require("../helpers/emailHelper"));
+const emailTemplateHelper_1 = require("../helpers/emailTemplateHelper");
 const tokenHelper_1 = require("../helpers/tokenHelper");
 const customError_1 = require("../models/customError");
 const repositories_1 = require("../repositories");
@@ -40,7 +41,7 @@ class UserServices {
                 const offset = (Number(page) - 1) * Number(limit);
                 // Conditions for filtering
                 const filterConditions = filter
-                    ? JSON.parse(filter)
+                    ? { status: filter == 'true' ? true : false }
                     : {};
                 // Conditions for search
                 const searchCondition = search
@@ -99,7 +100,7 @@ class UserServices {
     updateUser(data) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                const { userId, companyId, roleId, status } = data, userData = __rest(data, ["userId", "companyId", "roleId", "status"]);
+                const { userId, companyId, roleId, status, isChangeStatus = false } = data, userData = __rest(data, ["userId", "companyId", "roleId", "status", "isChangeStatus"]);
                 // Find User
                 const user = yield repositories_1.userRepository.getById(userId);
                 if (!user) {
@@ -118,7 +119,24 @@ class UserServices {
                     const error = new customError_1.CustomError(404, 'User does not exist in this company');
                     throw error;
                 }
-                // Update User Role
+                if (isChangeStatus && roleId) {
+                    const roleExist = yield repositories_1.roleRepository.getDetails(roleId);
+                    if (!roleExist) {
+                        const error = new customError_1.CustomError(404, 'Role does not exist');
+                        throw error;
+                    }
+                    // Update User Role
+                    if (status === true) {
+                        const companyUsers = yield repositories_1.userRepository.checkAddUserLimit(companyId);
+                        if (companyUsers.totalNoOfUser.length >= 11) {
+                            throw new customError_1.CustomError(403, 'User limit is reached');
+                        }
+                        if (companyUsers.totalAdminUser.length >= 2 &&
+                            roleExist.isAdminRole) {
+                            throw new customError_1.CustomError(403, 'Admin user limit is reached');
+                        }
+                    }
+                }
                 let updatedUser;
                 yield repositories_1.userRepository.update(userId, userData);
                 if (status != null && roleId) {
@@ -136,7 +154,7 @@ class UserServices {
         });
     }
     // Invite user
-    inviteUser(invitedBy, email, role, company) {
+    inviteUser(invitedBy, invitedByEmail, email, role, company, phone, firstName, lastName) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 // Find user by Email
@@ -155,15 +173,60 @@ class UserServices {
                         throw error;
                     }
                     const invitedUser = yield companyRoleRepository_1.default.create(user === null || user === void 0 ? void 0 : user.id, role, company);
+                    const companyName = yield repositories_1.companyRepository.getDetails(company);
+                    // Mail send to the invited user
+                    const emailContent = (0, emailTemplateHelper_1.getInvitationEmailUserExistTemplate)({
+                        email,
+                        companyName: companyName === null || companyName === void 0 ? void 0 : companyName.tenantName,
+                        url: config_1.default === null || config_1.default === void 0 ? void 0 : config_1.default.reactAppBaseUrl,
+                    });
                     // Send mail to generate new password
                     const mailOptions = {
                         from: config_1.default.smtpEmail,
                         to: email,
-                        subject: 'Invitation to join Cost Allocation Pro company',
-                        html: `You have been invited to join the cost Allocation Pro company. You can login to CAP portal with your credentials to access this new company.`,
+                        subject: 'Invitation to join CostAllocation Pro portal',
+                        html: emailContent,
                         // text: `Please use the following token to reset your password: ${forgotPasswordToken}`,
                     };
+                    // Mail send to admin
+                    const adminEmailContent = (0, emailTemplateHelper_1.getInvitationAdminMailTemplate)({
+                        invitedByEmail,
+                        email,
+                        companyName: companyName === null || companyName === void 0 ? void 0 : companyName.tenantName,
+                        url: config_1.default === null || config_1.default === void 0 ? void 0 : config_1.default.reactAppBaseUrl,
+                    });
+                    // const adminEmailContent = `
+                    // <body>
+                    // 	<p>Hi <b>${invitedByEmail}</b>,</p>
+                    // 	<br/>
+                    // 	<p>
+                    // 		You just invited ${email} to ${company} on CostAllocation Pro. If you don't want this person on your account, you can delete them from your Manage Users page.
+                    //  	</p>
+                    // 	<br/>
+                    // 	<p>
+                    // 		<a href='${config?.reactAppBaseUrl}' style="color:blue;text-decoration:none;">Click here<a/>, to view the Manage Users page.
+                    // 	</p>
+                    // 	<br/>
+                    // 	<p>
+                    // 	Best regards,
+                    // 	<br/>
+                    // 	<br/>
+                    // 	CostAllocation Pro Team
+                    // 	</p>
+                    // </body>
+                    // `;
+                    // Send mail to Admin
+                    const adminMailOptions = {
+                        from: config_1.default.smtpEmail,
+                        to: invitedByEmail,
+                        subject: 'Invitation to join CostAllocation Pro portal',
+                        html: adminEmailContent,
+                        // text: `Please use the following token to reset your password: ${forgotPasswordToken}`,
+                    };
+                    // Send email to user
                     yield (0, emailHelper_1.default)(mailOptions);
+                    // Send email to admin
+                    yield (0, emailHelper_1.default)(adminMailOptions);
                     return invitedUser;
                 }
                 else {
@@ -172,7 +235,7 @@ class UserServices {
                     if (companyUsers.totalNoOfUser.length >= 11) {
                         throw new customError_1.CustomError(403, 'User limit is reached');
                     }
-                    if (companyUsers.totalAdminUser.length >= 2) {
+                    if (companyUsers.totalAdminUser.length >= 2 && roleExist.isAdminRole) {
                         throw new customError_1.CustomError(403, 'Admin user limit is reached');
                     }
                     // Reset Password Token Generate
@@ -181,13 +244,15 @@ class UserServices {
                         role: role,
                     });
                     // Expires in 1 hour
-                    const resetPasswordTokenExpiresAt = (Date.now() +
-                        60 * 60 * 1000).toString();
+                    const resetPasswordTokenExpiresAt = (Date.now() + (config_1.default === null || config_1.default === void 0 ? void 0 : config_1.default.registerUrlExpireTime)).toString();
                     // Create new user with forgot password token and verified false
                     const createdUser = yield repositories_1.userRepository.create({
                         email: email,
                         forgotPasswordToken: resetPasswordToken,
                         forgotPasswordTokenExpiresAt: resetPasswordTokenExpiresAt,
+                        phone: phone,
+                        firstName,
+                        lastName,
                     });
                     // Check if role (first time created) already exists without user
                     let companyRole;
@@ -202,17 +267,39 @@ class UserServices {
                     }
                     // Create new invite
                     yield inviteRepository_1.default.create(invitedBy, createdUser === null || createdUser === void 0 ? void 0 : createdUser.id, role, company, companyRole === null || companyRole === void 0 ? void 0 : companyRole.id);
+                    const companyName = yield repositories_1.companyRepository.getDetails(company);
                     // Verify token url
-                    const url = `${config_1.default === null || config_1.default === void 0 ? void 0 : config_1.default.reactAppBaseUrl}/reset-password?token=${resetPasswordToken}`;
+                    const url = `${config_1.default === null || config_1.default === void 0 ? void 0 : config_1.default.reactAppBaseUrl}/reset-password?token=${resetPasswordToken}&first=true`;
+                    const emailContent = (0, emailTemplateHelper_1.getInvitationEmailUserTemplate)({
+                        email,
+                        companyName: companyName === null || companyName === void 0 ? void 0 : companyName.tenantName,
+                        url,
+                    });
                     // Send mail to generate new password
                     const mailOptions = {
                         from: config_1.default.smtpEmail,
                         to: email,
-                        subject: 'Invitation to join Cost Allocation Pro company',
-                        html: `Please use the following token to generate your password for Cost Allocation Pro portal :<a href='${url}'>Generate Password<a/>`,
+                        subject: 'Invitation to join CostAllocation Pro company',
+                        html: emailContent,
+                        // text: `Please use the following token to reset your password: ${forgotPasswordToken}`,
+                    };
+                    // Mail send to admin
+                    const adminEmailContent = (0, emailTemplateHelper_1.getInvitationAdminMailTemplate)({
+                        invitedByEmail,
+                        email,
+                        companyName: companyName === null || companyName === void 0 ? void 0 : companyName.tenantName,
+                        url: config_1.default === null || config_1.default === void 0 ? void 0 : config_1.default.reactAppBaseUrl,
+                    });
+                    // Send mail to Admin
+                    const adminMailOptions = {
+                        from: config_1.default.smtpEmail,
+                        to: invitedByEmail,
+                        subject: 'Invitation to join CostAllocation Pro portal',
+                        html: adminEmailContent,
                         // text: `Please use the following token to reset your password: ${forgotPasswordToken}`,
                     };
                     yield (0, emailHelper_1.default)(mailOptions);
+                    yield (0, emailHelper_1.default)(adminMailOptions);
                     return companyRole;
                 }
             }

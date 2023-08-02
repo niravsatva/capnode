@@ -18,7 +18,7 @@ class CompanyController {
     getUserWiseCompanies(req, res, next) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                const user = req.session.user;
+                const user = req.user;
                 const companies = yield companyRepository_1.default.getUserCompanies(user);
                 return (0, defaultResponseHelper_1.DefaultResponse)(res, 200, 'Companies fetched successfully', companies);
             }

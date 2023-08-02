@@ -13,6 +13,23 @@ const prisma_1 = require("../client/prisma");
 const data_1 = require("../constants/data");
 class RoleRepositories {
     constructor() {
+        this.checkIsUsersInRole = (roleId, companyId) => __awaiter(this, void 0, void 0, function* () {
+            try {
+                const users = yield prisma_1.prisma.companyRole.count({
+                    where: {
+                        roleId: roleId,
+                        companyId: companyId,
+                        userId: {
+                            not: null,
+                        },
+                    },
+                });
+                return users;
+            }
+            catch (error) {
+                throw error;
+            }
+        });
         // For create the role
         this.createRole = (roleName, roleDescription, isAdminRole, isCompanyAdmin) => __awaiter(this, void 0, void 0, function* () {
             try {
@@ -62,44 +79,59 @@ class RoleRepositories {
             }
         });
         // For get all the roles of some organization
-        this.getAllRole = (page, company, offset, limit, sortCondition, search = '') => __awaiter(this, void 0, void 0, function* () {
+        this.getAllRole = (sortCondition = 'asc', search = '', page, company, offset, limit, filterConditions) => __awaiter(this, void 0, void 0, function* () {
+            const searchRegex = new RegExp(search, 'ig');
             try {
-                const roles = yield prisma_1.prisma.companyRole.findMany(Object.assign({ where: {
-                        role: {
-                            isCompanyAdmin: false,
-                            isAdminRole: false,
-                            OR: [
-                                {
-                                    roleName: {
-                                        mode: 'insensitive',
-                                        contains: search,
-                                    },
+                const roles = yield prisma_1.prisma.role.findMany({
+                    where: Object.assign(Object.assign({ isCompanyAdmin: false, isAdminRole: false, OR: [
+                            {
+                                roleName: {
+                                    mode: 'insensitive',
+                                    contains: search,
                                 },
-                                {
-                                    roleDescription: {
-                                        mode: 'insensitive',
-                                        contains: search,
-                                    },
-                                },
-                            ],
-                        },
-                        companyId: company,
-                    }, distinct: ['roleId'], include: {
-                        role: true,
-                        user: true,
-                    }, skip: offset, take: limit }, sortCondition));
-                const rolesList = roles === null || roles === void 0 ? void 0 : roles.map((singleRole) => singleRole.role);
-                if (page === 1) {
-                    const adminRole = yield prisma_1.prisma.role.findFirst({
-                        where: {
-                            roleName: {
-                                mode: 'insensitive',
-                                equals: 'admin',
                             },
-                            isAdminRole: true,
-                        },
-                    });
-                    return [adminRole, ...rolesList];
+                            {
+                                roleDescription: {
+                                    mode: 'insensitive',
+                                    contains: search,
+                                },
+                            },
+                        ] }, filterConditions), { users: {
+                            some: {
+                                companyId: company,
+                            },
+                        } }),
+                    skip: offset,
+                    take: limit,
+                    orderBy: {
+                        roleName: sortCondition,
+                    },
+                });
+                const rolesList = roles === null || roles === void 0 ? void 0 : roles.map((singleRole) => singleRole);
+                if (page === 1) {
+                    if (searchRegex.test('admin') || search === '') {
+                        const adminRole = yield prisma_1.prisma.role.findFirst({
+                            where: {
+                                roleName: {
+                                    mode: 'insensitive',
+                                    equals: 'admin',
+                                },
+                                isAdminRole: true,
+                            },
+                        });
+                        if (adminRole) {
+                            if (sortCondition === 'asc') {
+                                return [adminRole, ...rolesList];
+                            }
+                            else {
+                                return [...rolesList, adminRole];
+                            }
+                        }
+                        else {
+                            return [...rolesList];
+                        }
+                    }
+                    return [...rolesList];
                 }
                 else {
                     return rolesList;
@@ -140,7 +172,13 @@ class RoleRepositories {
         // For delete the role from role table
         this.deleteRole = (id) => __awaiter(this, void 0, void 0, function* () {
             try {
-                yield prisma_1.prisma.role.delete({
+                // TEMP code
+                yield prisma_1.prisma.invitations.deleteMany({
+                    where: {
+                        roleId: id,
+                    },
+                });
+                yield prisma_1.prisma.role.deleteMany({
                     where: {
                         id,
                     },

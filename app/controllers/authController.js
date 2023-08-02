@@ -25,9 +25,9 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const defaultResponseHelper_1 = require("../helpers/defaultResponseHelper");
 const validationHelper_1 = require("../helpers/validationHelper");
-const customError_1 = require("../models/customError");
 const authServices_1 = __importDefault(require("../services/authServices"));
 const repositories_1 = require("../repositories");
+const config_1 = __importDefault(require("../../config"));
 class AuthController {
     // Register User
     register(req, res, next) {
@@ -53,11 +53,21 @@ class AuthController {
                 }
                 // Create new user
                 const user = yield authServices_1.default.register(firstName, lastName, email.toLowerCase(), customerId);
+                // TEMP Until we not create the company
+                const companyData = {
+                    tenantID: Math.random().toString(),
+                    tenantName: 'Organization 1',
+                };
+                const company = yield repositories_1.companyRepository.create(companyData);
+                yield (repositories_1.companyRepository === null || repositories_1.companyRepository === void 0 ? void 0 : repositories_1.companyRepository.connectCompany(user.id, company === null || company === void 0 ? void 0 : company.id));
+                // TEMP END Until we not create the company
+                // Uncomment code
                 // Create new record in companyRole
-                yield repositories_1.companyRoleRepository.create(user === null || user === void 0 ? void 0 : user.id, companyAdminRole === null || companyAdminRole === void 0 ? void 0 : companyAdminRole.id);
+                // await companyRoleRepository.create(user?.id, companyAdminRole?.id);
                 return (0, defaultResponseHelper_1.DefaultResponse)(res, 201, 'User registration successful, please check your email for accessing your account');
             }
             catch (err) {
+                console.log(err);
                 next(err);
             }
         });
@@ -69,29 +79,12 @@ class AuthController {
                 (0, validationHelper_1.checkValidation)(req);
                 const { email, password } = req.body;
                 const { accessToken, refreshToken, user } = yield authServices_1.default.login(email.toLowerCase(), password);
-                req.session.accessToken = accessToken;
-                req.session.refreshToken = refreshToken;
+                console.log('Access token: ' + accessToken + ' refresh token: ' + refreshToken);
+                // req.session.accessToken = accessToken;
+                // req.session.refreshToken = refreshToken;
                 const { password: userPassword, forgotPasswordToken, forgotPasswordTokenExpiresAt, isVerified } = user, finalUser = __rest(user, ["password", "forgotPasswordToken", "forgotPasswordTokenExpiresAt", "isVerified"]);
-                return (0, defaultResponseHelper_1.DefaultResponse)(res, 200, 'User logged in successfully', finalUser);
-            }
-            catch (err) {
-                next(err);
-            }
-        });
-    }
-    // Logout User
-    logout(req, res, next) {
-        return __awaiter(this, void 0, void 0, function* () {
-            try {
-                req.session.destroy((err) => {
-                    if (err) {
-                        console.error('Error destroying session:', err);
-                        const error = new customError_1.CustomError(500, 'Something went wrong during logout');
-                        throw error;
-                    }
-                    res.clearCookie('connect.sid');
-                    return (0, defaultResponseHelper_1.DefaultResponse)(res, 200, 'Logout Successful');
-                });
+                return (0, defaultResponseHelper_1.DefaultResponse)(res, 200, 'User logged in successfully', Object.assign(Object.assign({}, finalUser), { accessToken,
+                    refreshToken }));
             }
             catch (err) {
                 next(err);
@@ -105,7 +98,9 @@ class AuthController {
                 (0, validationHelper_1.checkValidation)(req);
                 const { email } = req.body;
                 yield authServices_1.default.forgotPassword(email);
-                return (0, defaultResponseHelper_1.DefaultResponse)(res, 200, 'Password reset link sent to your email address');
+                return (0, defaultResponseHelper_1.DefaultResponse)(res, 200, 'Please check your inbox. If you have account with us you got email with reset instruction.'
+                // 'Password reset link sent to your email address'
+                );
             }
             catch (err) {
                 console.log('Err: ', err);
@@ -172,11 +167,56 @@ class AuthController {
     }
     // Update Profile
     updateProfile(req, res, next) {
+        var _a, _b, _c;
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                const _a = req.body, { email } = _a, data = __rest(_a, ["email"]);
+                const _d = req.body, { email } = _d, data = __rest(_d, ["email"]);
+                if ((_a = req === null || req === void 0 ? void 0 : req.file) === null || _a === void 0 ? void 0 : _a.location) {
+                    const fileUrl = req.file.location.replace(config_1.default.s3BaseUrl, '');
+                    data.profileImg = fileUrl;
+                }
+                // Form data giving the null in string
+                if (data.profileImg === 'null') {
+                    data.profileImg = null;
+                }
                 const profile = yield repositories_1.userRepository.update(req.user.id, data);
-                return (0, defaultResponseHelper_1.DefaultResponse)(res, 200, 'Profile updated successfully', profile);
+                // If the user has bought a subscription then there is no company or role assigned to that user
+                const user = yield repositories_1.companyRoleRepository.getRecordWithNullCompanyId(req.user.id);
+                let profileData;
+                if (user.length > 0) {
+                    // Check if the user is companyAdmin
+                    const isCompanyAdmin = yield repositories_1.roleRepository.checkCompanyAdminRole((_c = (_b = user[0]) === null || _b === void 0 ? void 0 : _b.role) === null || _c === void 0 ? void 0 : _c.id);
+                    if (isCompanyAdmin) {
+                        profileData = Object.assign(Object.assign({}, profile), { isFirstCompanyAdmin: true });
+                    }
+                    else {
+                        profileData = Object.assign(Object.assign({}, profile), { isFirstCompanyAdmin: false });
+                    }
+                }
+                else {
+                    profileData = Object.assign(Object.assign({}, profile), { isFirstCompanyAdmin: false });
+                }
+                return (0, defaultResponseHelper_1.DefaultResponse)(res, 200, 'Profile updated successfully', profileData);
+            }
+            catch (err) {
+                console.log(err);
+                next(err);
+            }
+        });
+    }
+    // Logout
+    logout(req, res, next) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                const accessToken = req.accessToken;
+                const refreshToken = req.refreshToken;
+                // console.log('LOGOUT: ', accessToken, refreshToken);
+                // const deleted = await tokenRepository.delete(
+                // 	req.user.id,
+                // 	accessToken,
+                // 	refreshToken
+                // );
+                return (0, defaultResponseHelper_1.DefaultResponse)(res, 200, 'User logged out successfully');
             }
             catch (err) {
                 next(err);

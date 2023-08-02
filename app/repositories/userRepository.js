@@ -13,16 +13,28 @@ const prisma_1 = require("../client/prisma");
 class UserRepository {
     // Get all users
     getAll(company, offset, limit, filterConditions, searchCondition, sortCondition) {
+        var _a;
         return __awaiter(this, void 0, void 0, function* () {
+            const sortPosition = ((_a = sortCondition === null || sortCondition === void 0 ? void 0 : sortCondition.orderBy) === null || _a === void 0 ? void 0 : _a.firstName) || 'asc';
             try {
-                const users = yield prisma_1.prisma.companyRole.findMany(Object.assign({ where: Object.assign(Object.assign({}, filterConditions), { 
+                const users = yield prisma_1.prisma.companyRole.findMany({
+                    where: Object.assign(Object.assign({}, filterConditions), { 
                         // ...searchCondition,
                         user: Object.assign({}, searchCondition), companyId: company, NOT: {
                             userId: null,
-                        } }), include: {
+                        } }),
+                    orderBy: {
+                        user: {
+                            firstName: sortPosition || 'asc',
+                        },
+                    },
+                    include: {
                         role: true,
                         user: true,
-                    }, skip: offset, take: limit }, sortCondition));
+                    },
+                    skip: offset,
+                    take: limit,
+                });
                 // const res = await prisma.user.findMany({
                 // 	where: {
                 // 		...filterConditions,
@@ -59,6 +71,7 @@ class UserRepository {
                 return users;
             }
             catch (err) {
+                console.log(err);
                 throw err;
             }
         });
@@ -246,6 +259,53 @@ class UserRepository {
                         } }),
                 });
                 return total;
+            }
+            catch (err) {
+                throw err;
+            }
+        });
+    }
+    // async count(company: string, filterConditions: any, searchCondition: any) {
+    // 	try {
+    // 		const total = await prisma.user.count({
+    // 			where: { ...filterConditions, ...searchCondition },
+    // 		});
+    // 		return total;
+    // 	} catch (err) {
+    // 		throw err;
+    // 	}
+    // }
+    // Get all admin emails
+    getAllAdminEmails(companyId) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                const adminEmails = yield prisma_1.prisma.companyRole.findMany({
+                    where: {
+                        companyId: companyId,
+                        OR: [
+                            {
+                                role: {
+                                    isAdminRole: true,
+                                },
+                            },
+                            {
+                                role: {
+                                    isCompanyAdmin: true,
+                                },
+                            },
+                        ],
+                    },
+                    select: {
+                        user: {
+                            select: {
+                                email: true,
+                                firstName: true,
+                                lastName: true,
+                            },
+                        },
+                    },
+                });
+                return adminEmails;
             }
             catch (err) {
                 throw err;

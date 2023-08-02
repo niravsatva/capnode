@@ -110,23 +110,30 @@ class CompanyRepository {
                         },
                     },
                 });
-                const companyRole = yield prisma_1.prisma.companyRole.findFirst({
-                    where: {
-                        userId: userId,
-                        roleId: companyAdminRole === null || companyAdminRole === void 0 ? void 0 : companyAdminRole.id,
-                        companyId: {
-                            equals: null,
-                        },
-                    },
-                });
-                const company = yield prisma_1.prisma.companyRole.update({
-                    where: {
-                        id: companyRole === null || companyRole === void 0 ? void 0 : companyRole.id,
-                    },
+                const company = yield prisma_1.prisma.companyRole.create({
                     data: {
+                        user: { connect: { id: userId } },
+                        role: { connect: { id: companyAdminRole === null || companyAdminRole === void 0 ? void 0 : companyAdminRole.id } },
                         company: { connect: { id: companyId } },
                     },
                 });
+                // const companyRole = await prisma.companyRole.findFirst({
+                // 	where: {
+                // 		userId: userId,
+                // 		roleId: companyAdminRole?.id,
+                // 		companyId: {
+                // 			equals: null,
+                // 		},
+                // 	},
+                // });
+                // const company = await prisma.companyRole.update({
+                // 	where: {
+                // 		id: companyRole?.id,
+                // 	},
+                // 	data: {
+                // 		company: { connect: { id: companyId } },
+                // 	},
+                // });
                 return company;
             }
             catch (err) {

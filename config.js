@@ -25,12 +25,15 @@ function config(Env) {
         smtpPassword: Env === null || Env === void 0 ? void 0 : Env.SMTP_PASSWORD,
         smtpHost: Env === null || Env === void 0 ? void 0 : Env.SMTP_HOST,
         smtpPort: Env === null || Env === void 0 ? void 0 : Env.SMTP_PORT,
-        forgotPasswordUrlExpireTime: 60 * 60 * 1000,
+        forgotPasswordUrlExpireTime: 30 * 60 * 1000,
         registerUrlExpireTime: 7 * 24 * 60 * 60 * 1000,
         accessTokenExpireTime: 24 * 60 * 60,
         refreshTokenExpireTime: 10 * 24 * 60 * 60,
         resetPasswordReactUrl: `${Env === null || Env === void 0 ? void 0 : Env.REACT_APP_BASE_URL}/reset-password`,
         changePasswordReactUrl: `${Env === null || Env === void 0 ? void 0 : Env.REACT_APP_BASE_URL}/reset-password`,
+        s3accessKeyId: Env === null || Env === void 0 ? void 0 : Env.S3_ACCESSKEYID,
+        s3secretAccessKey: Env === null || Env === void 0 ? void 0 : Env.S3_SECRETACCESSKEY,
+        s3BaseUrl: Env === null || Env === void 0 ? void 0 : Env.S3_BASE_URL,
     };
 }
 exports.default = Object.assign({}, config(process.env));

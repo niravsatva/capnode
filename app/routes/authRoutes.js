@@ -7,6 +7,7 @@ const express_1 = __importDefault(require("express"));
 const controllers_1 = require("../controllers");
 const validators_1 = require("../helpers/validators");
 const authMiddleware_1 = require("../middlewares/authMiddleware");
+const multer_1 = require("../helpers/multer");
 const router = express_1.default.Router();
 // Login
 router.post('/login', validators_1.loginValidationRules, controllers_1.authController.login);
@@ -23,5 +24,5 @@ router.post('/change-password/:token', validators_1.changePasswordValidationRule
 // Fetch Profile
 router.get('/fetch-profile', authMiddleware_1.isAuthenticated, controllers_1.authController.fetchProfile);
 // Update Profile
-router.put('/', authMiddleware_1.isAuthenticated, validators_1.updateProfileValidationRules, controllers_1.authController.updateProfile);
+router.put('/', authMiddleware_1.isAuthenticated, multer_1.updateProfileMiddleware.single('profileImg'), validators_1.updateProfileValidationRules, controllers_1.authController.updateProfile);
 exports.default = router;

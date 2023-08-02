@@ -41,7 +41,6 @@ class RolesController {
                 const { id } = req.params;
                 const { page = 1, limit = 10, search, filter, type, sort } = req.query;
                 const roles = yield roleService_1.default.getAllRoles(id, Number(page), Number(limit), search, filter, type, sort);
-                // const roles = await roleRepository.getAllRole(id);
                 return (0, defaultResponseHelper_1.DefaultResponse)(res, 200, 'Roles find successful', roles);
             }
             catch (error) {

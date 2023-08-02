@@ -132,14 +132,8 @@ class CompanyRoleRepository {
             try {
                 const deletedUser = yield prisma_1.prisma.companyRole.deleteMany({
                     where: {
-                        AND: [
-                            {
-                                userId: user,
-                            },
-                            {
-                                companyId: company,
-                            },
-                        ],
+                        userId: user,
+                        companyId: company,
                     },
                 });
                 return deletedUser;
@@ -199,6 +193,9 @@ class CompanyRoleRepository {
                     where: {
                         companyId: company,
                         roleId: role,
+                        userId: {
+                            equals: null,
+                        },
                     },
                 });
                 if ((companyRole === null || companyRole === void 0 ? void 0 : companyRole.length) > 0) {

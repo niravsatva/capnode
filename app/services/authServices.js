@@ -14,6 +14,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const config_1 = __importDefault(require("../../config"));
 const emailHelper_1 = __importDefault(require("../helpers/emailHelper"));
+const emailTemplateHelper_1 = require("../helpers/emailTemplateHelper");
 const passwordHelper_1 = require("../helpers/passwordHelper");
 const tokenHelper_1 = require("../helpers/tokenHelper");
 const customError_1 = require("../models/customError");
@@ -43,6 +44,12 @@ class AuthServices {
                 //   Credentials Valid
                 const accessToken = (0, tokenHelper_1.generateAccessToken)({ id: user === null || user === void 0 ? void 0 : user.id, email: email });
                 const refreshToken = (0, tokenHelper_1.generateRefreshToken)({ id: user === null || user === void 0 ? void 0 : user.id, email: email });
+                // const tokenGenerated = await tokenRepository.create(
+                // 	user?.id,
+                // 	accessToken,
+                // 	refreshToken
+                // );
+                // console.log('Token generated: ', tokenGenerated);
                 return { accessToken, refreshToken, user };
             }
             catch (err) {
@@ -67,13 +74,15 @@ class AuthServices {
                     forgotPasswordTokenExpiresAt: forgotPasswordTokenExpiresAt,
                 });
                 // Change Password url
-                const url = `${config_1.default === null || config_1.default === void 0 ? void 0 : config_1.default.changePasswordReactUrl}?token=${forgotPasswordToken}`;
+                const url = `${config_1.default === null || config_1.default === void 0 ? void 0 : config_1.default.changePasswordReactUrl}?token=${forgotPasswordToken}&first=true`;
                 // const url = `${config?.reactAppBaseUrl}/change-password?token=${forgotPasswordToken}`;
+                const fullName = firstName || lastName ? firstName + ' ' + lastName : 'User';
+                const emailContent = (0, emailTemplateHelper_1.getRegisterEmailTemplate)({ fullName, url });
                 const mailOptions = {
                     from: config_1.default.smtpEmail,
                     to: email,
-                    subject: 'Generate Password',
-                    html: `Please use the following token to generate your password first time:<a href='${url}'>Generate Password<a/>`,
+                    subject: 'Welcome to CostAllocation Pro!',
+                    html: emailContent,
                 };
                 yield (0, emailHelper_1.default)(mailOptions);
                 return user;
@@ -88,7 +97,8 @@ class AuthServices {
             try {
                 const user = yield userRepository_1.default.getByEmail(email);
                 if (!user) {
-                    const error = new customError_1.CustomError(404, 'User not found');
+                    return;
+                    const error = new customError_1.CustomError(404, 'Please check your inbox. If you have account with us you got email with reset instruction.');
                     throw error;
                 }
                 // Generate forgot password token
@@ -103,15 +113,22 @@ class AuthServices {
                     forgotPasswordToken: forgotPasswordToken,
                     forgotPasswordTokenExpiresAt: forgotPasswordTokenExpiresAt,
                 });
+                const fullName = (user === null || user === void 0 ? void 0 : user.firstName) || (user === null || user === void 0 ? void 0 : user.lastName)
+                    ? (user === null || user === void 0 ? void 0 : user.firstName) + ' ' + (user === null || user === void 0 ? void 0 : user.lastName)
+                    : 'User';
                 // Verify token url
                 const url = `${config_1.default === null || config_1.default === void 0 ? void 0 : config_1.default.resetPasswordReactUrl}?token=${forgotPasswordToken}&exp=${forgotPasswordTokenExpiresAt}`;
                 // const url = `${config?.reactAppBaseUrl}/reset-password?token=${forgotPasswordToken}&exp=${forgotPasswordTokenExpiresAt}`;
+                const emailContent = (0, emailTemplateHelper_1.getForgotPasswordTemplate)({
+                    fullName,
+                    url,
+                });
                 // Send the email with the reset token
                 const mailOptions = {
                     from: config_1.default.smtpEmail,
                     to: email,
-                    subject: 'Password Reset',
-                    html: `Please use the following token to reset your password:<a href='${url}'>Reset Password<a/>`,
+                    subject: 'Reset Password - CostAllocation Pro',
+                    html: emailContent,
                     // text: `Please use the following token to reset your password: ${forgotPasswordToken}`,
                 };
                 yield (0, emailHelper_1.default)(mailOptions);
@@ -218,7 +235,7 @@ class AuthServices {
                 if (user === null || user === void 0 ? void 0 : user.password) {
                     const encrypted = yield (0, passwordHelper_1.comparePassword)(password, user === null || user === void 0 ? void 0 : user.password);
                     if (encrypted) {
-                        const error = new customError_1.CustomError(422, 'New password can not be same as old password');
+                        const error = new customError_1.CustomError(422, 'New password cannot be same as old password');
                         throw error;
                     }
                 }

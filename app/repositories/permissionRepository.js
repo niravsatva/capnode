@@ -26,17 +26,22 @@ class PermissionRepository {
         });
         // For update the permission
         this.updateRolePermission = (permissions, roleId) => __awaiter(this, void 0, void 0, function* () {
+            // "comment"
             yield Promise.all(yield permissions.map((singlePermission) => __awaiter(this, void 0, void 0, function* () {
                 const permissionObjCopy = Object.assign({}, singlePermission);
                 if (permissionObjCopy.all === true) {
                     permissionObjCopy.delete = true;
                     permissionObjCopy.edit = true;
                     permissionObjCopy.view = true;
+                    permissionObjCopy.add = true;
                 }
                 if (permissionObjCopy.edit === true) {
                     permissionObjCopy.view = true;
                 }
                 if (permissionObjCopy.delete === true) {
+                    permissionObjCopy.view = true;
+                }
+                if (permissionObjCopy.add === true) {
                     permissionObjCopy.view = true;
                 }
                 yield prisma_1.prisma.permission.updateMany({
@@ -49,6 +54,7 @@ class PermissionRepository {
                         delete: permissionObjCopy.delete,
                         edit: permissionObjCopy.edit,
                         view: permissionObjCopy.view,
+                        add: permissionObjCopy.add,
                     },
                 });
             })));

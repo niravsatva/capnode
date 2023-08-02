@@ -36,22 +36,17 @@ class RoleService {
                 else {
                     offset = (Number(page) - 1) * Number(limit) - 1;
                 }
-                // Conditions for sort
-                const sortCondition = sort
-                    ? {
-                        orderBy: {
-                            role: {
-                                [sort]: type !== null && type !== void 0 ? type : 'asc',
-                            },
-                        },
-                    }
+                const filterConditions = filter
+                    ? { status: filter == 'true' ? true : false }
                     : {};
+                // Conditions for sort
                 // Get all roles
-                const roles = yield repositories_1.roleRepository.getAllRole(page, company, offset, limit, sortCondition, search);
+                const roles = yield repositories_1.roleRepository.getAllRole(sort, search, page, company, offset, limit, filterConditions);
                 const total = yield repositories_1.roleRepository.count(search, company);
                 return { roles, total: total };
             }
             catch (err) {
+                console.log(err);
                 throw err;
             }
         });
@@ -69,6 +64,7 @@ class RoleService {
                 }
             }
             catch (error) {
+                console.log(error);
                 throw error;
             }
         });
@@ -105,6 +101,7 @@ class RoleService {
                 }
             }
             catch (error) {
+                console.log(error);
                 throw error;
             }
         });
@@ -113,6 +110,10 @@ class RoleService {
             try {
                 const role = yield repositories_1.roleRepository.getDetails(roleId);
                 const isFromSameOrg = yield repositories_1.roleRepository.checkCompanyAndRole(roleId, companyId);
+                const isUsersInRole = yield repositories_1.roleRepository.checkIsUsersInRole(roleId, companyId);
+                if (isUsersInRole) {
+                    throw new customError_1.CustomError(403, 'Please delete associated user first');
+                }
                 if (role) {
                     if (!(role.isAdminRole || role.isCompanyAdmin)) {
                         if (isFromSameOrg) {
@@ -132,6 +133,7 @@ class RoleService {
                 }
             }
             catch (error) {
+                console.log(error);
                 throw error;
             }
         });
