@@ -24,8 +24,8 @@ jobs:
       with:
         node-version: ${{ matrix.node-version }}
         cache: 'npm'
-    - run: sudo npm ci
+    - run: npm i
     - run: |
-        sudo touch .env
-        sudo echo "${{secrets.CAPNODE_ENV_FILE}}" > .env
+         touch .env
+         echo "${{secrets.CAPNODE_ENV_FILE}}" > .env
         
