@@ -34,6 +34,13 @@ function config(Env) {
         s3accessKeyId: Env === null || Env === void 0 ? void 0 : Env.S3_ACCESSKEYID,
         s3secretAccessKey: Env === null || Env === void 0 ? void 0 : Env.S3_SECRETACCESSKEY,
         s3BaseUrl: Env === null || Env === void 0 ? void 0 : Env.S3_BASE_URL,
+        quickbooksClientId: Env === null || Env === void 0 ? void 0 : Env.QUICKBOOKS_CLIENT_ID,
+        quickbooksClientSecret: Env === null || Env === void 0 ? void 0 : Env.QUICKBOOKS_CLIENT_SECRET,
+        quickbooksEnvironment: Env === null || Env === void 0 ? void 0 : Env.QUICKBOOKS_ENVIRONMENT,
+        quickbooksRedirectUri: Env === null || Env === void 0 ? void 0 : Env.QUICKBOOKS_REDIRECT_URI,
+        quickbooksScopes: Env === null || Env === void 0 ? void 0 : Env.QUICKBOOKS_SCOPES,
+        quickbooksUserInfoEndpoint: Env === null || Env === void 0 ? void 0 : Env.QUICKBOOKS_USER_INFO_ENDPOINT,
+        quickbooksTokenRevokeEndpoint: Env === null || Env === void 0 ? void 0 : Env.QUICKBOOKS_TOKEN_REVOKE_ENDPOINT,
     };
 }
 exports.default = Object.assign({}, config(process.env));

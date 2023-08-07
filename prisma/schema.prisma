@@ -49,17 +49,24 @@ model Token {
 }
 
 model Company {
-  id                 String        @id @default(uuid())
-  tenantName         String?
-  tenantID           String?
-  accessToken        String?
-  refreshToken       String?
-  accessTokenUTCDate DateTime?
-  customerLastSync   DateTime?
-  users              CompanyRole[]
-  createdAt          DateTime      @default(now())
-  updatedAt          DateTime      @updatedAt
-  Invitations        Invitations[]
+  id                   String         @id @default(uuid())
+  tenantName           String?
+  tenantID             String?
+  accessToken          String?
+  refreshToken         String?
+  accessTokenUTCDate   DateTime?
+  customerLastSyncDate DateTime?
+  classLastSyncDate    DateTime?
+  employeeLastSyncDate DateTime?
+  isConnected          Boolean?       @default(false)
+  status               Boolean?       @default(true)
+  fiscalYear           String?
+  users                CompanyRole[]
+  createdAt            DateTime       @default(now())
+  updatedAt            DateTime       @updatedAt
+  Invitations          Invitations[]
+  configuration        Configuration?
+  Employee             Employee[]
 }
 
 model Role {
@@ -100,6 +107,7 @@ model Permission {
   add            Boolean  @default(false)
   role           Role     @relation(fields: [roleId], references: [id], onDelete: Cascade)
   roleId         String
+  sortId         Int
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
 }
@@ -119,6 +127,35 @@ model Invitations {
   invitationStatus InvitationStatus
   createdAt        DateTime         @default(now())
   updatedAt        DateTime         @updatedAt
+}
+
+model Configuration {
+  id                  String          @id @default(uuid())
+  settings            Json
+  indirectExpenseRate Int?
+  payrollMethod       PayrollMethods?
+  company             Company?        @relation(fields: [companyId], references: [id])
+  companyId           String          @unique
+  createdAt           DateTime        @default(now())
+  updatedAt           DateTime        @updatedAt
+}
+
+model Employee {
+  id         String   @id @default(uuid())
+  employeeId String
+  fullName   String
+  email      String?
+  phone      String?
+  active     Boolean
+  company    Company? @relation(fields: [companyId], references: [id])
+  companyId  String?
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+}
+
+enum PayrollMethods {
+  Hours
+  Percentage
 }
 
 enum InvitationStatus {

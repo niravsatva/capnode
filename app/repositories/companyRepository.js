@@ -110,31 +110,66 @@ class CompanyRepository {
                         },
                     },
                 });
-                const company = yield prisma_1.prisma.companyRole.create({
-                    data: {
-                        user: { connect: { id: userId } },
-                        role: { connect: { id: companyAdminRole === null || companyAdminRole === void 0 ? void 0 : companyAdminRole.id } },
-                        company: { connect: { id: companyId } },
-                    },
-                });
-                // const companyRole = await prisma.companyRole.findFirst({
-                // 	where: {
-                // 		userId: userId,
-                // 		roleId: companyAdminRole?.id,
-                // 		companyId: {
-                // 			equals: null,
-                // 		},
-                // 	},
-                // });
-                // const company = await prisma.companyRole.update({
-                // 	where: {
-                // 		id: companyRole?.id,
-                // 	},
+                // const company = await prisma.companyRole.create({
                 // 	data: {
+                // 		user: { connect: { id: userId } },
+                // 		role: { connect: { id: companyAdminRole?.id } },
                 // 		company: { connect: { id: companyId } },
                 // 	},
                 // });
+                const companyRole = yield prisma_1.prisma.companyRole.findFirst({
+                    where: {
+                        userId: userId,
+                        roleId: companyAdminRole === null || companyAdminRole === void 0 ? void 0 : companyAdminRole.id,
+                        companyId: {
+                            equals: null,
+                        },
+                    },
+                });
+                const company = yield prisma_1.prisma.companyRole.update({
+                    where: {
+                        id: companyRole === null || companyRole === void 0 ? void 0 : companyRole.id,
+                    },
+                    data: {
+                        company: { connect: { id: companyId } },
+                    },
+                });
                 return company;
+            }
+            catch (err) {
+                throw err;
+            }
+        });
+    }
+    updateCompany(companyId, data) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                const updatedCompany = yield prisma_1.prisma.company.update({
+                    where: {
+                        id: companyId,
+                    },
+                    data: data,
+                });
+                return updatedCompany;
+            }
+            catch (err) {
+                console.log('Err: ', err);
+                throw err;
+            }
+        });
+    }
+    updateStatus(companyId, status) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                const updatedCompany = yield prisma_1.prisma.company.update({
+                    where: {
+                        id: companyId,
+                    },
+                    data: {
+                        status: status,
+                    },
+                });
+                return updatedCompany;
             }
             catch (err) {
                 throw err;

@@ -31,14 +31,14 @@ const config_1 = __importDefault(require("../../config"));
 class AuthController {
     // Register User
     register(req, res, next) {
-        var _a;
+        var _a, _b;
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 const { data } = req.body;
                 const customer = (_a = data === null || data === void 0 ? void 0 : data.subscription) === null || _a === void 0 ? void 0 : _a.customer;
                 const firstName = customer === null || customer === void 0 ? void 0 : customer.first_name;
                 const lastName = customer === null || customer === void 0 ? void 0 : customer.last_name;
-                const email = customer === null || customer === void 0 ? void 0 : customer.email;
+                const email = (_b = customer === null || customer === void 0 ? void 0 : customer.email) === null || _b === void 0 ? void 0 : _b.toLowerCase();
                 const customerId = customer === null || customer === void 0 ? void 0 : customer.customer_id;
                 let companyAdminRole;
                 // Check if company admin role exists
@@ -52,18 +52,18 @@ class AuthController {
                     yield repositories_1.roleRepository.createRole('Admin', 'All permissions granted', true, false);
                 }
                 // Create new user
-                const user = yield authServices_1.default.register(firstName, lastName, email.toLowerCase(), customerId);
+                const user = yield authServices_1.default.register(firstName, lastName, email, customerId);
                 // TEMP Until we not create the company
-                const companyData = {
-                    tenantID: Math.random().toString(),
-                    tenantName: 'Organization 1',
-                };
-                const company = yield repositories_1.companyRepository.create(companyData);
-                yield (repositories_1.companyRepository === null || repositories_1.companyRepository === void 0 ? void 0 : repositories_1.companyRepository.connectCompany(user.id, company === null || company === void 0 ? void 0 : company.id));
+                // const companyData = {
+                // 	tenantID: Math.random().toString(),
+                // 	tenantName: 'Organization 1',
+                // };
+                // const company = await companyRepository.create(companyData);
+                // await companyRepository?.connectCompany(user.id, company?.id);
                 // TEMP END Until we not create the company
                 // Uncomment code
                 // Create new record in companyRole
-                // await companyRoleRepository.create(user?.id, companyAdminRole?.id);
+                yield repositories_1.companyRoleRepository.create(user === null || user === void 0 ? void 0 : user.id, companyAdminRole === null || companyAdminRole === void 0 ? void 0 : companyAdminRole.id);
                 return (0, defaultResponseHelper_1.DefaultResponse)(res, 201, 'User registration successful, please check your email for accessing your account');
             }
             catch (err) {
@@ -78,7 +78,7 @@ class AuthController {
             try {
                 (0, validationHelper_1.checkValidation)(req);
                 const { email, password } = req.body;
-                const { accessToken, refreshToken, user } = yield authServices_1.default.login(email.toLowerCase(), password);
+                const { accessToken, refreshToken, user } = yield authServices_1.default.login(email === null || email === void 0 ? void 0 : email.toLowerCase(), password);
                 console.log('Access token: ' + accessToken + ' refresh token: ' + refreshToken);
                 // req.session.accessToken = accessToken;
                 // req.session.refreshToken = refreshToken;

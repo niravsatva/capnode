@@ -27,6 +27,7 @@ class RoleService {
         // Get all the roles
         this.getAllRoles = (company, page, limit, search, filter, type, sort) => __awaiter(this, void 0, void 0, function* () {
             try {
+                // checking is user permitted
                 // Offset set
                 let offset;
                 if (page === 1) {

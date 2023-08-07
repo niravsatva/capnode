@@ -12,39 +12,35 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-const repositories_1 = require("../repositories");
 const defaultResponseHelper_1 = require("../helpers/defaultResponseHelper");
 const validationHelper_1 = require("../helpers/validationHelper");
-const permissionService_1 = __importDefault(require("../services/permissionService"));
-const isAuthorizedUser_1 = require("../middlewares/isAuthorizedUser");
-const customError_1 = require("../models/customError");
-class PermissionController {
-    getAllPermission(req, res, next) {
+const employeeServices_1 = __importDefault(require("../services/employeeServices"));
+class EmployeeController {
+    getAllEmployees(req, res, next) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                const { id } = req.params;
-                const permissions = yield repositories_1.permissionRepository.getRolePermissions(id);
-                return (0, defaultResponseHelper_1.DefaultResponse)(res, 200, 'Permissions fetched successfully', permissions);
+                // Check validation for company id
+                (0, validationHelper_1.checkValidation)(req);
+                const companyId = req.body.companyId;
+                // Get all employees
+                const employees = yield employeeServices_1.default.getEmployees(companyId);
+                return (0, defaultResponseHelper_1.DefaultResponse)(res, 200, 'Employees fetched successfully', employees);
             }
             catch (err) {
                 next(err);
             }
         });
     }
-    updatePermission(req, res, next) {
+    syncEmployees(req, res, next) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
+                // Check validation for company id
                 (0, validationHelper_1.checkValidation)(req);
-                const { orgId, roleId, permissions } = req.body;
-                const isPermitted = yield (0, isAuthorizedUser_1.checkPermission)(req, orgId, {
-                    permissionName: 'Roles',
-                    permission: ['edit', 'add'],
-                });
-                if (!isPermitted) {
-                    throw new customError_1.CustomError(403, 'You are not authorized');
-                }
-                yield permissionService_1.default.updatePermission(orgId, roleId, permissions);
-                return (0, defaultResponseHelper_1.DefaultResponse)(res, 202, 'Permission updated successfully');
+                const companyId = req.body.companyId;
+                // Get new employees
+                const updatedEmployees = yield employeeServices_1.default.syncEmployeesByLastSync(companyId);
+                console.log('Updated employees: ', updatedEmployees);
+                return (0, defaultResponseHelper_1.DefaultResponse)(res, 200, 'Employees synced successfully', updatedEmployees);
             }
             catch (err) {
                 next(err);
@@ -52,4 +48,4 @@ class PermissionController {
         });
     }
 }
-exports.default = new PermissionController();
+exports.default = new EmployeeController();

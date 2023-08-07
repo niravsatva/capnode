@@ -6,7 +6,6 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = __importDefault(require("express"));
 const controllers_1 = require("../controllers");
 const validators_1 = require("../helpers/validators");
-const adminMiddleware_1 = require("../middlewares/adminMiddleware");
 const router = express_1.default.Router();
 // Get All Users
 router.get('/', controllers_1.userController.getAllUsers);
@@ -19,7 +18,7 @@ router.put('/', validators_1.updateUserByAdminValidation, controllers_1.userCont
 // Invite New User
 router.post('/invite-user', validators_1.inviteUserValidationRules, controllers_1.userController.inviteUser);
 // Delete User From Particular Company
-router.delete('/', adminMiddleware_1.isAdminUser, validators_1.deleteUserFromCompanyRules, controllers_1.userController.deleteUser);
+router.delete('/', validators_1.deleteUserFromCompanyRules, controllers_1.userController.deleteUser);
 // Integrate user with company (Temporary Api)
 router.post('/integrate', controllers_1.userController.integrate);
 exports.default = router;

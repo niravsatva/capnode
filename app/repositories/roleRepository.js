@@ -31,7 +31,7 @@ class RoleRepositories {
             }
         });
         // For create the role
-        this.createRole = (roleName, roleDescription, isAdminRole, isCompanyAdmin) => __awaiter(this, void 0, void 0, function* () {
+        this.createRole = (roleName, roleDescription, isAdminRole = false, isCompanyAdmin = false) => __awaiter(this, void 0, void 0, function* () {
             try {
                 const role = yield prisma_1.prisma.role.create({
                     data: {
@@ -41,7 +41,9 @@ class RoleRepositories {
                         isCompanyAdmin,
                         permissions: {
                             createMany: {
-                                data: data_1.DefaultPermissions,
+                                data: isCompanyAdmin || isAdminRole
+                                    ? data_1.DefaultAdminPermissions
+                                    : data_1.DefaultPermissions,
                             },
                         },
                     },

@@ -22,12 +22,25 @@ const emailHelper_1 = __importDefault(require("../helpers/emailHelper"));
 const repositories_1 = require("../repositories");
 const config_1 = __importDefault(require("../../config"));
 const emailTemplateHelper_1 = require("../helpers/emailTemplateHelper");
+const isAuthorizedUser_1 = require("../middlewares/isAuthorizedUser");
+const customError_1 = require("../models/customError");
 class UserController {
     // Get All Users
     getAllUsers(req, res, next) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 const { page = 1, limit = 10, search, filter, type, sort, company, } = req.query;
+                if (!company) {
+                    throw new customError_1.CustomError(403, 'Company not found');
+                }
+                // Checking is the user is permitted
+                const isPermitted = yield (0, isAuthorizedUser_1.checkPermission)(req, company, {
+                    permissionName: 'Users',
+                    permission: ['view'],
+                });
+                if (!isPermitted) {
+                    throw new customError_1.CustomError(403, 'You are not authorized');
+                }
                 const { users, total } = yield userServices_1.default.getAllUsers(company, Number(page), Number(limit), search, filter, type, sort);
                 return (0, defaultResponseHelper_1.DefaultResponse)(res, 200, 'Users fetched successfully', users, total, Number(page));
             }
@@ -76,7 +89,16 @@ class UserController {
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 // Check Validation
+                const { companyId } = req.body;
                 (0, validationHelper_1.checkValidation)(req);
+                // Checking is the user is permitted
+                const isPermitted = yield (0, isAuthorizedUser_1.checkPermission)(req, companyId, {
+                    permissionName: 'Users',
+                    permission: ['edit'],
+                });
+                if (!isPermitted) {
+                    throw new customError_1.CustomError(403, 'You are not authorized');
+                }
                 // Update User
                 const user = yield userServices_1.default.updateUser(req.body);
                 return (0, defaultResponseHelper_1.DefaultResponse)(res, 200, 'User updated successfully', user);
@@ -92,6 +114,14 @@ class UserController {
             try {
                 (0, validationHelper_1.checkValidation)(req);
                 const { user, company } = req.body;
+                // Checking is the user is permitted
+                const isPermitted = yield (0, isAuthorizedUser_1.checkPermission)(req, company, {
+                    permissionName: 'Users',
+                    permission: ['delete'],
+                });
+                if (!isPermitted) {
+                    throw new customError_1.CustomError(403, 'You are not authorized');
+                }
                 const adminEmails = yield userRepository_1.default.getAllAdminEmails(company);
                 // const emails = await adminEmails.map((item) => item?.user?.email);
                 const companyDetails = yield repositories_1.companyRepository.getDetails(company);
@@ -156,6 +186,14 @@ class UserController {
             try {
                 (0, validationHelper_1.checkValidation)(req);
                 const { email, role, company, phone, firstName = '', lastName = '', } = req.body;
+                // Checking is the user is permitted
+                const isPermitted = yield (0, isAuthorizedUser_1.checkPermission)(req, company, {
+                    permissionName: 'Users',
+                    permission: ['add'],
+                });
+                if (!isPermitted) {
+                    throw new customError_1.CustomError(403, 'You are not authorized');
+                }
                 const user = yield userServices_1.default.inviteUser((_a = req === null || req === void 0 ? void 0 : req.user) === null || _a === void 0 ? void 0 : _a.id, (_b = req === null || req === void 0 ? void 0 : req.user) === null || _b === void 0 ? void 0 : _b.email, email, role, company, phone, firstName, lastName);
                 return (0, defaultResponseHelper_1.DefaultResponse)(res, 200, 'User invited successfully', user);
             }

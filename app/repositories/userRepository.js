@@ -138,7 +138,13 @@ class UserRepository {
                     where: {
                         id: id,
                     },
-                    include: {
+                    select: {
+                        id: true,
+                        email: true,
+                        firstName: true,
+                        lastName: true,
+                        phone: true,
+                        status: true,
                         companies: {
                             where: {
                                 NOT: {
@@ -146,10 +152,34 @@ class UserRepository {
                                 },
                                 status: true,
                             },
-                            include: {
-                                company: true,
+                            select: {
+                                id: true,
+                                userId: true,
+                                companyId: true,
+                                status: true,
+                                company: {
+                                    select: {
+                                        id: true,
+                                        tenantID: true,
+                                        tenantName: true,
+                                        accessTokenUTCDate: true,
+                                        customerLastSyncDate: true,
+                                        employeeLastSyncDate: true,
+                                        classLastSyncDate: true,
+                                        isConnected: true,
+                                        status: true,
+                                        fiscalYear: true,
+                                        configuration: true,
+                                    },
+                                },
                                 role: {
-                                    include: {
+                                    select: {
+                                        id: true,
+                                        roleName: true,
+                                        roleDescription: true,
+                                        isCompanyAdmin: true,
+                                        isAdminRole: true,
+                                        status: true,
                                         permissions: true,
                                     },
                                 },
@@ -172,11 +202,47 @@ class UserRepository {
                     where: {
                         email: email,
                     },
-                    include: {
+                    select: {
+                        id: true,
+                        email: true,
+                        firstName: true,
+                        lastName: true,
+                        phone: true,
+                        status: true,
+                        isVerified: true,
+                        password: true,
+                        forgotPasswordToken: true,
+                        forgotPasswordTokenExpiresAt: true,
                         companies: {
-                            include: {
-                                company: true,
-                                role: true,
+                            select: {
+                                id: true,
+                                userId: true,
+                                roleId: true,
+                                companyId: true,
+                                status: true,
+                                company: {
+                                    select: {
+                                        id: true,
+                                        tenantID: true,
+                                        tenantName: true,
+                                        customerLastSyncDate: true,
+                                        classLastSyncDate: true,
+                                        employeeLastSyncDate: true,
+                                        isConnected: true,
+                                        status: true,
+                                        fiscalYear: true,
+                                    },
+                                },
+                                role: {
+                                    select: {
+                                        id: true,
+                                        roleName: true,
+                                        roleDescription: true,
+                                        isCompanyAdmin: true,
+                                        isAdminRole: true,
+                                        status: true,
+                                    },
+                                },
                             },
                         },
                     },

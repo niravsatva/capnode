@@ -29,7 +29,10 @@ const getForgotPasswordTemplate = (data) => {
 									<p>If you didn't make this request, please disregard this message. However, if you did the password reset, you can proceed to reset now. 
 										<br/>
 									<p style="margin:30px 0px"><button class="reset-button" style="border:none;border-radius:20px;padding:8px 20px;background-color:#000;"><a href='${url}' style="color:white;text-decoration:none;">Reset Your Password<a/></button> </p>
-							</div>
+									<br/>
+									<p>	Best Regards,</p>
+									<p> CostAllocation Team</p>
+									</div>
 						</div> 
 					</div>
 				</body>
@@ -61,7 +64,10 @@ const getRegisterEmailTemplate = (data) => {
 									<p>Please generate password for your account to access our portal using below link : </p>
 									<br/>
 									<p style="margin:30px 0px"><button class="reset-button" style="border:none;border-radius:20px;padding:8px 20px;background-color:#000;"><a href='${url}' style="color:white;text-decoration:none;">Generate Password<a/></button> </p>
-							</div>
+									<br/>
+									<p>	Best Regards,</p>
+									<p> CostAllocation Team</p>
+								</div>
 						</div>
 					</div>
 				</body>
@@ -97,7 +103,10 @@ const getInvitationEmailUserExistTemplate = (data) => {
 									<p>To log in,  
 										<br/>
 									<p style="margin:30px 0px"><button class="reset-button" style="border:none;border-radius:20px;padding:8px 20px;background-color:#000;"><a href='${url}' style="color:white;text-decoration:none;">Click Here<a/></button> </p>
-							</div>
+									<br/>
+									<p>	Best Regards,</p>
+									<p> CostAllocation Team</p>
+								</div>
 						</div> 
 					</div>
 				</body>
@@ -133,7 +142,10 @@ const getInvitationAdminMailTemplate = (data) => {
 									<p>		You just invited ${email} to ${companyName} on CostAllocation Pro.</p><p> If you don't want this person on your account, you can delete them from your Manage Users page.</p>  
 										<br/>
 									<p style="margin:30px 0px"><button class="reset-button" style="border:none;border-radius:20px;padding:8px 20px;background-color:#000;"><a href='${url}' style="color:white;text-decoration:none;">Click Here<a/></button>, to view the Manage Users page.</p>
-							</div>
+									<br/>
+									<p>	Best Regards,</p>
+									<p> CostAllocation Team</p>
+								</div>
 						</div> 
 					</div>
 				</body>
@@ -170,7 +182,10 @@ const getInvitationEmailUserTemplate = (data) => {
 									<p>Please generate password for your account to access our portal using below link :</p>  
 										<br/>
 									<p style="margin:30px 0px"><button class="reset-button" style="border:none;border-radius:20px;padding:8px 20px;background-color:#000;"><a href='${url}' style="color:white;text-decoration:none;">Generate Password<a/></button></p>
-							</div>
+									<br/>
+									<p>	Best Regards,</p>
+									<p> CostAllocation Team</p>
+								</div>
 						</div> 
 					</div>
 				</body>
@@ -207,7 +222,10 @@ const getAdminEmailOnUserDeleteTemplate = (data) => {
 									<p>To view the Manage Users page </p>  
 										<br/>
 									<p style="margin:30px 0px"><button class="reset-button" style="border:none;border-radius:20px;padding:8px 20px;background-color:#000;"><a href='${url}' style="color:white;text-decoration:none;">Click Here<a/></button></p>
-							</div>
+									<br/>
+									<p>	Best Regards,</p>
+									<p> CostAllocation Team</p>
+								</div>
 						</div> 
 					</div>
 				</body>
@@ -243,7 +261,11 @@ const getUserEmailOnDeleteTemplate = (data) => {
 									<p>	Your user access for ${companyName} on CostAllocation Pro has been removed. </p>  
 									<p>Please contact the Administrator on your account if you have any questions.  </p>  
 								 	</div>
-						</div> 
+									<br/>
+									<p>	Best Regards,</p>
+									<p> CostAllocation Team</p>
+								</div> 
+							</div> 
 					</div>
 				</body>
 			</html>

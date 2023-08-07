@@ -19,7 +19,7 @@ class PermissionRepository {
                     roleId: id,
                 },
                 orderBy: {
-                    permissionName: 'asc',
+                    sortId: 'asc',
                 },
             });
             return permissions;
