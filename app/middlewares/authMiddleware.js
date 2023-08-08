@@ -124,16 +124,12 @@ const isAuthenticated = (req, res, next) => __awaiter(void 0, void 0, void 0, fu
             const error = new customError_1.CustomError(401, 'Invalid access token');
             return next(error);
         }
-        // const isValid = await checkTokens(
-        // 	verifiedAccessToken?.id,
-        // 	accessToken,
-        // 	refreshToken
-        // );
+        const isValid = yield (0, tokenHelper_1.checkTokens)(verifiedAccessToken === null || verifiedAccessToken === void 0 ? void 0 : verifiedAccessToken.id, accessToken, refreshToken);
         // console.log('Is valid: ', isValid);
-        // if (!isValid) {
-        // 	const error = new CustomError(401, 'Token expired');
-        // 	return next(error);
-        // }
+        if (!isValid) {
+            const error = new customError_1.CustomError(401, 'Token expired');
+            return next(error);
+        }
         next();
     }
     catch (err) {

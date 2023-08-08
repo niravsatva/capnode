@@ -11,7 +11,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 const prisma_1 = require("../client/prisma");
 class TokenRepository {
-    create(userId, accessToken, refreshToken) {
+    create(userId, accessToken, refreshToken, machineId) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 const token = yield prisma_1.prisma.token.create({
@@ -19,6 +19,7 @@ class TokenRepository {
                         userId: userId,
                         accessToken: accessToken,
                         refreshToken: refreshToken,
+                        machineId: machineId,
                     },
                 });
                 return token;
@@ -28,7 +29,7 @@ class TokenRepository {
             }
         });
     }
-    delete(userId, accessToken, refreshToken) {
+    delete(userId, accessToken, refreshToken, machineId) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 const token = yield prisma_1.prisma.token.deleteMany({
@@ -36,6 +37,7 @@ class TokenRepository {
                         accessToken: accessToken,
                         refreshToken: refreshToken,
                         userId: userId,
+                        machineId: machineId,
                     },
                 });
                 return token;

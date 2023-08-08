@@ -12,7 +12,7 @@ const router = express_1.default.Router();
 // Login
 router.post('/login', validators_1.loginValidationRules, controllers_1.authController.login);
 // Logout
-router.post('/logout', controllers_1.authController.logout);
+router.post('/logout', authMiddleware_1.isAuthenticated, controllers_1.authController.logout);
 // Register User
 router.post('/register', controllers_1.authController.register);
 // Forgot password

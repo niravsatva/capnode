@@ -18,9 +18,10 @@ const emailTemplateHelper_1 = require("../helpers/emailTemplateHelper");
 const passwordHelper_1 = require("../helpers/passwordHelper");
 const tokenHelper_1 = require("../helpers/tokenHelper");
 const customError_1 = require("../models/customError");
+const tokenRepository_1 = __importDefault(require("../repositories/tokenRepository"));
 const userRepository_1 = __importDefault(require("../repositories/userRepository"));
 class AuthServices {
-    login(email, password) {
+    login(email, password, machineId) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 // Check if user exists
@@ -44,12 +45,7 @@ class AuthServices {
                 //   Credentials Valid
                 const accessToken = (0, tokenHelper_1.generateAccessToken)({ id: user === null || user === void 0 ? void 0 : user.id, email: email });
                 const refreshToken = (0, tokenHelper_1.generateRefreshToken)({ id: user === null || user === void 0 ? void 0 : user.id, email: email });
-                // const tokenGenerated = await tokenRepository.create(
-                // 	user?.id,
-                // 	accessToken,
-                // 	refreshToken
-                // );
-                // console.log('Token generated: ', tokenGenerated);
+                yield tokenRepository_1.default.create(user === null || user === void 0 ? void 0 : user.id, accessToken, refreshToken, machineId);
                 return { accessToken, refreshToken, user };
             }
             catch (err) {

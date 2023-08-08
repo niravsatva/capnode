@@ -23,11 +23,12 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+const config_1 = __importDefault(require("../../config"));
 const defaultResponseHelper_1 = require("../helpers/defaultResponseHelper");
 const validationHelper_1 = require("../helpers/validationHelper");
-const authServices_1 = __importDefault(require("../services/authServices"));
 const repositories_1 = require("../repositories");
-const config_1 = __importDefault(require("../../config"));
+const tokenRepository_1 = __importDefault(require("../repositories/tokenRepository"));
+const authServices_1 = __importDefault(require("../services/authServices"));
 class AuthController {
     // Register User
     register(req, res, next) {
@@ -77,8 +78,8 @@ class AuthController {
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 (0, validationHelper_1.checkValidation)(req);
-                const { email, password } = req.body;
-                const { accessToken, refreshToken, user } = yield authServices_1.default.login(email === null || email === void 0 ? void 0 : email.toLowerCase(), password);
+                const { email, password, machineId } = req.body;
+                const { accessToken, refreshToken, user } = yield authServices_1.default.login(email === null || email === void 0 ? void 0 : email.toLowerCase(), password, machineId);
                 console.log('Access token: ' + accessToken + ' refresh token: ' + refreshToken);
                 // req.session.accessToken = accessToken;
                 // req.session.refreshToken = refreshToken;
@@ -210,12 +211,8 @@ class AuthController {
             try {
                 const accessToken = req.accessToken;
                 const refreshToken = req.refreshToken;
-                // console.log('LOGOUT: ', accessToken, refreshToken);
-                // const deleted = await tokenRepository.delete(
-                // 	req.user.id,
-                // 	accessToken,
-                // 	refreshToken
-                // );
+                const machineId = req.body.machineId;
+                const deleted = yield tokenRepository_1.default.delete(req.user.id, accessToken, refreshToken, machineId);
                 return (0, defaultResponseHelper_1.DefaultResponse)(res, 200, 'User logged out successfully');
             }
             catch (err) {

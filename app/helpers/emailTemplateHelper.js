@@ -31,7 +31,7 @@ const getForgotPasswordTemplate = (data) => {
 									<p style="margin:30px 0px"><button class="reset-button" style="border:none;border-radius:20px;padding:8px 20px;background-color:#000;"><a href='${url}' style="color:white;text-decoration:none;">Reset Your Password<a/></button> </p>
 									<br/>
 									<p>	Best Regards,</p>
-									<p> CostAllocation Team</p>
+									<p> CostAllocation Pro Team</p>
 									</div>
 						</div> 
 					</div>
@@ -66,7 +66,7 @@ const getRegisterEmailTemplate = (data) => {
 									<p style="margin:30px 0px"><button class="reset-button" style="border:none;border-radius:20px;padding:8px 20px;background-color:#000;"><a href='${url}' style="color:white;text-decoration:none;">Generate Password<a/></button> </p>
 									<br/>
 									<p>	Best Regards,</p>
-									<p> CostAllocation Team</p>
+									<p> CostAllocation Pro Team</p>
 								</div>
 						</div>
 					</div>
@@ -105,7 +105,7 @@ const getInvitationEmailUserExistTemplate = (data) => {
 									<p style="margin:30px 0px"><button class="reset-button" style="border:none;border-radius:20px;padding:8px 20px;background-color:#000;"><a href='${url}' style="color:white;text-decoration:none;">Click Here<a/></button> </p>
 									<br/>
 									<p>	Best Regards,</p>
-									<p> CostAllocation Team</p>
+									<p> CostAllocation Pro Team</p>
 								</div>
 						</div> 
 					</div>
@@ -144,7 +144,7 @@ const getInvitationAdminMailTemplate = (data) => {
 									<p style="margin:30px 0px"><button class="reset-button" style="border:none;border-radius:20px;padding:8px 20px;background-color:#000;"><a href='${url}' style="color:white;text-decoration:none;">Click Here<a/></button>, to view the Manage Users page.</p>
 									<br/>
 									<p>	Best Regards,</p>
-									<p> CostAllocation Team</p>
+									<p> CostAllocation Pro Team</p>
 								</div>
 						</div> 
 					</div>
@@ -184,7 +184,7 @@ const getInvitationEmailUserTemplate = (data) => {
 									<p style="margin:30px 0px"><button class="reset-button" style="border:none;border-radius:20px;padding:8px 20px;background-color:#000;"><a href='${url}' style="color:white;text-decoration:none;">Generate Password<a/></button></p>
 									<br/>
 									<p>	Best Regards,</p>
-									<p> CostAllocation Team</p>
+									<p> CostAllocation Pro Team</p>
 								</div>
 						</div> 
 					</div>
@@ -224,7 +224,7 @@ const getAdminEmailOnUserDeleteTemplate = (data) => {
 									<p style="margin:30px 0px"><button class="reset-button" style="border:none;border-radius:20px;padding:8px 20px;background-color:#000;"><a href='${url}' style="color:white;text-decoration:none;">Click Here<a/></button></p>
 									<br/>
 									<p>	Best Regards,</p>
-									<p> CostAllocation Team</p>
+									<p> CostAllocation Pro Team</p>
 								</div>
 						</div> 
 					</div>
@@ -263,7 +263,7 @@ const getUserEmailOnDeleteTemplate = (data) => {
 								 	</div>
 									<br/>
 									<p>	Best Regards,</p>
-									<p> CostAllocation Team</p>
+									<p> CostAllocation Pro Team</p>
 								</div> 
 							</div> 
 					</div>
