@@ -89,7 +89,7 @@ class AuthController {
                 console.log('Access token: ' + accessToken + ' refresh token: ' + refreshToken);
                 // req.session.accessToken = accessToken;
                 // req.session.refreshToken = refreshToken;
-                const { password: userPassword, forgotPasswordToken, forgotPasswordTokenExpiresAt, isVerified } = user, finalUser = __rest(user, ["password", "forgotPasswordToken", "forgotPasswordTokenExpiresAt", "isVerified"]);
+                const { password: userPassword, forgotPasswordToken, forgotPasswordTokenExpiresAt, isVerified, companies } = user, finalUser = __rest(user, ["password", "forgotPasswordToken", "forgotPasswordTokenExpiresAt", "isVerified", "companies"]);
                 return (0, defaultResponseHelper_1.DefaultResponse)(res, 200, 'User logged in successfully', Object.assign(Object.assign({}, finalUser), { accessToken,
                     refreshToken }));
             }

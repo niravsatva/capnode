@@ -243,6 +243,7 @@ class UserRepository {
                                         isCompanyAdmin: true,
                                         isAdminRole: true,
                                         status: true,
+                                        permissions: true,
                                     },
                                 },
                             },

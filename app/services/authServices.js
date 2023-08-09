@@ -22,10 +22,28 @@ const tokenRepository_1 = __importDefault(require("../repositories/tokenReposito
 const userRepository_1 = __importDefault(require("../repositories/userRepository"));
 class AuthServices {
     login(email, password, machineId) {
+        var _a;
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 // Check if user exists
                 const user = yield userRepository_1.default.getByEmail(email);
+                const isValidForLogin = (_a = user === null || user === void 0 ? void 0 : user.companies) === null || _a === void 0 ? void 0 : _a.some((singleCompany) => {
+                    var _a, _b;
+                    const permissions = (_b = (_a = singleCompany === null || singleCompany === void 0 ? void 0 : singleCompany.role) === null || _a === void 0 ? void 0 : _a.permissions) === null || _b === void 0 ? void 0 : _b.filter((item) => (item === null || item === void 0 ? void 0 : item.all) === true ||
+                        (item === null || item === void 0 ? void 0 : item.view) === true ||
+                        (item === null || item === void 0 ? void 0 : item.edit) === true ||
+                        (item === null || item === void 0 ? void 0 : item.delete) === true ||
+                        (item === null || item === void 0 ? void 0 : item.add) === true);
+                    if ((permissions === null || permissions === void 0 ? void 0 : permissions.length) === 0) {
+                        return false;
+                    }
+                    else {
+                        return true;
+                    }
+                });
+                if (!isValidForLogin) {
+                    throw new customError_1.CustomError(401, 'You are not authorized to access the system please contact your administrator.');
+                }
                 if (!user) {
                     const error = new customError_1.CustomError(401, 'Invalid credentials');
                     throw error;
