@@ -12,6 +12,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+const axios_1 = __importDefault(require("axios"));
 const defaultResponseHelper_1 = require("../helpers/defaultResponseHelper");
 const validationHelper_1 = require("../helpers/validationHelper");
 const isAuthorizedUser_1 = require("../middlewares/isAuthorizedUser");
@@ -19,8 +20,9 @@ const customError_1 = require("../models/customError");
 const quickbooksAuthClient_1 = __importDefault(require("../quickbooksClient/quickbooksAuthClient"));
 const quickbooksClient_1 = __importDefault(require("../quickbooksClient/quickbooksClient"));
 const repositories_1 = require("../repositories");
-const quickbooksServices_1 = __importDefault(require("../services/quickbooksServices"));
 const configurationRepository_1 = __importDefault(require("../repositories/configurationRepository"));
+const quickbooksServices_1 = __importDefault(require("../services/quickbooksServices"));
+const config_1 = __importDefault(require("../../config"));
 class QuickbooksController {
     // Get Quickbooks Auth URI
     getQuickbooksAuthUri(req, res, next) {
@@ -78,8 +80,31 @@ class QuickbooksController {
                         tenantID: authToken.realmId,
                         fiscalYear: qboCompanyInfo === null || qboCompanyInfo === void 0 ? void 0 : qboCompanyInfo.FiscalYearStartMonth,
                     });
+                    console.log('MY data: ', authToken.access_token, authToken.refresh_token, authToken.realmId, companyId, companyDetails === null || companyDetails === void 0 ? void 0 : companyDetails.employeeLastSyncDate);
+                    // const syncData = await axios.post(
+                    // 	'https://vwarjgvafl.execute-api.us-east-1.amazonaws.com/default/cost-allocation-pro-dev-employeeDump',
+                    // 	{
+                    // 		accessToken: authToken.access_token,
+                    // 		refreshToken: authToken.refresh_token,
+                    // 		tenantID: authToken.realmId,
+                    // 		companyId: companyId,
+                    // 		employeeLastSyncDate: companyDetails?.employeeLastSyncDate,
+                    // 	},
+                    // 	{
+                    // 		headers: {
+                    // 			'x-api-key': 'CRkwakE0jkO3y4uNIBVZ8LeqJfK7rtHaXTR9NkXg',
+                    // 			'Content-Type': 'application/json',
+                    // 		},
+                    // 	}
+                    // );
+                    // console.log('Sync data update: ', syncData);
                 }
                 else {
+                    const isAlreadyConnected = yield repositories_1.companyRepository.getCompanyByTenantId(authToken.realmId);
+                    if (isAlreadyConnected) {
+                        const error = new customError_1.CustomError(404, 'Company is already connected');
+                        throw error;
+                    }
                     const data = {
                         tenantID: authToken.realmId,
                         tenantName: qboCompanyInfo === null || qboCompanyInfo === void 0 ? void 0 : qboCompanyInfo.CompanyName,
@@ -92,6 +117,21 @@ class QuickbooksController {
                     finalCompanyDetails = yield repositories_1.companyRepository.create(data);
                     yield (repositories_1.companyRepository === null || repositories_1.companyRepository === void 0 ? void 0 : repositories_1.companyRepository.connectCompany(userId, finalCompanyDetails === null || finalCompanyDetails === void 0 ? void 0 : finalCompanyDetails.id));
                     yield configurationRepository_1.default.createDefaultConfiguration(finalCompanyDetails === null || finalCompanyDetails === void 0 ? void 0 : finalCompanyDetails.id);
+                    console.log('LAMBDA body: ', authToken.access_token, authToken.refresh_token, authToken.realmId, finalCompanyDetails === null || finalCompanyDetails === void 0 ? void 0 : finalCompanyDetails.id);
+                    console.log('LAMBDA details: ', config_1.default.employeeSyncLambdaEndpoint, config_1.default.employeeSyncLambdaApiKey);
+                    const syncData = yield axios_1.default.post(config_1.default.employeeSyncLambdaEndpoint, {
+                        accessToken: authToken.access_token,
+                        refreshToken: authToken.refresh_token,
+                        tenantID: authToken.realmId,
+                        companyId: finalCompanyDetails === null || finalCompanyDetails === void 0 ? void 0 : finalCompanyDetails.id,
+                    }, {
+                        headers: {
+                            'x-api-key': config_1.default.employeeSyncLambdaApiKey,
+                            'Content-Type': 'application/json',
+                        },
+                    });
+                    console.log('Sync data in create: ', syncData);
+                    // await employeeServices.syncEmployeesByLastSync(companyId);
                 }
                 return (0, defaultResponseHelper_1.DefaultResponse)(res, 200, 'Company connected successfully', finalCompanyDetails);
             }

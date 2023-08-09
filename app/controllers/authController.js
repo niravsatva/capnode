@@ -29,6 +29,7 @@ const validationHelper_1 = require("../helpers/validationHelper");
 const repositories_1 = require("../repositories");
 const tokenRepository_1 = __importDefault(require("../repositories/tokenRepository"));
 const authServices_1 = __importDefault(require("../services/authServices"));
+const customError_1 = require("../models/customError");
 class AuthController {
     // Register User
     register(req, res, next) {
@@ -51,6 +52,11 @@ class AuthController {
                 const isAdminExist = yield repositories_1.roleRepository.checkAdmin('admin');
                 if (!isAdminExist) {
                     yield repositories_1.roleRepository.createRole('Admin', 'All permissions granted', true, false);
+                }
+                // If email already exists
+                const isExist = yield repositories_1.userRepository.getByEmail(email);
+                if (isExist) {
+                    throw new customError_1.CustomError(400, 'Email already exists');
                 }
                 // Create new user
                 const user = yield authServices_1.default.register(firstName, lastName, email, customerId);

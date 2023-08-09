@@ -41,6 +41,8 @@ function config(Env) {
         quickbooksScopes: Env === null || Env === void 0 ? void 0 : Env.QUICKBOOKS_SCOPES,
         quickbooksUserInfoEndpoint: Env === null || Env === void 0 ? void 0 : Env.QUICKBOOKS_USER_INFO_ENDPOINT,
         quickbooksTokenRevokeEndpoint: Env === null || Env === void 0 ? void 0 : Env.QUICKBOOKS_TOKEN_REVOKE_ENDPOINT,
+        employeeSyncLambdaEndpoint: Env === null || Env === void 0 ? void 0 : Env.EMPLOYEE_SYNC_LAMBDA_ENDPOINT,
+        employeeSyncLambdaApiKey: Env === null || Env === void 0 ? void 0 : Env.EMPLOYEE_SYNC_API_KEY,
     };
 }
 exports.default = Object.assign({}, config(process.env));

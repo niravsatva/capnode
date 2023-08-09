@@ -176,5 +176,20 @@ class CompanyRepository {
             }
         });
     }
+    getCompanyByTenantId(tenantId) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                const companyDetails = yield prisma_1.prisma.company.findFirst({
+                    where: {
+                        tenantID: tenantId,
+                    },
+                });
+                return companyDetails;
+            }
+            catch (err) {
+                throw err;
+            }
+        });
+    }
 }
 exports.default = new CompanyRepository();

@@ -113,13 +113,10 @@ class RoleRepositories {
                 if (page === 1) {
                     if (searchRegex.test('admin') || search === '') {
                         const adminRole = yield prisma_1.prisma.role.findFirst({
-                            where: {
-                                roleName: {
+                            where: Object.assign(Object.assign({}, filterConditions), { roleName: {
                                     mode: 'insensitive',
                                     equals: 'admin',
-                                },
-                                isAdminRole: true,
-                            },
+                                }, isAdminRole: true }),
                         });
                         if (adminRole) {
                             if (sortCondition === 'asc') {

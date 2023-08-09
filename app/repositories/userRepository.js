@@ -103,6 +103,7 @@ class UserRepository {
             const totalAdminUser = yield prisma_1.prisma.companyRole.findMany({
                 where: {
                     companyId: company,
+                    status: true,
                     userId: {
                         not: null,
                     },
@@ -145,6 +146,7 @@ class UserRepository {
                         lastName: true,
                         phone: true,
                         status: true,
+                        profileImg: true,
                         companies: {
                             where: {
                                 NOT: {
@@ -294,19 +296,67 @@ class UserRepository {
                 const user = yield prisma_1.prisma.user.update({
                     where: { id: id },
                     data: data,
-                    include: {
+                    select: {
+                        id: true,
+                        email: true,
+                        firstName: true,
+                        lastName: true,
+                        phone: true,
+                        isVerified: true,
+                        status: true,
+                        profileImg: true,
+                        customerId: true,
                         companies: {
                             where: {
                                 NOT: {
                                     companyId: null,
                                 },
                             },
-                            include: {
-                                company: true,
-                                role: true,
+                            select: {
+                                id: true,
+                                userId: true,
+                                roleId: true,
+                                companyId: true,
+                                status: true,
+                                company: {
+                                    select: {
+                                        id: true,
+                                        tenantName: true,
+                                        tenantID: true,
+                                        accessTokenUTCDate: true,
+                                        customerLastSyncDate: true,
+                                        classLastSyncDate: true,
+                                        isConnected: true,
+                                        status: true,
+                                        fiscalYear: true,
+                                    },
+                                },
+                                role: {
+                                    select: {
+                                        id: true,
+                                        roleName: true,
+                                        roleDescription: true,
+                                        isCompanyAdmin: true,
+                                        isAdminRole: true,
+                                        status: true,
+                                    },
+                                },
                             },
                         },
                     },
+                    // include: {
+                    // 	companies: {
+                    // 		where: {
+                    // 			NOT: {
+                    // 				companyId: null,
+                    // 			},
+                    // 		},
+                    // 		include: {
+                    // 			company: true,
+                    // 			role: true,
+                    // 		},
+                    // 	},
+                    // },
                 });
                 return user;
             }
