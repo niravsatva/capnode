@@ -212,7 +212,7 @@ exports.DefaultConfigurationSettings = {
         addMore: true,
         toolTip: 'Salary Expense Accounts:  These are the Salary expense accounts, if the user add a new account here, it will be added as new columns in Cost allocation ',
         placeHolder: 'Select QBO Chart of Account',
-        errorMessage: 'Please Select QBO Chart of Account',
+        errorMessage: 'Please Select Chart of Account',
         qbMappingValue: 'QuickBooks Online Chart of Accounts',
         capMappingTitle: 'Salary Expense Accounts',
     },
