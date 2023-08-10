@@ -50,13 +50,6 @@ class RolesController {
             try {
                 const { id } = req.params;
                 const { page = 1, limit = 10, search, filter, type, sort } = req.query;
-                const isPermitted = yield (0, isAuthorizedUser_1.checkPermission)(req, id, {
-                    permissionName: 'Roles',
-                    permission: ['view'],
-                });
-                if (!isPermitted) {
-                    throw new customError_1.CustomError(403, 'You are not authorized');
-                }
                 const roles = yield roleService_1.default.getAllRoles(id, Number(page), Number(limit), search, filter, type, sort);
                 return (0, defaultResponseHelper_1.DefaultResponse)(res, 200, 'Roles find successful', roles);
             }

@@ -132,7 +132,7 @@ model Invitations {
 model Configuration {
   id                  String          @id @default(uuid())
   settings            Json
-  indirectExpenseRate Int?
+  indirectExpenseRate Float?
   payrollMethod       PayrollMethods?
   company             Company?        @relation(fields: [companyId], references: [id])
   companyId           String          @unique
