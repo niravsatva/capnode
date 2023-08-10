@@ -213,9 +213,14 @@ class QuickbooksController {
                 const companyId = req.body.companyId;
                 // Get access token
                 const authResponse = yield quickbooksServices_1.default.getAccessToken(companyId);
-                // Get All Accounts From Quickbooks
-                const accounts = yield quickbooksClient_1.default.getAllAccounts(authResponse === null || authResponse === void 0 ? void 0 : authResponse.accessToken, authResponse === null || authResponse === void 0 ? void 0 : authResponse.tenantID, authResponse === null || authResponse === void 0 ? void 0 : authResponse.refreshToken);
-                return (0, defaultResponseHelper_1.DefaultResponse)(res, 200, 'All accounts fetched successfully', (_a = accounts === null || accounts === void 0 ? void 0 : accounts.QueryResponse) === null || _a === void 0 ? void 0 : _a.Account);
+                if ((authResponse === null || authResponse === void 0 ? void 0 : authResponse.status) == true) {
+                    // Get All Accounts From Quickbooks
+                    const accounts = yield quickbooksClient_1.default.getAllAccounts(authResponse === null || authResponse === void 0 ? void 0 : authResponse.accessToken, authResponse === null || authResponse === void 0 ? void 0 : authResponse.tenantID, authResponse === null || authResponse === void 0 ? void 0 : authResponse.refreshToken);
+                    return (0, defaultResponseHelper_1.DefaultResponse)(res, 200, 'All accounts fetched successfully', (_a = accounts === null || accounts === void 0 ? void 0 : accounts.QueryResponse) === null || _a === void 0 ? void 0 : _a.Account);
+                }
+                else {
+                    return (0, defaultResponseHelper_1.DefaultResponse)(res, 200, 'Company status is not active');
+                }
             }
             catch (err) {
                 next(err);
@@ -232,9 +237,14 @@ class QuickbooksController {
                 const companyId = req.body.companyId;
                 // Get access token
                 const authResponse = yield quickbooksServices_1.default.getAccessToken(companyId);
-                // Get All Customers from Quickbooks
-                const customers = yield quickbooksClient_1.default.getAllCustomers(authResponse === null || authResponse === void 0 ? void 0 : authResponse.accessToken, authResponse === null || authResponse === void 0 ? void 0 : authResponse.tenantID, authResponse === null || authResponse === void 0 ? void 0 : authResponse.refreshToken);
-                return (0, defaultResponseHelper_1.DefaultResponse)(res, 200, 'All accounts fetched successfully', (_a = customers === null || customers === void 0 ? void 0 : customers.QueryResponse) === null || _a === void 0 ? void 0 : _a.Customer);
+                if ((authResponse === null || authResponse === void 0 ? void 0 : authResponse.status) == true) {
+                    // Get All Customers from Quickbooks
+                    const customers = yield quickbooksClient_1.default.getAllCustomers(authResponse === null || authResponse === void 0 ? void 0 : authResponse.accessToken, authResponse === null || authResponse === void 0 ? void 0 : authResponse.tenantID, authResponse === null || authResponse === void 0 ? void 0 : authResponse.refreshToken);
+                    return (0, defaultResponseHelper_1.DefaultResponse)(res, 200, 'All accounts fetched successfully', (_a = customers === null || customers === void 0 ? void 0 : customers.QueryResponse) === null || _a === void 0 ? void 0 : _a.Customer);
+                }
+                else {
+                    return (0, defaultResponseHelper_1.DefaultResponse)(res, 200, 'Company status is not active');
+                }
             }
             catch (err) {
                 next(err);
@@ -251,10 +261,15 @@ class QuickbooksController {
                 const companyId = req.body.companyId;
                 // Get access token
                 const authResponse = yield quickbooksServices_1.default.getAccessToken(companyId);
-                // Get All Classes From Quickbooks
-                const classes = yield quickbooksClient_1.default.getAllClasses(authResponse === null || authResponse === void 0 ? void 0 : authResponse.accessToken, authResponse === null || authResponse === void 0 ? void 0 : authResponse.tenantID, authResponse === null || authResponse === void 0 ? void 0 : authResponse.refreshToken);
-                const finalClasses = (_b = (_a = classes === null || classes === void 0 ? void 0 : classes.QueryResponse) === null || _a === void 0 ? void 0 : _a.Class) === null || _b === void 0 ? void 0 : _b.filter((item) => (item === null || item === void 0 ? void 0 : item.SubClass) === true);
-                return (0, defaultResponseHelper_1.DefaultResponse)(res, 200, 'All class fetched successfully', finalClasses);
+                if ((authResponse === null || authResponse === void 0 ? void 0 : authResponse.status) == true) {
+                    // Get All Classes From Quickbooks
+                    const classes = yield quickbooksClient_1.default.getAllClasses(authResponse === null || authResponse === void 0 ? void 0 : authResponse.accessToken, authResponse === null || authResponse === void 0 ? void 0 : authResponse.tenantID, authResponse === null || authResponse === void 0 ? void 0 : authResponse.refreshToken);
+                    const finalClasses = (_b = (_a = classes === null || classes === void 0 ? void 0 : classes.QueryResponse) === null || _a === void 0 ? void 0 : _a.Class) === null || _b === void 0 ? void 0 : _b.filter((item) => (item === null || item === void 0 ? void 0 : item.SubClass) === true);
+                    return (0, defaultResponseHelper_1.DefaultResponse)(res, 200, 'All classes fetched successfully', finalClasses);
+                }
+                else {
+                    return (0, defaultResponseHelper_1.DefaultResponse)(res, 200, 'Company status is not active');
+                }
             }
             catch (err) {
                 next(err);
