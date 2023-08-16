@@ -322,7 +322,7 @@ exports.DefaultConfigurationSettings = {
         },
         addMore: false,
         toolTip: 'Funding Source: This is mapped with QBO Customer, This is also mapped with QBO Class.  (Used in a journal entry. This is the customer for the credit lines of the journal entry. See journal entry sample.)',
-        placeHolder: 'Select Expense Pools Funding Source',
+        placeHolder: 'Select Customer',
         errorMessage: 'Please Select Expense Pools Funding Source',
         qbMappingValue: 'Quickbooks Customer',
         capMappingTitle: 'Expense Pools Funding Source',

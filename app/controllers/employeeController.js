@@ -21,9 +21,18 @@ class EmployeeController {
             try {
                 // Check validation for company id
                 (0, validationHelper_1.checkValidation)(req);
+                const { page = 1, limit = 10, search, filter, type, sort } = req.query;
                 const companyId = req.body.companyId;
                 // Get all employees
-                const employees = yield employeeServices_1.default.getEmployees(companyId);
+                const employees = yield employeeServices_1.default.getEmployees({
+                    page: Number(page),
+                    limit: Number(limit),
+                    search: String(search),
+                    filter: String(filter),
+                    type: String(type),
+                    sort: String(sort),
+                    companyId: companyId,
+                });
                 return (0, defaultResponseHelper_1.DefaultResponse)(res, 200, 'Employees fetched successfully', employees);
             }
             catch (err) {
@@ -31,6 +40,7 @@ class EmployeeController {
             }
         });
     }
+    // Sync lambda call
     syncEmployees(req, res, next) {
         return __awaiter(this, void 0, void 0, function* () {
             try {

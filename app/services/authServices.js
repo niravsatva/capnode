@@ -27,6 +27,22 @@ class AuthServices {
             try {
                 // Check if user exists
                 const user = yield userRepository_1.default.getByEmail(email);
+                if (!user) {
+                    const error = new customError_1.CustomError(401, 'Invalid credentials');
+                    throw error;
+                }
+                // Check if user is verified
+                if (!(user === null || user === void 0 ? void 0 : user.isVerified)) {
+                    const error = new customError_1.CustomError(401, 'User is not verified');
+                    throw error;
+                }
+                //   Validate Password
+                const validPassword = yield (0, passwordHelper_1.comparePassword)(password, user.password);
+                //   Password not valid
+                if (!validPassword) {
+                    const error = new customError_1.CustomError(401, 'Invalid credentials');
+                    throw error;
+                }
                 const isValidForLogin = (_a = user === null || user === void 0 ? void 0 : user.companies) === null || _a === void 0 ? void 0 : _a.some((singleCompany) => {
                     var _a, _b;
                     const permissions = (_b = (_a = singleCompany === null || singleCompany === void 0 ? void 0 : singleCompany.role) === null || _a === void 0 ? void 0 : _a.permissions) === null || _b === void 0 ? void 0 : _b.filter((item) => (item === null || item === void 0 ? void 0 : item.all) === true ||
@@ -43,22 +59,6 @@ class AuthServices {
                 });
                 if (!isValidForLogin) {
                     throw new customError_1.CustomError(401, 'You are not authorized to access the system please contact your administrator.');
-                }
-                if (!user) {
-                    const error = new customError_1.CustomError(401, 'Invalid credentials');
-                    throw error;
-                }
-                // Check if user is verified
-                if (!(user === null || user === void 0 ? void 0 : user.isVerified)) {
-                    const error = new customError_1.CustomError(401, 'User is not verified');
-                    throw error;
-                }
-                //   Validate Password
-                const validPassword = yield (0, passwordHelper_1.comparePassword)(password, user.password);
-                //   Password not valid
-                if (!validPassword) {
-                    const error = new customError_1.CustomError(401, 'Invalid credentials');
-                    throw error;
                 }
                 //   Credentials Valid
                 const accessToken = (0, tokenHelper_1.generateAccessToken)({ id: user === null || user === void 0 ? void 0 : user.id, email: email });
