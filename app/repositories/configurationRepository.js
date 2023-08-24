@@ -11,6 +11,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 const prisma_1 = require("../client/prisma");
 const data_1 = require("../constants/data");
+const data_2 = require("../constants/data");
 class ConfigurationRepository {
     // Create default configuration settings for the first time company is created
     createDefaultConfiguration(companyId) {
@@ -58,6 +59,106 @@ class ConfigurationRepository {
                     data: data,
                 });
                 return updatedConfiguration;
+            }
+            catch (err) {
+                throw err;
+            }
+        });
+    }
+    getConfigurationField(companyId) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                const configurationSection = yield prisma_1.prisma.configurationSection.findMany({
+                    where: {
+                        companyId,
+                    },
+                    orderBy: {
+                        no: 'asc',
+                    },
+                    include: {
+                        fields: {
+                            orderBy: {
+                                jsonId: 'asc',
+                            },
+                        },
+                    },
+                });
+                return configurationSection;
+            }
+            catch (err) {
+                throw err;
+            }
+        });
+    }
+    createField(companyId, sectionId, data) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                const createdField = yield prisma_1.prisma.field.create({
+                    data: Object.assign({ company: { connect: { id: companyId } }, configurationSection: { connect: { id: sectionId } } }, data),
+                });
+                return createdField;
+            }
+            catch (err) {
+                throw err;
+            }
+        });
+    }
+    deleteConfigurationField(fieldId) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                const deletedField = yield prisma_1.prisma.field.delete({
+                    where: {
+                        id: fieldId,
+                    },
+                });
+                return deletedField;
+            }
+            catch (err) {
+                throw err;
+            }
+        });
+    }
+    editConfigurationField(fieldId, fieldName) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                const updatedField = yield prisma_1.prisma.field.update({
+                    where: {
+                        id: fieldId,
+                    },
+                    data: {
+                        name: fieldName,
+                    },
+                });
+                return updatedField;
+            }
+            catch (err) {
+                throw err;
+            }
+        });
+    }
+    initialFieldSectionCreate(companyId) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                yield Promise.all(data_2.sections.map((singleSection) => __awaiter(this, void 0, void 0, function* () {
+                    const section = yield prisma_1.prisma.configurationSection.create({
+                        data: {
+                            sectionName: singleSection.sectionName,
+                            no: singleSection.no,
+                            company: { connect: { id: companyId } },
+                        },
+                    });
+                    singleSection.fields.map((singleField) => __awaiter(this, void 0, void 0, function* () {
+                        yield prisma_1.prisma.field.create({
+                            data: {
+                                jsonId: singleField.jsonId,
+                                name: singleField.name,
+                                type: singleField.type,
+                                company: { connect: { id: companyId } },
+                                configurationSection: { connect: { id: section.id } },
+                            },
+                        });
+                    }));
+                })));
             }
             catch (err) {
                 throw err;

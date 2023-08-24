@@ -26,7 +26,7 @@ class EmployeeRepository {
             }
         });
     }
-    updateOrCreateEmployees(empId, companyId, employeeData) {
+    updateOrCreateEmployee(empId, companyId, employeeData) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 const employee = yield prisma_1.prisma.employee.findFirst({
@@ -68,6 +68,16 @@ class EmployeeRepository {
             catch (err) {
                 throw err;
             }
+        });
+    }
+    getEmployeeDetails(employeeId) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const employee = yield prisma_1.prisma.employee.findUnique({
+                where: {
+                    id: employeeId,
+                },
+            });
+            return employee;
         });
     }
 }

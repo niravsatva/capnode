@@ -8,6 +8,17 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
+var __rest = (this && this.__rest) || function (s, e) {
+    var t = {};
+    for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p) && e.indexOf(p) < 0)
+        t[p] = s[p];
+    if (s != null && typeof Object.getOwnPropertySymbols === "function")
+        for (var i = 0, p = Object.getOwnPropertySymbols(s); i < p.length; i++) {
+            if (e.indexOf(p[i]) < 0 && Object.prototype.propertyIsEnumerable.call(s, p[i]))
+                t[p[i]] = s[p[i]];
+        }
+    return t;
+};
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
@@ -17,6 +28,7 @@ const validationHelper_1 = require("../helpers/validationHelper");
 const customError_1 = require("../models/customError");
 const repositories_1 = require("../repositories");
 const configurationRepository_1 = __importDefault(require("../repositories/configurationRepository"));
+const configurationServices_1 = __importDefault(require("../services/configurationServices"));
 class ConfigurationController {
     getCompanyConfiguration(req, res, next) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -60,6 +72,57 @@ class ConfigurationController {
             }
             catch (err) {
                 next(err);
+            }
+        });
+    }
+    getFieldsSection(req, res, next) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                const { companyId } = req.params;
+                const sections = yield configurationServices_1.default.getFieldsSection(companyId);
+                return (0, defaultResponseHelper_1.DefaultResponse)(res, 200, 'Section fields fetched successfully', sections);
+            }
+            catch (error) {
+                next(error);
+            }
+        });
+    }
+    createField(req, res, next) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                const _a = req.body, { companyId, sectionId } = _a, data = __rest(_a, ["companyId", "sectionId"]);
+                (0, validationHelper_1.checkValidation)(req);
+                const createdField = yield configurationServices_1.default.createField(companyId, sectionId, data);
+                return (0, defaultResponseHelper_1.DefaultResponse)(res, 200, 'Field created successfully', createdField);
+            }
+            catch (error) {
+                next(error);
+            }
+        });
+    }
+    deleteField(req, res, next) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                const { fieldId } = req.body;
+                (0, validationHelper_1.checkValidation)(req);
+                const deletedField = yield configurationServices_1.default.deleteField(fieldId);
+                return (0, defaultResponseHelper_1.DefaultResponse)(res, 200, 'Field deleted successfully', deletedField);
+            }
+            catch (error) {
+                next(error);
+            }
+        });
+    }
+    updateField(req, res, next) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                const { fieldId, fieldName } = req.body;
+                (0, validationHelper_1.checkValidation)(req);
+                const editedField = yield configurationServices_1.default.updateField(fieldId, fieldName);
+                return (0, defaultResponseHelper_1.DefaultResponse)(res, 200, 'Field updated successfully', editedField);
+            }
+            catch (error) {
+                next(error);
             }
         });
     }

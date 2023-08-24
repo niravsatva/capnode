@@ -8,10 +8,16 @@ const userServices_1 = __importDefault(require("./userServices"));
 const roleService_1 = __importDefault(require("./roleService"));
 const permissionService_1 = __importDefault(require("./permissionService"));
 const employeeServices_1 = __importDefault(require("./employeeServices"));
+const timeActivityServices_1 = __importDefault(require("./timeActivityServices"));
+const configurationServices_1 = __importDefault(require("./configurationServices"));
+const employeeCostServices_1 = __importDefault(require("./employeeCostServices"));
 exports.default = {
     authServices: authServices_1.default,
     userServices: userServices_1.default,
     roleService: roleService_1.default,
     permissionService: permissionService_1.default,
     employeeServices: employeeServices_1.default,
+    timeActivityServices: timeActivityServices_1.default,
+    configurationServices: configurationServices_1.default,
+    employeeCostServices: employeeCostServices_1.default,
 };

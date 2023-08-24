@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.DefaultConfigurationSettings = exports.DefaultAdminPermissions = exports.DefaultPermissions = void 0;
+exports.sections = exports.DefaultConfigurationSettings = exports.DefaultAdminPermissions = exports.DefaultPermissions = void 0;
 exports.DefaultPermissions = [
     { permissionName: 'Dashboard', sortId: 1 },
     { permissionName: 'Employee Cost', sortId: 2 },
@@ -328,3 +328,79 @@ exports.DefaultConfigurationSettings = {
         capMappingTitle: 'Expense Pools Funding Source',
     },
 };
+exports.sections = [
+    {
+        sectionName: 'Employee Type',
+        no: 0,
+        fields: [
+            {
+                name: 'Employee Type',
+                type: 'Monthly',
+                jsonId: 'f1',
+            },
+            {
+                name: 'Maximum allocate hours per year',
+                type: 'Yearly',
+                jsonId: 'f2',
+            },
+            {
+                name: 'Maximum Vacation/PTO hours per year',
+                type: 'Yearly',
+                jsonId: 'f3',
+            },
+        ],
+    },
+    {
+        sectionName: 'Salary Expense Accounts',
+        no: 1,
+        fields: [
+            {
+                name: 'Salary',
+                type: 'Monthly',
+                jsonId: 'f1',
+            },
+            {
+                name: 'Vacation/PTO',
+                type: 'Monthly',
+                jsonId: 'f2',
+            },
+        ],
+    },
+    {
+        sectionName: 'Fringe expense',
+        no: 2,
+        fields: [
+            {
+                name: 'Health Insurance',
+                type: 'Monthly',
+                jsonId: 'f1',
+            },
+            {
+                name: 'Retirement',
+                type: 'Monthly',
+                jsonId: 'f2',
+            },
+            {
+                name: `Worker's Comp`,
+                type: 'Monthly',
+                jsonId: 'f3',
+            },
+        ],
+    },
+    {
+        sectionName: 'Payroll Taxes Expense',
+        no: 3,
+        fields: [
+            {
+                name: 'FICA',
+                type: 'Monthly',
+                jsonId: 'f1',
+            },
+            {
+                name: 'SUI',
+                type: 'Monthly',
+                jsonId: 'f2',
+            },
+        ],
+    },
+];

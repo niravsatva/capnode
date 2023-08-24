@@ -6,6 +6,7 @@ const customError_1 = require("../models/customError");
 const customError = (err, req, res, next) => {
     const error = new customError_1.CustomError(err.status, err.message, err.additionalInfo);
     if (error.status == 500) {
+        console.log('Error: ', err);
         return res.status(error.status).json({
             error: err,
             message: 'Something went wrong',

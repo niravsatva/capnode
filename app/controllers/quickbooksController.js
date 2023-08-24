@@ -12,7 +12,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-const axios_1 = __importDefault(require("axios"));
+const config_1 = __importDefault(require("../../config"));
 const defaultResponseHelper_1 = require("../helpers/defaultResponseHelper");
 const validationHelper_1 = require("../helpers/validationHelper");
 const isAuthorizedUser_1 = require("../middlewares/isAuthorizedUser");
@@ -21,8 +21,10 @@ const quickbooksAuthClient_1 = __importDefault(require("../quickbooksClient/quic
 const quickbooksClient_1 = __importDefault(require("../quickbooksClient/quickbooksClient"));
 const repositories_1 = require("../repositories");
 const configurationRepository_1 = __importDefault(require("../repositories/configurationRepository"));
+const employeeServices_1 = __importDefault(require("../services/employeeServices"));
 const quickbooksServices_1 = __importDefault(require("../services/quickbooksServices"));
-const config_1 = __importDefault(require("../../config"));
+const timeActivityServices_1 = __importDefault(require("../services/timeActivityServices"));
+// import timeActivityServices from '../services/timeActivityServices';
 class QuickbooksController {
     // Get Quickbooks Auth URI
     getQuickbooksAuthUri(req, res, next) {
@@ -100,6 +102,8 @@ class QuickbooksController {
                     // console.log('Sync data update: ', syncData);
                 }
                 else {
+                    // For first time company integration
+                    // Check if the same company is already connected
                     const isAlreadyConnected = yield repositories_1.companyRepository.getCompanyByTenantId(authToken.realmId);
                     if (isAlreadyConnected) {
                         const error = new customError_1.CustomError(404, 'Company is already connected');
@@ -117,20 +121,50 @@ class QuickbooksController {
                     finalCompanyDetails = yield repositories_1.companyRepository.create(data);
                     yield (repositories_1.companyRepository === null || repositories_1.companyRepository === void 0 ? void 0 : repositories_1.companyRepository.connectCompany(userId, finalCompanyDetails === null || finalCompanyDetails === void 0 ? void 0 : finalCompanyDetails.id));
                     yield configurationRepository_1.default.createDefaultConfiguration(finalCompanyDetails === null || finalCompanyDetails === void 0 ? void 0 : finalCompanyDetails.id);
-                    console.log('LAMBDA body: ', authToken.access_token, authToken.refresh_token, authToken.realmId, finalCompanyDetails === null || finalCompanyDetails === void 0 ? void 0 : finalCompanyDetails.id);
                     console.log('LAMBDA details: ', config_1.default.employeeSyncLambdaEndpoint, config_1.default.employeeSyncLambdaApiKey);
-                    const syncData = yield axios_1.default.post(config_1.default.employeeSyncLambdaEndpoint, {
-                        accessToken: authToken.access_token,
-                        refreshToken: authToken.refresh_token,
-                        tenantID: authToken.realmId,
+                    // DO NOT REMOVE THIS CODE
+                    // LAMBDA FUNCTION CALL
+                    // const syncData = await axios.post(
+                    // 	config.employeeSyncLambdaEndpoint,
+                    // 	{
+                    // 		accessToken: authToken.access_token,
+                    // 		refreshToken: authToken.refresh_token,
+                    // 		tenantID: authToken.realmId,
+                    // 		companyId: finalCompanyDetails?.id,
+                    // 	},
+                    // 	{
+                    // 		headers: {
+                    // 			'x-api-key': config.employeeSyncLambdaApiKey,
+                    // 			'Content-Type': 'application/json',
+                    // 		},
+                    // 	}
+                    // );
+                    // LAMBDA FUNCTION CALL
+                    const syncData = yield employeeServices_1.default.syncEmployeeFirstTime({
+                        accessToken: authToken === null || authToken === void 0 ? void 0 : authToken.access_token,
+                        refreshToken: authToken === null || authToken === void 0 ? void 0 : authToken.refresh_token,
+                        tenantId: authToken === null || authToken === void 0 ? void 0 : authToken.realmId,
                         companyId: finalCompanyDetails === null || finalCompanyDetails === void 0 ? void 0 : finalCompanyDetails.id,
-                    }, {
-                        headers: {
-                            'x-api-key': config_1.default.employeeSyncLambdaApiKey,
-                            'Content-Type': 'application/json',
-                        },
                     });
+                    console.log('MAAAAAAAAAAAAAAAAAAa: ', authToken);
+                    const syncTimeActivities = yield timeActivityServices_1.default.lambdaSyncFunction({
+                        accessToken: authToken === null || authToken === void 0 ? void 0 : authToken.access_token,
+                        refreshToken: authToken === null || authToken === void 0 ? void 0 : authToken.refresh_token,
+                        tenantId: authToken === null || authToken === void 0 ? void 0 : authToken.realmId,
+                        companyId: finalCompanyDetails === null || finalCompanyDetails === void 0 ? void 0 : finalCompanyDetails.id,
+                    });
+                    // const syncTimeActivities =
+                    // 	await timeActivityServices.syncTimeActivities(companyId);
+                    yield configurationRepository_1.default.initialFieldSectionCreate(finalCompanyDetails === null || finalCompanyDetails === void 0 ? void 0 : finalCompanyDetails.id);
+                    const employees = yield repositories_1.employeeRepository.getAllEmployeesByCompanyId(finalCompanyDetails === null || finalCompanyDetails === void 0 ? void 0 : finalCompanyDetails.id);
+                    const sectionWithFields = yield configurationRepository_1.default.getConfigurationField(finalCompanyDetails === null || finalCompanyDetails === void 0 ? void 0 : finalCompanyDetails.id);
+                    const sectionFields = sectionWithFields.reduce((accumulator, section) => {
+                        accumulator.push(...section.fields);
+                        return accumulator;
+                    }, []);
+                    yield repositories_1.employeeCostRepository.createInitialValues(employees, sectionFields, finalCompanyDetails === null || finalCompanyDetails === void 0 ? void 0 : finalCompanyDetails.id);
                     console.log('Sync data in create: ', syncData);
+                    console.log('Sync activities in create: ', syncTimeActivities);
                     // await employeeServices.syncEmployeesByLastSync(companyId);
                 }
                 return (0, defaultResponseHelper_1.DefaultResponse)(res, 200, 'Company connected successfully', finalCompanyDetails);
@@ -205,7 +239,7 @@ class QuickbooksController {
     }
     // Get All Accounts
     getAllAccounts(req, res, next) {
-        var _a;
+        var _a, _b;
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 // Check validation for company id
@@ -216,7 +250,17 @@ class QuickbooksController {
                 if ((authResponse === null || authResponse === void 0 ? void 0 : authResponse.status) == true) {
                     // Get All Accounts From Quickbooks
                     const accounts = yield quickbooksClient_1.default.getAllAccounts(authResponse === null || authResponse === void 0 ? void 0 : authResponse.accessToken, authResponse === null || authResponse === void 0 ? void 0 : authResponse.tenantID, authResponse === null || authResponse === void 0 ? void 0 : authResponse.refreshToken);
-                    return (0, defaultResponseHelper_1.DefaultResponse)(res, 200, 'All accounts fetched successfully', (_a = accounts === null || accounts === void 0 ? void 0 : accounts.QueryResponse) === null || _a === void 0 ? void 0 : _a.Account);
+                    // Accounts with account number
+                    const finalAccounts = (_b = (_a = accounts === null || accounts === void 0 ? void 0 : accounts.QueryResponse) === null || _a === void 0 ? void 0 : _a.Account) === null || _b === void 0 ? void 0 : _b.map((account) => {
+                        if (account === null || account === void 0 ? void 0 : account.AcctNum) {
+                            return Object.assign(Object.assign({}, account), { Name: `${account === null || account === void 0 ? void 0 : account.AcctNum} - ${account === null || account === void 0 ? void 0 : account.Name}` });
+                        }
+                        else {
+                            return account;
+                        }
+                    });
+                    console.log('Accounts: ', finalAccounts);
+                    return (0, defaultResponseHelper_1.DefaultResponse)(res, 200, 'All accounts fetched successfully', finalAccounts);
                 }
                 else {
                     return (0, defaultResponseHelper_1.DefaultResponse)(res, 200, 'Company status is not active');
@@ -288,6 +332,24 @@ class QuickbooksController {
                 // Get Company Details From Quickbooks
                 const qboCompanyInfo = yield quickbooksClient_1.default.getCompanyInfo(authResponse.accessToken, authResponse.tenantID, authResponse.refreshToken);
                 return (0, defaultResponseHelper_1.DefaultResponse)(res, 200, 'Company details fetched successfully', qboCompanyInfo);
+            }
+            catch (err) {
+                next(err);
+            }
+        });
+    }
+    // Get All TimeActivities
+    getAllTimeActivities(req, res, next) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                // Check validation for company id
+                (0, validationHelper_1.checkValidation)(req);
+                const companyId = req.body.companyId;
+                // Get access token
+                const authResponse = yield quickbooksServices_1.default.getAccessToken(companyId);
+                // Get Company Details From Quickbooks
+                const qboCompanyInfo = yield quickbooksClient_1.default.getAllTimeActivities(authResponse.accessToken, authResponse.tenantID, authResponse.refreshToken);
+                return (0, defaultResponseHelper_1.DefaultResponse)(res, 200, 'Time activities fetched successfully', qboCompanyInfo);
             }
             catch (err) {
                 next(err);

@@ -3,7 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.configurationController = exports.quickbooksController = exports.permissionController = exports.rolesController = exports.companyController = exports.userController = exports.authController = void 0;
+exports.employeeCostController = exports.timeActivityController = exports.configurationController = exports.quickbooksController = exports.permissionController = exports.rolesController = exports.companyController = exports.userController = exports.authController = void 0;
 const authController_1 = __importDefault(require("./authController"));
 exports.authController = authController_1.default;
 const userController_1 = __importDefault(require("./userController"));
@@ -18,3 +18,7 @@ const quickbooksController_1 = __importDefault(require("./quickbooksController")
 exports.quickbooksController = quickbooksController_1.default;
 const configurationController_1 = __importDefault(require("./configurationController"));
 exports.configurationController = configurationController_1.default;
+const timeActivityController_1 = __importDefault(require("./timeActivityController"));
+exports.timeActivityController = timeActivityController_1.default;
+const employeeCostController_1 = __importDefault(require("./employeeCostController"));
+exports.employeeCostController = employeeCostController_1.default;

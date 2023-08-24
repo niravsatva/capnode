@@ -167,6 +167,7 @@ class UserRepository {
                                         accessTokenUTCDate: true,
                                         customerLastSyncDate: true,
                                         employeeLastSyncDate: true,
+                                        timeActivitiesLastSyncDate: true,
                                         classLastSyncDate: true,
                                         isConnected: true,
                                         status: true,

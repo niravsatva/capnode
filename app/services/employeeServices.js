@@ -13,9 +13,10 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 /* eslint-disable no-mixed-spaces-and-tabs */
-const axios_1 = __importDefault(require("axios"));
-const config_1 = __importDefault(require("../../config"));
+const moment_timezone_1 = __importDefault(require("moment-timezone"));
+const prisma_1 = require("../client/prisma");
 const customError_1 = require("../models/customError");
+const quickbooksClient_1 = __importDefault(require("../quickbooksClient/quickbooksClient"));
 const repositories_1 = require("../repositories");
 const quickbooksServices_1 = __importDefault(require("./quickbooksServices"));
 class EmployeeServices {
@@ -74,7 +75,44 @@ class EmployeeServices {
             }
         });
     }
+    syncEmployeeFirstTime(employeeData) {
+        var _a, _b, _c, _d;
+        return __awaiter(this, void 0, void 0, function* () {
+            // Get all employees from the quickbooks
+            const employees = yield quickbooksClient_1.default.getEmployees(employeeData === null || employeeData === void 0 ? void 0 : employeeData.accessToken, employeeData === null || employeeData === void 0 ? void 0 : employeeData.tenantId, employeeData === null || employeeData === void 0 ? void 0 : employeeData.refreshToken);
+            let employeeArr = [];
+            if (employees && ((_b = (_a = employees === null || employees === void 0 ? void 0 : employees.QueryResponse) === null || _a === void 0 ? void 0 : _a.Employee) === null || _b === void 0 ? void 0 : _b.length) > 0) {
+                employeeArr = yield Promise.all((_d = (_c = employees === null || employees === void 0 ? void 0 : employees.QueryResponse) === null || _c === void 0 ? void 0 : _c.Employee) === null || _d === void 0 ? void 0 : _d.map((employee) => __awaiter(this, void 0, void 0, function* () {
+                    var _e, _f, _g, _h;
+                    const data = {
+                        employeeId: employee === null || employee === void 0 ? void 0 : employee.Id,
+                        fullName: employee === null || employee === void 0 ? void 0 : employee.DisplayName,
+                        email: (_f = (_e = employee === null || employee === void 0 ? void 0 : employee.PrimaryEmailAddr) === null || _e === void 0 ? void 0 : _e.Address) !== null && _f !== void 0 ? _f : '',
+                        phone: (_h = (_g = employee === null || employee === void 0 ? void 0 : employee.PrimaryPhone) === null || _g === void 0 ? void 0 : _g.FreeFormNumber) !== null && _h !== void 0 ? _h : '',
+                        active: employee === null || employee === void 0 ? void 0 : employee.Active,
+                        companyId: employeeData === null || employeeData === void 0 ? void 0 : employeeData.companyId,
+                    };
+                    // Update or create employee in db
+                    return yield repositories_1.employeeRepository.updateOrCreateEmployee(employee === null || employee === void 0 ? void 0 : employee.Id, employeeData === null || employeeData === void 0 ? void 0 : employeeData.companyId, data);
+                })));
+            }
+            // Update employee last sync date
+            yield prisma_1.prisma.company.update({
+                where: {
+                    id: employeeData === null || employeeData === void 0 ? void 0 : employeeData.companyId,
+                },
+                data: {
+                    employeeLastSyncDate: (0, moment_timezone_1.default)(new Date())
+                        .tz('America/Los_Angeles')
+                        .format(),
+                },
+            });
+            return employeeArr;
+        });
+    }
+    // Will be called on sync now button
     syncEmployeesByLastSync(companyId) {
+        var _a, _b, _c, _d;
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 // Check if company exists or not
@@ -84,19 +122,58 @@ class EmployeeServices {
                 }
                 // Get access token
                 const authResponse = yield quickbooksServices_1.default.getAccessToken(companyId);
-                const syncData = yield axios_1.default.post(config_1.default.employeeSyncLambdaEndpoint, {
-                    accessToken: authResponse === null || authResponse === void 0 ? void 0 : authResponse.accessToken,
-                    refreshToken: authResponse === null || authResponse === void 0 ? void 0 : authResponse.refreshToken,
-                    tenantID: authResponse === null || authResponse === void 0 ? void 0 : authResponse.tenantID,
-                    companyId: companyId,
-                    employeeLastSyncDate: companyDetails === null || companyDetails === void 0 ? void 0 : companyDetails.employeeLastSyncDate,
-                }, {
-                    headers: {
-                        'x-api-key': config_1.default.employeeSyncLambdaApiKey,
-                        'Content-Type': 'application/json',
-                    },
-                });
-                return syncData === null || syncData === void 0 ? void 0 : syncData.data;
+                // DO NOT REMOVE THIS CODE
+                // LAMBDA FUNCTION CALL
+                // const syncData = await axios.post(
+                // 	config.employeeSyncLambdaEndpoint,
+                // 	{
+                // 		accessToken: authResponse?.accessToken,
+                // 		refreshToken: authResponse?.refreshToken,
+                // 		tenantID: authResponse?.tenantID,
+                // 		companyId: companyId,
+                // 		employeeLastSyncDate: companyDetails?.employeeLastSyncDate,
+                // 	},
+                // 	{
+                // 		headers: {
+                // 			'x-api-key': config.employeeSyncLambdaApiKey,
+                // 			'Content-Type': 'application/json',
+                // 		},
+                // 	}
+                // );
+                // return syncData?.data;
+                // LAMBDA FUNCTION CALL
+                // For local API
+                // Get employees by last sync from Quickbooks
+                const newEmployees = yield (quickbooksClient_1.default === null || quickbooksClient_1.default === void 0 ? void 0 : quickbooksClient_1.default.getEmployeesByLastSync(authResponse === null || authResponse === void 0 ? void 0 : authResponse.accessToken, authResponse === null || authResponse === void 0 ? void 0 : authResponse.tenantID, authResponse === null || authResponse === void 0 ? void 0 : authResponse.refreshToken, companyDetails === null || companyDetails === void 0 ? void 0 : companyDetails.employeeLastSyncDate));
+                // If new records found
+                let employeeArr = [];
+                if (((_b = (_a = newEmployees === null || newEmployees === void 0 ? void 0 : newEmployees.QueryResponse) === null || _a === void 0 ? void 0 : _a.Employee) === null || _b === void 0 ? void 0 : _b.length) > 0) {
+                    employeeArr = yield Promise.all((_d = (_c = newEmployees === null || newEmployees === void 0 ? void 0 : newEmployees.QueryResponse) === null || _c === void 0 ? void 0 : _c.Employee) === null || _d === void 0 ? void 0 : _d.map((employee) => __awaiter(this, void 0, void 0, function* () {
+                        var _e, _f, _g, _h;
+                        const employeeData = {
+                            employeeId: employee === null || employee === void 0 ? void 0 : employee.Id,
+                            fullName: employee === null || employee === void 0 ? void 0 : employee.DisplayName,
+                            email: (_f = (_e = employee === null || employee === void 0 ? void 0 : employee.PrimaryEmailAddr) === null || _e === void 0 ? void 0 : _e.Address) !== null && _f !== void 0 ? _f : '',
+                            phone: (_h = (_g = employee === null || employee === void 0 ? void 0 : employee.PrimaryPhone) === null || _g === void 0 ? void 0 : _g.FreeFormNumber) !== null && _h !== void 0 ? _h : '',
+                            active: employee === null || employee === void 0 ? void 0 : employee.Active,
+                            companyId: companyId,
+                        };
+                        // Update or create employee in db
+                        return yield repositories_1.employeeRepository.updateOrCreateEmployee(employee === null || employee === void 0 ? void 0 : employee.Id, companyId, employeeData);
+                    })));
+                    // Update employee last sync date
+                    yield prisma_1.prisma.company.update({
+                        where: {
+                            id: companyId,
+                        },
+                        data: {
+                            employeeLastSyncDate: (0, moment_timezone_1.default)(new Date())
+                                .tz('America/Los_Angeles')
+                                .format(),
+                        },
+                    });
+                }
+                return employeeArr;
             }
             catch (err) {
                 throw err;

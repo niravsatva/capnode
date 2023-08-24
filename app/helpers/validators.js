@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.employeeValidation = exports.companyConfigurationValidation = exports.companyGetConfigurationValidation = exports.quickbooksAccountsValidation = exports.quickbooksCustomersValidation = exports.quickbooksClassValidation = exports.quickbooksEmployeeValidation = exports.updateUserByAdminValidation = exports.permissionRoleValidationRules = exports.deleteRoleValidationRules = exports.updateRoleValidationRules = exports.createRoleValidationRules = exports.companyIdValidationRules = exports.updateProfileValidationRules = exports.deleteUserFromCompanyRules = exports.inviteUserValidationRules = exports.changePasswordValidationRules = exports.forgotPasswordValidationRules = exports.loginValidationRules = exports.companyIdValidation = void 0;
+exports.deleteConfigurationFieldValidation = exports.updateConfigurationFieldValidation = exports.addConfigurationFieldValidation = exports.deleteTimeActivityValidation = exports.createTimeActivityValidation = exports.updateTimeActivityValidation = exports.timeActivityValidation = exports.employeeValidation = exports.companyConfigurationValidation = exports.companyGetConfigurationValidation = exports.quickbooksTimeActivityValidation = exports.quickbooksAccountsValidation = exports.quickbooksCustomersValidation = exports.quickbooksClassValidation = exports.quickbooksEmployeeValidation = exports.updateUserByAdminValidation = exports.permissionRoleValidationRules = exports.deleteRoleValidationRules = exports.updateRoleValidationRules = exports.createRoleValidationRules = exports.companyIdValidationRules = exports.updateProfileValidationRules = exports.deleteUserFromCompanyRules = exports.inviteUserValidationRules = exports.changePasswordValidationRules = exports.forgotPasswordValidationRules = exports.loginValidationRules = exports.companyIdValidation = void 0;
 /* eslint-disable @typescript-eslint/no-var-requires */
 const { body } = require('express-validator');
 // CompanyId Validation
@@ -143,6 +143,7 @@ exports.quickbooksAccountsValidation = [
         .isUUID()
         .withMessage('Invalid company'),
 ];
+exports.quickbooksTimeActivityValidation = [...exports.companyIdValidation];
 const payrollMethods = ['Hours', 'Percentage'];
 exports.companyGetConfigurationValidation = [...exports.companyIdValidation];
 exports.companyConfigurationValidation = [
@@ -161,3 +162,37 @@ exports.companyConfigurationValidation = [
 ];
 // Employee Validation
 exports.employeeValidation = [...exports.companyIdValidation];
+// Time Activities
+exports.timeActivityValidation = [...exports.companyIdValidation];
+// Update time activity
+exports.updateTimeActivityValidation = [
+    ...exports.companyIdValidation,
+    body('timeActivityId').notEmpty().withMessage('Time Activity id is required'),
+    body('hours').notEmpty().withMessage('Hours is required'),
+    body('minute').notEmpty().withMessage('Minute is required'),
+];
+// Create time activity
+exports.createTimeActivityValidation = [
+    ...exports.companyIdValidation,
+    body('hours').notEmpty().withMessage('Hours is required'),
+    body('minute').notEmpty().withMessage('Minute is required'),
+    body('activityDate').notEmpty().withMessage('Activity Date is required'),
+];
+// Delete time activity
+exports.deleteTimeActivityValidation = [
+    ...exports.companyIdValidation,
+    body('timeActivityId').notEmpty().withMessage('Time Activity id is required'),
+];
+exports.addConfigurationFieldValidation = [
+    body('companyId').notEmpty().withMessage('Company id is required'),
+    body('sectionId').notEmpty().withMessage('section id is required'),
+    body('name').notEmpty().withMessage('Field name is required'),
+    body('jsonId').notEmpty().withMessage('Json id is required'),
+];
+exports.updateConfigurationFieldValidation = [
+    body('fieldId').notEmpty().withMessage('Field id is required'),
+    body('fieldName').notEmpty().withMessage('Field name is required'),
+];
+exports.deleteConfigurationFieldValidation = [
+    body('fieldId').notEmpty().withMessage('Field id is required'),
+];

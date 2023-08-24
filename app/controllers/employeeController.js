@@ -50,7 +50,7 @@ class EmployeeController {
                 // Get new employees
                 const updatedEmployees = yield employeeServices_1.default.syncEmployeesByLastSync(companyId);
                 console.log('Updated employees: ', updatedEmployees);
-                return (0, defaultResponseHelper_1.DefaultResponse)(res, 200, 'Employees synced successfully', updatedEmployees);
+                return (0, defaultResponseHelper_1.DefaultResponse)(res, 200, 'Employees synced successfully');
             }
             catch (err) {
                 next(err);

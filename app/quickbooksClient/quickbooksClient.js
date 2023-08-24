@@ -135,16 +135,17 @@ class QuickbooksClient {
                 return new Promise((resolve, reject) => {
                     const qbo = new QuickBooks(config_1.default.quickbooksClientId, config_1.default.quickbooksClientSecret, accessToken, true, realmId, config_1.default.quickbooksEnvironment == 'sandbox' ? true : false, true, null, '2.0', refreshToken);
                     qbo.findTimeActivities([
-                        { field: 'TxnDate', value: '2014-12-01', operator: '>' },
-                        { field: 'TxnDate', value: '2014-12-03', operator: '<' },
-                        { field: 'limit', value: 5 },
+                        // { field: 'TxnDate', value: '2014-12-01', operator: '>' },
+                        // { field: 'TxnDate', value: '2014-12-03', operator: '<' },
+                        // { field: 'limit', value: 5 },
+                        { field: 'fetchAll', value: true },
                     ], function (err, timeActivities) {
                         return __awaiter(this, void 0, void 0, function* () {
                             if (err) {
                                 reject(err);
                             }
                             else {
-                                console.log(timeActivities);
+                                console.log('Time activity: ' + timeActivities);
                                 resolve(timeActivities);
                             }
                         });
@@ -163,6 +164,37 @@ class QuickbooksClient {
                 return new Promise((resolve, reject) => {
                     const qbo = new QuickBooks(config_1.default.quickbooksClientId, config_1.default.quickbooksClientSecret, accessToken, true, realmId, config_1.default.quickbooksEnvironment == 'sandbox' ? true : false, true, null, '2.0', refreshToken);
                     qbo.findEmployees([
+                        {
+                            field: 'MetaData.LastUpdatedTime',
+                            value: (0, moment_timezone_1.default)(lastSyncDate).tz('America/Los_Angeles').format(),
+                            operator: '>=',
+                        },
+                        { field: 'fetchAll', value: true },
+                    ], function (err, timeActivities) {
+                        return __awaiter(this, void 0, void 0, function* () {
+                            if (err) {
+                                reject(err);
+                            }
+                            else {
+                                console.log(timeActivities);
+                                resolve(timeActivities);
+                            }
+                        });
+                    });
+                });
+            }
+            catch (err) {
+                throw err;
+            }
+        });
+    }
+    // Get time activities by last sync date
+    getTimeActivitiesByLastSync(accessToken, realmId, refreshToken, lastSyncDate) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                return new Promise((resolve, reject) => {
+                    const qbo = new QuickBooks(config_1.default.quickbooksClientId, config_1.default.quickbooksClientSecret, accessToken, true, realmId, config_1.default.quickbooksEnvironment == 'sandbox' ? true : false, true, null, '2.0', refreshToken);
+                    qbo.findTimeActivities([
                         {
                             field: 'MetaData.LastUpdatedTime',
                             value: (0, moment_timezone_1.default)(lastSyncDate).tz('America/Los_Angeles').format(),
