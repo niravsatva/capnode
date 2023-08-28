@@ -12,7 +12,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const prisma_1 = require("../client/prisma");
 class EmployeeCostRepository {
     // For get the monthly cost value per employee
-    getMonthlyCost(companyId, date, offset, limit, searchCondition, sortCondition) {
+    getMonthlyCost(companyId, date, offset, limit, searchCondition, sortCondition, isPercentage) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 const dateCopy = new Date(date);
@@ -24,6 +24,7 @@ class EmployeeCostRepository {
                                     where: {
                                         month: dateCopy.getMonth() + 1,
                                         year: dateCopy.getFullYear(),
+                                        isPercentage: isPercentage,
                                     },
                                 },
                             },
@@ -108,7 +109,7 @@ class EmployeeCostRepository {
                             },
                         },
                     });
-                    // Creating the values for single employee
+                    // Creating the values for single employee - For Hourly Method
                     employeeCostFields.map((singleEmployeeCostFields) => __awaiter(this, void 0, void 0, function* () {
                         var _a, _b, _c;
                         if (((_b = (_a = singleEmployeeCostFields === null || singleEmployeeCostFields === void 0 ? void 0 : singleEmployeeCostFields.field) === null || _a === void 0 ? void 0 : _a.configurationSection) === null || _b === void 0 ? void 0 : _b.no) == 0) {
@@ -122,6 +123,7 @@ class EmployeeCostRepository {
                                         month: dateCopy.getMonth() + 1,
                                         year: dateCopy.getFullYear(),
                                         value: null,
+                                        isPercentage: false,
                                     },
                                 });
                             }
@@ -135,6 +137,7 @@ class EmployeeCostRepository {
                                         month: dateCopy.getMonth() + 1,
                                         year: dateCopy.getFullYear(),
                                         value: '0:00',
+                                        isPercentage: false,
                                     },
                                 });
                             }
@@ -148,6 +151,81 @@ class EmployeeCostRepository {
                                     },
                                     month: dateCopy.getMonth() + 1,
                                     year: dateCopy.getFullYear(),
+                                    isPercentage: false,
+                                },
+                            });
+                        }
+                    }));
+                })));
+                yield Promise.all(employees.map((singleEmployee) => __awaiter(this, void 0, void 0, function* () {
+                    // Fetching all the fields of that employee
+                    const employeeCostFields = yield prisma_1.prisma.employeeCostField.findMany({
+                        where: {
+                            companyId: companyId,
+                            employeeId: singleEmployee.id,
+                        },
+                        select: {
+                            id: true,
+                            employee: true,
+                            employeeId: true,
+                            company: true,
+                            companyId: true,
+                            fieldId: true,
+                            field: {
+                                select: {
+                                    jsonId: true,
+                                    configurationSection: {
+                                        select: {
+                                            no: true,
+                                        },
+                                    },
+                                },
+                            },
+                        },
+                    });
+                    // Creating the values for single employee - For Percentage Method
+                    employeeCostFields.map((singleEmployeeCostFields) => __awaiter(this, void 0, void 0, function* () {
+                        var _d, _e, _f;
+                        if (((_e = (_d = singleEmployeeCostFields === null || singleEmployeeCostFields === void 0 ? void 0 : singleEmployeeCostFields.field) === null || _d === void 0 ? void 0 : _d.configurationSection) === null || _e === void 0 ? void 0 : _e.no) == 0) {
+                            if (((_f = singleEmployeeCostFields === null || singleEmployeeCostFields === void 0 ? void 0 : singleEmployeeCostFields.field) === null || _f === void 0 ? void 0 : _f.jsonId) == 'f1') {
+                                yield prisma_1.prisma.employeeCostValue.create({
+                                    data: {
+                                        employee: { connect: { id: singleEmployee.id } },
+                                        employeeCostField: {
+                                            connect: { id: singleEmployeeCostFields.id },
+                                        },
+                                        month: dateCopy.getMonth() + 1,
+                                        year: dateCopy.getFullYear(),
+                                        value: null,
+                                        isPercentage: true,
+                                    },
+                                });
+                            }
+                            else {
+                                yield prisma_1.prisma.employeeCostValue.create({
+                                    data: {
+                                        employee: { connect: { id: singleEmployee.id } },
+                                        employeeCostField: {
+                                            connect: { id: singleEmployeeCostFields.id },
+                                        },
+                                        month: dateCopy.getMonth() + 1,
+                                        year: dateCopy.getFullYear(),
+                                        value: '0:00',
+                                        isPercentage: true,
+                                    },
+                                });
+                            }
+                        }
+                        else {
+                            yield prisma_1.prisma.employeeCostValue.create({
+                                data: {
+                                    employee: { connect: { id: singleEmployee.id } },
+                                    employeeCostField: {
+                                        connect: { id: singleEmployeeCostFields.id },
+                                    },
+                                    month: dateCopy.getMonth() + 1,
+                                    year: dateCopy.getFullYear(),
+                                    isPercentage: true,
                                 },
                             });
                         }
@@ -197,7 +275,7 @@ class EmployeeCostRepository {
                             company: { connect: { id: companyId } },
                         },
                     });
-                    // creating the employee cost field value
+                    // creating the employee cost field value - hourly
                     yield Promise.all(listOfMonth.map((singleDate) => __awaiter(this, void 0, void 0, function* () {
                         const dateCopy = new Date(`${singleDate.month}/1/${singleDate.year}`);
                         yield prisma_1.prisma.employeeCostValue.create({
@@ -208,6 +286,22 @@ class EmployeeCostRepository {
                                 },
                                 month: dateCopy.getMonth() + 1,
                                 year: dateCopy.getFullYear(),
+                                isPercentage: false,
+                            },
+                        });
+                    })));
+                    // creating the employee cost field value - percentage
+                    yield Promise.all(listOfMonth.map((singleDate) => __awaiter(this, void 0, void 0, function* () {
+                        const dateCopy = new Date(`${singleDate.month}/1/${singleDate.year}`);
+                        yield prisma_1.prisma.employeeCostValue.create({
+                            data: {
+                                employee: { connect: { id: singleEmployee === null || singleEmployee === void 0 ? void 0 : singleEmployee.id } },
+                                employeeCostField: {
+                                    connect: { id: employeeCostField === null || employeeCostField === void 0 ? void 0 : employeeCostField.id },
+                                },
+                                month: dateCopy.getMonth() + 1,
+                                year: dateCopy.getFullYear(),
+                                isPercentage: true,
                             },
                         });
                     })));
@@ -244,6 +338,7 @@ class EmployeeCostRepository {
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 const dateCopy = new Date(date);
+                // For hours
                 yield Promise.all(employees.map((singleEmployee) => __awaiter(this, void 0, void 0, function* () {
                     yield prisma_1.prisma.employeeCostValue.create({
                         data: {
@@ -253,6 +348,21 @@ class EmployeeCostRepository {
                             },
                             month: dateCopy.getMonth() + 1,
                             year: dateCopy.getFullYear(),
+                            isPercentage: false,
+                        },
+                    });
+                })));
+                // For percentage
+                yield Promise.all(employees.map((singleEmployee) => __awaiter(this, void 0, void 0, function* () {
+                    yield prisma_1.prisma.employeeCostValue.create({
+                        data: {
+                            employee: { connect: { id: singleEmployee === null || singleEmployee === void 0 ? void 0 : singleEmployee.id } },
+                            employeeCostField: {
+                                connect: { id: employeeCostFieldId },
+                            },
+                            month: dateCopy.getMonth() + 1,
+                            year: dateCopy.getFullYear(),
+                            isPercentage: true,
                         },
                     });
                 })));

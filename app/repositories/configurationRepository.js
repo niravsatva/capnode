@@ -8,9 +8,13 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 const prisma_1 = require("../client/prisma");
 const data_1 = require("../constants/data");
+const employeeCostRepository_1 = __importDefault(require("./employeeCostRepository"));
 class ConfigurationRepository {
     // Create default configuration settings for the first time company is created
     createDefaultConfiguration(companyId) {
@@ -102,7 +106,7 @@ class ConfigurationRepository {
             }
         });
     }
-    deleteConfigurationField(fieldId) {
+    deleteConfigurationField(fieldId, companyId) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 const deletedField = yield prisma_1.prisma.field.delete({
@@ -110,6 +114,34 @@ class ConfigurationRepository {
                         id: fieldId,
                     },
                 });
+                const percentAndHourArray = [true, false];
+                const monthsByCompanyId = yield employeeCostRepository_1.default.getMonthsByCompanyId(companyId);
+                yield Promise.all(percentAndHourArray.map((singleMethod) => __awaiter(this, void 0, void 0, function* () {
+                    yield Promise.all(monthsByCompanyId.map((singleMonthlyValue) => __awaiter(this, void 0, void 0, function* () {
+                        const configurationFields = yield this.getConfigurationField(companyId);
+                        const monthlyCost = yield employeeCostRepository_1.default.getMonthlyCost(companyId, new Date(`${singleMonthlyValue.month}/1/${singleMonthlyValue.year}`).toString(), 0, 1000, {}, {}, singleMethod);
+                        const tableData = monthlyCost.map((singleEmployeeData) => {
+                            configurationFields.map((singleConfigurationSection) => __awaiter(this, void 0, void 0, function* () {
+                                if (singleConfigurationSection.no !== 0) {
+                                    let total = 0;
+                                    singleEmployeeData.employeeCostField.forEach((singleEmployeeCostField) => {
+                                        if (singleEmployeeCostField.field
+                                            .configurationSectionId ===
+                                            singleConfigurationSection.id &&
+                                            singleEmployeeCostField.field.jsonId !== 't1') {
+                                            total += Number(singleEmployeeCostField.costValue[0].value);
+                                        }
+                                    });
+                                    const fieldToUpdate = singleEmployeeData.employeeCostField.find((singleEmployeeCostField) => singleEmployeeCostField.field
+                                        .configurationSectionId ===
+                                        singleConfigurationSection.id &&
+                                        singleEmployeeCostField.field.jsonId === 't1');
+                                    yield employeeCostRepository_1.default.updateMonthlyCost(fieldToUpdate.costValue[0].id, total.toFixed(2));
+                                }
+                            }));
+                        });
+                    })));
+                })));
                 return deletedField;
             }
             catch (err) {

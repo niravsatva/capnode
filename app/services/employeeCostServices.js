@@ -8,10 +8,14 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 /* eslint-disable no-mixed-spaces-and-tabs */
 const customError_1 = require("../models/customError");
 const repositories_1 = require("../repositories");
+const configurationRepository_1 = __importDefault(require("../repositories/configurationRepository"));
 class EmployeeCostService {
     getMonthlyCost(companyId, date, page, limit, search, type, sort) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -44,7 +48,16 @@ class EmployeeCostService {
                         },
                     }
                     : {};
-                const employeesMonthlyCost = yield repositories_1.employeeCostRepository.getMonthlyCost(companyId, date, offset, limit, searchCondition, sortCondition);
+                // Check which method is activate in company configuration - Hourly Or Percentage
+                const configurations = yield configurationRepository_1.default.getCompanyConfiguration(companyId);
+                let isPercentage;
+                if ((configurations === null || configurations === void 0 ? void 0 : configurations.payrollMethod) === 'Hours') {
+                    isPercentage = false;
+                }
+                else {
+                    isPercentage = true;
+                }
+                const employeesMonthlyCost = yield repositories_1.employeeCostRepository.getMonthlyCost(companyId, date, offset, limit, searchCondition, sortCondition, isPercentage);
                 const count = yield repositories_1.employeeCostRepository.count(companyId, searchCondition);
                 return { employees: employeesMonthlyCost, count };
             }

@@ -103,9 +103,14 @@ class ConfigurationController {
     deleteField(req, res, next) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                const { fieldId } = req.body;
+                const { fieldId, companyId } = req.body;
+                // Check If company exists
+                const companyDetails = yield repositories_1.companyRepository.getDetails(companyId);
+                if (!companyDetails) {
+                    throw new customError_1.CustomError(404, 'Company not found');
+                }
                 (0, validationHelper_1.checkValidation)(req);
-                const deletedField = yield configurationServices_1.default.deleteField(fieldId);
+                const deletedField = yield configurationServices_1.default.deleteField(fieldId, companyId);
                 return (0, defaultResponseHelper_1.DefaultResponse)(res, 200, 'Field deleted successfully', deletedField);
             }
             catch (error) {

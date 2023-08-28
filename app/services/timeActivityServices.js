@@ -161,28 +161,23 @@ class TimeActivityService {
         });
     }
     lambdaSyncFunction(timeActivityData) {
-        var _a, _b, _c, _d, _e, _f;
+        var _a, _b, _c, _d;
         return __awaiter(this, void 0, void 0, function* () {
             const { accessToken, tenantId, refreshToken, companyId, timeActivityLastSyncDate, } = timeActivityData;
             if (timeActivityLastSyncDate) {
                 // Last sync exists
                 console.log('TIME Activity Last Sync exist');
-                // Find all time activities from quickbooks
-                const timeActivities = yield quickbooksClient_1.default.getAllTimeActivities(accessToken, tenantId, refreshToken);
-                if (((_b = (_a = timeActivities === null || timeActivities === void 0 ? void 0 : timeActivities.QueryResponse) === null || _a === void 0 ? void 0 : _a.TimeActivity) === null || _b === void 0 ? void 0 : _b.length) > 0) {
-                    console.log('TESt');
-                }
             }
             else {
                 // Last sync does not exist - time activity sync for the first time
                 // Find all time activities from quickbooks
                 const timeActivities = yield quickbooksClient_1.default.getAllTimeActivities(accessToken, tenantId, refreshToken);
                 if (timeActivities &&
-                    ((_d = (_c = timeActivities === null || timeActivities === void 0 ? void 0 : timeActivities.QueryResponse) === null || _c === void 0 ? void 0 : _c.TimeActivity) === null || _d === void 0 ? void 0 : _d.length) > 0) {
+                    ((_b = (_a = timeActivities === null || timeActivities === void 0 ? void 0 : timeActivities.QueryResponse) === null || _a === void 0 ? void 0 : _a.TimeActivity) === null || _b === void 0 ? void 0 : _b.length) > 0) {
                     // Filtered vendors, fetching employees only
-                    const filteredEmployees = (_f = (_e = timeActivities === null || timeActivities === void 0 ? void 0 : timeActivities.QueryResponse) === null || _e === void 0 ? void 0 : _e.TimeActivity) === null || _f === void 0 ? void 0 : _f.filter((timeActivity) => timeActivity === null || timeActivity === void 0 ? void 0 : timeActivity.EmployeeRef);
+                    const filteredEmployees = (_d = (_c = timeActivities === null || timeActivities === void 0 ? void 0 : timeActivities.QueryResponse) === null || _c === void 0 ? void 0 : _c.TimeActivity) === null || _d === void 0 ? void 0 : _d.filter((timeActivity) => timeActivity === null || timeActivity === void 0 ? void 0 : timeActivity.EmployeeRef);
                     yield Promise.all(filteredEmployees === null || filteredEmployees === void 0 ? void 0 : filteredEmployees.map((timeActivity) => __awaiter(this, void 0, void 0, function* () {
-                        var _g, _h, _j, _k, _l;
+                        var _e, _f, _g, _h, _j;
                         let hours = '0';
                         let minutes = '0';
                         if ((timeActivity === null || timeActivity === void 0 ? void 0 : timeActivity.Hours) && (timeActivity === null || timeActivity === void 0 ? void 0 : timeActivity.Minutes)) {
@@ -192,25 +187,32 @@ class TimeActivityService {
                         else {
                             const start = new Date(timeActivity === null || timeActivity === void 0 ? void 0 : timeActivity.StartTime);
                             const end = new Date(timeActivity === null || timeActivity === void 0 ? void 0 : timeActivity.EndTime);
-                            const timeDifferenceMilliseconds = Math.abs(start - end);
-                            const millisecondsInMinute = 60 * 1000;
-                            const millisecondsInHour = 60 * millisecondsInMinute;
-                            hours = Math.floor(timeDifferenceMilliseconds / millisecondsInHour);
-                            minutes = Math.floor((timeDifferenceMilliseconds % millisecondsInHour) /
-                                millisecondsInMinute);
+                            const breakHours = timeActivity === null || timeActivity === void 0 ? void 0 : timeActivity.BreakHours; // Example break hours
+                            const breakMinutes = timeActivity === null || timeActivity === void 0 ? void 0 : timeActivity.BreakMinutes; // Example break minutes
+                            // Calculate the total time duration in milliseconds
+                            const totalTimeInMillis = end - start;
+                            // Calculate the break time in milliseconds
+                            const breakTimeInMillis = (breakHours * 60 + breakMinutes) * 60 * 1000;
+                            // Calculate the effective work duration
+                            const effectiveTimeInMillis = totalTimeInMillis - breakTimeInMillis;
+                            // Calculate hours and minutes from milliseconds
+                            const effectiveHours = Math.floor(effectiveTimeInMillis / (60 * 60 * 1000));
+                            const effectiveMinutes = Math.floor((effectiveTimeInMillis % (60 * 60 * 1000)) / (60 * 1000));
+                            hours = effectiveHours;
+                            minutes = effectiveMinutes;
                         }
                         const data = {
                             timeActivityId: timeActivity === null || timeActivity === void 0 ? void 0 : timeActivity.Id,
-                            classId: ((_g = timeActivity === null || timeActivity === void 0 ? void 0 : timeActivity.ClassRef) === null || _g === void 0 ? void 0 : _g.value) || null,
-                            className: ((_h = timeActivity === null || timeActivity === void 0 ? void 0 : timeActivity.ClassRef) === null || _h === void 0 ? void 0 : _h.name) || null,
-                            customerId: ((_j = timeActivity === null || timeActivity === void 0 ? void 0 : timeActivity.CustomerRef) === null || _j === void 0 ? void 0 : _j.value) || null,
-                            customerName: ((_k = timeActivity === null || timeActivity === void 0 ? void 0 : timeActivity.CustomerRef) === null || _k === void 0 ? void 0 : _k.name) || null,
+                            classId: ((_e = timeActivity === null || timeActivity === void 0 ? void 0 : timeActivity.ClassRef) === null || _e === void 0 ? void 0 : _e.value) || null,
+                            className: ((_f = timeActivity === null || timeActivity === void 0 ? void 0 : timeActivity.ClassRef) === null || _f === void 0 ? void 0 : _f.name) || null,
+                            customerId: ((_g = timeActivity === null || timeActivity === void 0 ? void 0 : timeActivity.CustomerRef) === null || _g === void 0 ? void 0 : _g.value) || null,
+                            customerName: ((_h = timeActivity === null || timeActivity === void 0 ? void 0 : timeActivity.CustomerRef) === null || _h === void 0 ? void 0 : _h.name) || null,
                             hours: (hours === null || hours === void 0 ? void 0 : hours.toString()) || '0',
                             minute: (minutes === null || minutes === void 0 ? void 0 : minutes.toString()) || '0',
                             // hours: timeActivity?.Hours?.toString() || '0',
                             // minute: timeActivity?.Minutes?.toString() || '0',
                             activityDate: timeActivity === null || timeActivity === void 0 ? void 0 : timeActivity.TxnDate,
-                            employeeId: (_l = timeActivity === null || timeActivity === void 0 ? void 0 : timeActivity.EmployeeRef) === null || _l === void 0 ? void 0 : _l.value,
+                            employeeId: (_j = timeActivity === null || timeActivity === void 0 ? void 0 : timeActivity.EmployeeRef) === null || _j === void 0 ? void 0 : _j.value,
                             companyId: companyId,
                         };
                         // Dump time activity in the database for the first time
@@ -291,12 +293,19 @@ class TimeActivityService {
                         else {
                             const start = new Date(timeActivity === null || timeActivity === void 0 ? void 0 : timeActivity.StartTime);
                             const end = new Date(timeActivity === null || timeActivity === void 0 ? void 0 : timeActivity.EndTime);
-                            const timeDifferenceMilliseconds = Math.abs(start - end);
-                            const millisecondsInMinute = 60 * 1000;
-                            const millisecondsInHour = 60 * millisecondsInMinute;
-                            hours = Math.floor(timeDifferenceMilliseconds / millisecondsInHour);
-                            minutes = Math.floor((timeDifferenceMilliseconds % millisecondsInHour) /
-                                millisecondsInMinute);
+                            const breakHours = timeActivity === null || timeActivity === void 0 ? void 0 : timeActivity.BreakHours; // Example break hours
+                            const breakMinutes = timeActivity === null || timeActivity === void 0 ? void 0 : timeActivity.BreakMinutes; // Example break minutes
+                            // Calculate the total time duration in milliseconds
+                            const totalTimeInMillis = end - start;
+                            // Calculate the break time in milliseconds
+                            const breakTimeInMillis = (breakHours * 60 + breakMinutes) * 60 * 1000;
+                            // Calculate the effective work duration
+                            const effectiveTimeInMillis = totalTimeInMillis - breakTimeInMillis;
+                            // Calculate hours and minutes from milliseconds
+                            const effectiveHours = Math.floor(effectiveTimeInMillis / (60 * 60 * 1000));
+                            const effectiveMinutes = Math.floor((effectiveTimeInMillis % (60 * 60 * 1000)) / (60 * 1000));
+                            hours = effectiveHours;
+                            minutes = effectiveMinutes;
                         }
                         const timeActivityData = {
                             timeActivityId: timeActivity === null || timeActivity === void 0 ? void 0 : timeActivity.Id,

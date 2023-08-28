@@ -8,8 +8,12 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 const prisma_1 = require("../client/prisma");
+const employeeCostRepository_1 = __importDefault(require("./employeeCostRepository"));
 class EmployeeRepository {
     getAllEmployeesByCompanyId(companyId) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -64,17 +68,26 @@ class EmployeeRepository {
                     });
                     console.log('List of fields: ' + listOfFields);
                     // This is new code for creating fields for employees after syncing
-                    // await Promise.all(
-                    // 	await listOfFields.map(async (singleField: any) => {
-                    // 		await prisma.employeeCostField.create({
-                    // 			data: {
-                    // 				employee: { connect: { id: updatedEmployees.id } },
-                    // 				field: { connect: { id: singleField.id } },
-                    // 				company: { connect: { id: companyId } },
-                    // 			},
-                    // 		});
-                    // 	})
-                    // );
+                    if (listOfFields && (listOfFields === null || listOfFields === void 0 ? void 0 : listOfFields.length) > 0) {
+                        yield Promise.all(yield listOfFields.map((singleField) => __awaiter(this, void 0, void 0, function* () {
+                            yield prisma_1.prisma.employeeCostField.create({
+                                data: {
+                                    employee: { connect: { id: updatedEmployees.id } },
+                                    field: { connect: { id: singleField.id } },
+                                    company: { connect: { id: companyId } },
+                                },
+                            });
+                        })));
+                        const monthList = yield prisma_1.prisma.monthYearTable.findMany({
+                            where: {
+                                companyId: companyId,
+                            },
+                        });
+                        // Create initial values
+                        monthList === null || monthList === void 0 ? void 0 : monthList.map((singleRecord) => __awaiter(this, void 0, void 0, function* () {
+                            yield employeeCostRepository_1.default.createMonthlyCost([updatedEmployees], companyId, new Date(`${singleRecord === null || singleRecord === void 0 ? void 0 : singleRecord.month}/1/${singleRecord === null || singleRecord === void 0 ? void 0 : singleRecord.year}`).toString());
+                        }));
+                    }
                 }
                 return updatedEmployees;
             }

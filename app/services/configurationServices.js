@@ -15,6 +15,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const customError_1 = require("../models/customError");
 const repositories_1 = require("../repositories");
 const configurationRepository_1 = __importDefault(require("../repositories/configurationRepository"));
+// import employeeServices from './employeeServices';
 class ConfigurationService {
     // For get sections with fields
     getFieldsSection(companyId) {
@@ -53,11 +54,15 @@ class ConfigurationService {
         });
     }
     // For delete field
-    deleteField(fieldId) {
+    deleteField(fieldId, companyId) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                const deletedField = yield configurationRepository_1.default.deleteConfigurationField(fieldId);
-                return deletedField;
+                // const deletedField =
+                yield configurationRepository_1.default.deleteConfigurationField(fieldId, companyId);
+                // Get all employee list
+                const employees = yield repositories_1.employeeRepository.getAllEmployeesByCompanyId(companyId);
+                // return deletedField;
+                return employees;
             }
             catch (error) {
                 throw error;

@@ -146,7 +146,6 @@ class QuickbooksController {
                         tenantId: authToken === null || authToken === void 0 ? void 0 : authToken.realmId,
                         companyId: finalCompanyDetails === null || finalCompanyDetails === void 0 ? void 0 : finalCompanyDetails.id,
                     });
-                    console.log('MAAAAAAAAAAAAAAAAAAa: ', authToken);
                     const syncTimeActivities = yield timeActivityServices_1.default.lambdaSyncFunction({
                         accessToken: authToken === null || authToken === void 0 ? void 0 : authToken.access_token,
                         refreshToken: authToken === null || authToken === void 0 ? void 0 : authToken.refresh_token,

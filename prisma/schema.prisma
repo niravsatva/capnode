@@ -213,7 +213,8 @@ model EmployeeCostValue {
   employeeCostField EmployeeCostField @relation(fields: [employeeFieldId], references: [id], onDelete: Cascade)
   month             Int //06
   year              Int //2022
-  value             String?           @default("0.00") // Employee 1 - March Fringe Expense = 10    
+  value             String?           @default("0.00") // Employee 1 - March Fringe Expense = 10 
+  isPercentage      Boolean // If percentage method is selected from configuration
   createdAt         DateTime          @default(now())
   updatedAt         DateTime          @updatedAt
 }

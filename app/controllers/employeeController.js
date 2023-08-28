@@ -15,6 +15,8 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const defaultResponseHelper_1 = require("../helpers/defaultResponseHelper");
 const validationHelper_1 = require("../helpers/validationHelper");
 const employeeServices_1 = __importDefault(require("../services/employeeServices"));
+const customError_1 = require("../models/customError");
+const repositories_1 = require("../repositories");
 class EmployeeController {
     getAllEmployees(req, res, next) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -47,6 +49,15 @@ class EmployeeController {
                 // Check validation for company id
                 (0, validationHelper_1.checkValidation)(req);
                 const companyId = req.body.companyId;
+                // Check If company exists
+                const companyDetails = yield repositories_1.companyRepository.getDetails(companyId);
+                if (!companyDetails) {
+                    throw new customError_1.CustomError(404, 'Company not found');
+                }
+                // Check if company is connected
+                if (companyDetails.isConnected == false) {
+                    throw new customError_1.CustomError(400, 'Company is not connected');
+                }
                 // Get new employees
                 const updatedEmployees = yield employeeServices_1.default.syncEmployeesByLastSync(companyId);
                 console.log('Updated employees: ', updatedEmployees);

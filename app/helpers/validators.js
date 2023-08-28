@@ -194,6 +194,7 @@ exports.updateConfigurationFieldValidation = [
     body('fieldName').notEmpty().withMessage('Field name is required'),
 ];
 exports.deleteConfigurationFieldValidation = [
+    body('companyId').notEmpty().withMessage('Company id is required'),
     body('fieldId').notEmpty().withMessage('Field id is required'),
 ];
 exports.employeeCostCreateValidation = [
