@@ -18,6 +18,11 @@ class EmployeeCostService {
             try {
                 // Offset
                 const offset = (Number(page) - 1) * Number(limit);
+                const company = yield repositories_1.companyRepository.getDetails(companyId);
+                if (!company) {
+                    const error = new customError_1.CustomError(404, 'Company not found');
+                    throw error;
+                }
                 // Conditions for search
                 const searchCondition = search
                     ? {
@@ -35,12 +40,51 @@ class EmployeeCostService {
                 const sortCondition = sort
                     ? {
                         orderBy: {
-                            [sort]: type !== null && type !== void 0 ? type : 'asc',
+                            fullName: sort !== null && sort !== void 0 ? sort : 'asc',
                         },
                     }
                     : {};
                 const employeesMonthlyCost = yield repositories_1.employeeCostRepository.getMonthlyCost(companyId, date, offset, limit, searchCondition, sortCondition);
-                return employeesMonthlyCost;
+                const count = yield repositories_1.employeeCostRepository.count(companyId, searchCondition);
+                return { employees: employeesMonthlyCost, count };
+            }
+            catch (error) {
+                throw error;
+            }
+        });
+    }
+    getMonthlyCostExport(companyId, date, search, type, sort) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                const company = yield repositories_1.companyRepository.getDetails(companyId);
+                if (!company) {
+                    const error = new customError_1.CustomError(404, 'Company not found');
+                    throw error;
+                }
+                // Conditions for search
+                const searchCondition = search
+                    ? {
+                        OR: [
+                            {
+                                fullName: {
+                                    mode: 'insensitive',
+                                    contains: search,
+                                },
+                            },
+                        ],
+                    }
+                    : {};
+                // Conditions for sort
+                const sortCondition = sort
+                    ? {
+                        orderBy: {
+                            fullName: sort !== null && sort !== void 0 ? sort : 'asc',
+                        },
+                    }
+                    : {};
+                const employeesMonthlyCost = yield repositories_1.employeeCostRepository.getMonthlyCostExport(companyId, date, searchCondition, sortCondition);
+                const count = yield repositories_1.employeeCostRepository.count(companyId, searchCondition);
+                return { employees: employeesMonthlyCost, count };
             }
             catch (error) {
                 throw error;
@@ -56,6 +100,11 @@ class EmployeeCostService {
                     const error = new customError_1.CustomError(404, 'Company not found');
                     throw error;
                 }
+                const isValueExist = yield repositories_1.employeeCostRepository.isMonthlyValueCreated(companyId, date);
+                if (isValueExist) {
+                    return;
+                }
+                yield repositories_1.employeeCostRepository.createMonth(companyId, date);
                 const employees = yield repositories_1.employeeRepository.getAllEmployeesByCompanyId(companyId);
                 if (employees.length === 0) {
                     const error = new customError_1.CustomError(404, 'No employee found in this company');

@@ -11,7 +11,6 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 const prisma_1 = require("../client/prisma");
 const data_1 = require("../constants/data");
-const data_2 = require("../constants/data");
 class ConfigurationRepository {
     // Create default configuration settings for the first time company is created
     createDefaultConfiguration(companyId) {
@@ -139,7 +138,7 @@ class ConfigurationRepository {
     initialFieldSectionCreate(companyId) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                yield Promise.all(data_2.sections.map((singleSection) => __awaiter(this, void 0, void 0, function* () {
+                yield Promise.all(data_1.sections.map((singleSection) => __awaiter(this, void 0, void 0, function* () {
                     const section = yield prisma_1.prisma.configurationSection.create({
                         data: {
                             sectionName: singleSection.sectionName,
@@ -147,7 +146,7 @@ class ConfigurationRepository {
                             company: { connect: { id: companyId } },
                         },
                     });
-                    singleSection.fields.map((singleField) => __awaiter(this, void 0, void 0, function* () {
+                    yield Promise.all(singleSection.fields.map((singleField) => __awaiter(this, void 0, void 0, function* () {
                         yield prisma_1.prisma.field.create({
                             data: {
                                 jsonId: singleField.jsonId,
@@ -157,7 +156,7 @@ class ConfigurationRepository {
                                 configurationSection: { connect: { id: section.id } },
                             },
                         });
-                    }));
+                    })));
                 })));
             }
             catch (err) {

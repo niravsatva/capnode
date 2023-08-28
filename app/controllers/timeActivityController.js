@@ -19,6 +19,7 @@ const repositories_1 = require("../repositories");
 const timeActivityServices_1 = __importDefault(require("../services/timeActivityServices"));
 const quickbooksServices_1 = __importDefault(require("../services/quickbooksServices"));
 const quickbooksClient_1 = __importDefault(require("../quickbooksClient/quickbooksClient"));
+const dataExporter = require('json2csv').Parser;
 class TimeActivityController {
     getAllTimeActivities(req, res, next) {
         var _a;
@@ -139,7 +140,7 @@ class TimeActivityController {
             }
         });
     }
-    testController(req, res) {
+    testController(req, res, next) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 const authResponse = yield quickbooksServices_1.default.getAccessToken(req.body.companyId);
@@ -150,7 +151,33 @@ class TimeActivityController {
                 return res.json(timeActivities);
             }
             catch (err) {
-                throw err;
+                next(err);
+            }
+        });
+    }
+    // Export Time Activity
+    exportTimeActivity(req, res, next) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                const { companyId, search = '', classId = '', customerId = '', employeeId = '', startDate = '', endDate = '', } = req.query;
+                console.log('Search: ', search, classId, customerId, employeeId, startDate, endDate);
+                const timeActivities = yield timeActivityServices_1.default.exportTimeActivity(companyId, search, classId, customerId, employeeId, startDate, endDate);
+                const timeActivityData = JSON.parse(JSON.stringify(timeActivities));
+                const fileHeader = [
+                    'Activity Date',
+                    'Employee Name',
+                    'Customer',
+                    'Class',
+                    'Hours',
+                ];
+                const jsonData = new dataExporter({ fileHeader });
+                const csvData = jsonData.parse(timeActivityData);
+                res.setHeader('Content-Type', 'text/csv');
+                res.setHeader('Content-Disposition', 'attachment; filename=sample_data.csv');
+                return res.status(200).end(csvData);
+            }
+            catch (err) {
+                next(err);
             }
         });
     }

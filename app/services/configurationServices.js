@@ -21,6 +21,7 @@ class ConfigurationService {
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 const sections = yield configurationRepository_1.default.getConfigurationField(companyId);
+                console.log('Sections: ', sections);
                 return sections;
             }
             catch (error) {
@@ -38,6 +39,12 @@ class ConfigurationService {
                     throw error;
                 }
                 const createdField = yield configurationRepository_1.default.createField(companyId, sectionId, data);
+                // Get all employees by companyId
+                const employeeList = yield repositories_1.employeeRepository.getAllEmployeesByCompanyId(companyId);
+                console.log('Employee list: ', employeeList);
+                // Employee Cost Field
+                const listOfMonths = yield repositories_1.employeeCostRepository.getMonthsByCompanyId(companyId);
+                yield repositories_1.employeeCostRepository.createNewEmployeeCost(employeeList, createdField === null || createdField === void 0 ? void 0 : createdField.id, companyId, listOfMonths);
                 return createdField;
             }
             catch (error) {

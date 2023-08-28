@@ -10,6 +10,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const prisma_1 = require("../client/prisma");
+const customError_1 = require("../models/customError");
 class TimeActivityRepository {
     getAllTimeActivities(timeActivityData) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -129,7 +130,16 @@ class TimeActivityRepository {
     updateTimeActivity(timeActivityData) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                const { timeActivityId, hours, minute } = timeActivityData;
+                const { timeActivityId, companyId, hours, minute } = timeActivityData;
+                const findActivity = yield prisma_1.prisma.timeActivities.findFirst({
+                    where: {
+                        id: timeActivityId,
+                        companyId: companyId,
+                    },
+                });
+                if (!findActivity) {
+                    throw new customError_1.CustomError(404, 'Time Activity not found');
+                }
                 const updatedTimeActivity = yield prisma_1.prisma.timeActivities.update({
                     where: {
                         id: timeActivityId,
@@ -258,6 +268,15 @@ class TimeActivityRepository {
     deleteTimeActivity(timeActivityData) {
         return __awaiter(this, void 0, void 0, function* () {
             const { timeActivityId, companyId } = timeActivityData;
+            const findActivity = yield prisma_1.prisma.timeActivities.findFirst({
+                where: {
+                    id: timeActivityId,
+                    companyId: companyId,
+                },
+            });
+            if (!findActivity) {
+                throw new customError_1.CustomError(404, 'Time Activity not found');
+            }
             const deleted = yield prisma_1.prisma.timeActivities.deleteMany({
                 where: {
                     id: timeActivityId,
@@ -265,6 +284,32 @@ class TimeActivityRepository {
                 },
             });
             return deleted;
+        });
+    }
+    // Get all time activities for export
+    getAllTimeActivityForExport(data) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const { companyId, filterConditions, searchCondition, dateFilters } = data;
+            try {
+                const timeActivities = yield prisma_1.prisma.timeActivities.findMany({
+                    where: Object.assign(Object.assign(Object.assign({ companyId: companyId }, searchCondition), filterConditions), dateFilters),
+                    include: {
+                        employee: {
+                            select: {
+                                id: true,
+                                fullName: true,
+                            },
+                        },
+                    },
+                    orderBy: {
+                        activityDate: 'desc',
+                    },
+                });
+                return timeActivities;
+            }
+            catch (err) {
+                throw err;
+            }
         });
     }
 }

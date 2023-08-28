@@ -19,5 +19,7 @@ router.put('/', authMiddleware_1.isAuthenticated, validators_1.updateTimeActivit
 router.post('/create', authMiddleware_1.isAuthenticated, validators_1.createTimeActivityValidation, controllers_1.timeActivityController === null || controllers_1.timeActivityController === void 0 ? void 0 : controllers_1.timeActivityController.createTimeActivity);
 // Delete time activity
 router.delete('/', authMiddleware_1.isAuthenticated, validators_1.deleteTimeActivityValidation, controllers_1.timeActivityController === null || controllers_1.timeActivityController === void 0 ? void 0 : controllers_1.timeActivityController.deleteTimeActivity);
+// Export time activity
+router.get('/export', controllers_1.timeActivityController.exportTimeActivity);
 router.post('/first', controllers_1.timeActivityController.testController);
 exports.default = router;

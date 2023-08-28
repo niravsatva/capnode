@@ -72,6 +72,7 @@ model Company {
   ConfigurationSection       ConfigurationSection[]
   Field                      Field[]
   EmployeeCostField          EmployeeCostField[]
+  MonthYearTable             MonthYearTable[]
 }
 
 model Role {
@@ -195,7 +196,7 @@ model EmployeeCostField {
   companyId  String
   company    Company             @relation(fields: [companyId], references: [id])
   employeeId String?
-  field      Field?              @relation(fields: [fieldId], references: [id])
+  field      Field?              @relation(fields: [fieldId], references: [id], onDelete: Cascade)
   fieldId    String?
   costValue  EmployeeCostValue[]
   createdAt  DateTime            @default(now())
@@ -209,12 +210,26 @@ model EmployeeCostValue {
   employee          Employee          @relation(fields: [employeeId], references: [id])
   employeeType      EmployeeType?
   employeeFieldId   String
-  employeeCostField EmployeeCostField @relation(fields: [employeeFieldId], references: [id])
+  employeeCostField EmployeeCostField @relation(fields: [employeeFieldId], references: [id], onDelete: Cascade)
   month             Int //06
   year              Int //2022
-  value             String            @default("0.00") // Employee 1 - March Fringe Expense = 10    
+  value             String?           @default("0.00") // Employee 1 - March Fringe Expense = 10    
   createdAt         DateTime          @default(now())
   updatedAt         DateTime          @updatedAt
+}
+
+// Month Year table to get month and year of created employee cost
+
+model MonthYearTable {
+  id        String   @id @default(uuid())
+  month     Int //06
+  year      Int //2022
+  companyId String
+  company   Company  @relation(fields: [companyId], references: [id])
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([month, year, companyId])
 }
 
 model TimeActivities {

@@ -2,8 +2,11 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = require("express");
 const controllers_1 = require("../controllers");
+const validators_1 = require("../helpers/validators");
+const authMiddleware_1 = require("../middlewares/authMiddleware");
 const employeeCostRouter = (0, express_1.Router)();
-employeeCostRouter.get('/', controllers_1.employeeCostController.getMonthlyCost);
-employeeCostRouter.post('/', controllers_1.employeeCostController.createMonthlyCost);
-employeeCostRouter.put('/', controllers_1.employeeCostController.updateMonthlyCost);
+employeeCostRouter.get('/', authMiddleware_1.isAuthenticated, controllers_1.employeeCostController.getMonthlyCost);
+employeeCostRouter.post('/', validators_1.employeeCostCreateValidation, authMiddleware_1.isAuthenticated, controllers_1.employeeCostController.createMonthlyCost);
+employeeCostRouter.put('/', validators_1.employeeCostUpdateValidation, authMiddleware_1.isAuthenticated, controllers_1.employeeCostController.updateMonthlyCost);
+employeeCostRouter.get('/export', controllers_1.employeeCostController.exportEmployeeCost);
 exports.default = employeeCostRouter;

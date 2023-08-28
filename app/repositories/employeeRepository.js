@@ -26,7 +26,7 @@ class EmployeeRepository {
             }
         });
     }
-    updateOrCreateEmployee(empId, companyId, employeeData) {
+    updateOrCreateEmployee(empId, companyId, employeeData, listOfFields) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 const employee = yield prisma_1.prisma.employee.findFirst({
@@ -62,6 +62,19 @@ class EmployeeRepository {
                             company: { connect: { id: employeeData === null || employeeData === void 0 ? void 0 : employeeData.companyId } },
                         },
                     });
+                    console.log('List of fields: ' + listOfFields);
+                    // This is new code for creating fields for employees after syncing
+                    // await Promise.all(
+                    // 	await listOfFields.map(async (singleField: any) => {
+                    // 		await prisma.employeeCostField.create({
+                    // 			data: {
+                    // 				employee: { connect: { id: updatedEmployees.id } },
+                    // 				field: { connect: { id: singleField.id } },
+                    // 				company: { connect: { id: companyId } },
+                    // 			},
+                    // 		});
+                    // 	})
+                    // );
                 }
                 return updatedEmployees;
             }

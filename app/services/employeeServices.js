@@ -19,6 +19,7 @@ const customError_1 = require("../models/customError");
 const quickbooksClient_1 = __importDefault(require("../quickbooksClient/quickbooksClient"));
 const repositories_1 = require("../repositories");
 const quickbooksServices_1 = __importDefault(require("./quickbooksServices"));
+const configurationRepository_1 = __importDefault(require("../repositories/configurationRepository"));
 class EmployeeServices {
     getEmployees(employeeData) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -148,6 +149,11 @@ class EmployeeServices {
                 // If new records found
                 let employeeArr = [];
                 if (((_b = (_a = newEmployees === null || newEmployees === void 0 ? void 0 : newEmployees.QueryResponse) === null || _a === void 0 ? void 0 : _a.Employee) === null || _b === void 0 ? void 0 : _b.length) > 0) {
+                    const sectionWithFields = yield configurationRepository_1.default.getConfigurationField(companyId);
+                    const sectionFields = sectionWithFields.reduce((accumulator, section) => {
+                        accumulator.push(...section.fields);
+                        return accumulator;
+                    }, []);
                     employeeArr = yield Promise.all((_d = (_c = newEmployees === null || newEmployees === void 0 ? void 0 : newEmployees.QueryResponse) === null || _c === void 0 ? void 0 : _c.Employee) === null || _d === void 0 ? void 0 : _d.map((employee) => __awaiter(this, void 0, void 0, function* () {
                         var _e, _f, _g, _h;
                         const employeeData = {
@@ -159,20 +165,20 @@ class EmployeeServices {
                             companyId: companyId,
                         };
                         // Update or create employee in db
-                        return yield repositories_1.employeeRepository.updateOrCreateEmployee(employee === null || employee === void 0 ? void 0 : employee.Id, companyId, employeeData);
+                        return yield repositories_1.employeeRepository.updateOrCreateEmployee(employee === null || employee === void 0 ? void 0 : employee.Id, companyId, employeeData, sectionFields);
                     })));
-                    // Update employee last sync date
-                    yield prisma_1.prisma.company.update({
-                        where: {
-                            id: companyId,
-                        },
-                        data: {
-                            employeeLastSyncDate: (0, moment_timezone_1.default)(new Date())
-                                .tz('America/Los_Angeles')
-                                .format(),
-                        },
-                    });
                 }
+                // Update employee last sync date
+                yield prisma_1.prisma.company.update({
+                    where: {
+                        id: companyId,
+                    },
+                    data: {
+                        employeeLastSyncDate: (0, moment_timezone_1.default)(new Date())
+                            .tz('America/Los_Angeles')
+                            .format(),
+                    },
+                });
                 return employeeArr;
             }
             catch (err) {

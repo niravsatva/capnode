@@ -360,9 +360,14 @@ exports.sections = [
                 jsonId: 'f1',
             },
             {
-                name: 'Vacation/PTO',
+                name: 'Gross Wage',
                 type: 'Monthly',
                 jsonId: 'f2',
+            },
+            {
+                name: 'Total Salary',
+                type: 'Monthly',
+                jsonId: 't1',
             },
         ],
     },
@@ -385,6 +390,11 @@ exports.sections = [
                 type: 'Monthly',
                 jsonId: 'f3',
             },
+            {
+                name: `Total Fringe`,
+                type: 'Monthly',
+                jsonId: 't1',
+            },
         ],
     },
     {
@@ -400,6 +410,11 @@ exports.sections = [
                 name: 'SUI',
                 type: 'Monthly',
                 jsonId: 'f2',
+            },
+            {
+                name: `Total Payroll Taxes`,
+                type: 'Monthly',
+                jsonId: 't1',
             },
         ],
     },

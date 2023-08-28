@@ -182,17 +182,35 @@ class TimeActivityService {
                     // Filtered vendors, fetching employees only
                     const filteredEmployees = (_f = (_e = timeActivities === null || timeActivities === void 0 ? void 0 : timeActivities.QueryResponse) === null || _e === void 0 ? void 0 : _e.TimeActivity) === null || _f === void 0 ? void 0 : _f.filter((timeActivity) => timeActivity === null || timeActivity === void 0 ? void 0 : timeActivity.EmployeeRef);
                     yield Promise.all(filteredEmployees === null || filteredEmployees === void 0 ? void 0 : filteredEmployees.map((timeActivity) => __awaiter(this, void 0, void 0, function* () {
-                        var _g, _h, _j, _k, _l, _m, _o;
+                        var _g, _h, _j, _k, _l;
+                        let hours = '0';
+                        let minutes = '0';
+                        if ((timeActivity === null || timeActivity === void 0 ? void 0 : timeActivity.Hours) && (timeActivity === null || timeActivity === void 0 ? void 0 : timeActivity.Minutes)) {
+                            hours = timeActivity === null || timeActivity === void 0 ? void 0 : timeActivity.Hours;
+                            minutes = timeActivity === null || timeActivity === void 0 ? void 0 : timeActivity.Minutes;
+                        }
+                        else {
+                            const start = new Date(timeActivity === null || timeActivity === void 0 ? void 0 : timeActivity.StartTime);
+                            const end = new Date(timeActivity === null || timeActivity === void 0 ? void 0 : timeActivity.EndTime);
+                            const timeDifferenceMilliseconds = Math.abs(start - end);
+                            const millisecondsInMinute = 60 * 1000;
+                            const millisecondsInHour = 60 * millisecondsInMinute;
+                            hours = Math.floor(timeDifferenceMilliseconds / millisecondsInHour);
+                            minutes = Math.floor((timeDifferenceMilliseconds % millisecondsInHour) /
+                                millisecondsInMinute);
+                        }
                         const data = {
                             timeActivityId: timeActivity === null || timeActivity === void 0 ? void 0 : timeActivity.Id,
                             classId: ((_g = timeActivity === null || timeActivity === void 0 ? void 0 : timeActivity.ClassRef) === null || _g === void 0 ? void 0 : _g.value) || null,
                             className: ((_h = timeActivity === null || timeActivity === void 0 ? void 0 : timeActivity.ClassRef) === null || _h === void 0 ? void 0 : _h.name) || null,
                             customerId: ((_j = timeActivity === null || timeActivity === void 0 ? void 0 : timeActivity.CustomerRef) === null || _j === void 0 ? void 0 : _j.value) || null,
                             customerName: ((_k = timeActivity === null || timeActivity === void 0 ? void 0 : timeActivity.CustomerRef) === null || _k === void 0 ? void 0 : _k.name) || null,
-                            hours: ((_l = timeActivity === null || timeActivity === void 0 ? void 0 : timeActivity.Hours) === null || _l === void 0 ? void 0 : _l.toString()) || '0',
-                            minute: ((_m = timeActivity === null || timeActivity === void 0 ? void 0 : timeActivity.Minutes) === null || _m === void 0 ? void 0 : _m.toString()) || '0',
+                            hours: (hours === null || hours === void 0 ? void 0 : hours.toString()) || '0',
+                            minute: (minutes === null || minutes === void 0 ? void 0 : minutes.toString()) || '0',
+                            // hours: timeActivity?.Hours?.toString() || '0',
+                            // minute: timeActivity?.Minutes?.toString() || '0',
                             activityDate: timeActivity === null || timeActivity === void 0 ? void 0 : timeActivity.TxnDate,
-                            employeeId: (_o = timeActivity === null || timeActivity === void 0 ? void 0 : timeActivity.EmployeeRef) === null || _o === void 0 ? void 0 : _o.value,
+                            employeeId: (_l = timeActivity === null || timeActivity === void 0 ? void 0 : timeActivity.EmployeeRef) === null || _l === void 0 ? void 0 : _l.value,
                             companyId: companyId,
                         };
                         // Dump time activity in the database for the first time
@@ -255,7 +273,7 @@ class TimeActivityService {
                 // LAMBDA FUNCTION CALL
                 // For local API
                 // Get employees by last sync from Quickbooks
-                const newTimeActivities = yield (quickbooksClient_1.default === null || quickbooksClient_1.default === void 0 ? void 0 : quickbooksClient_1.default.getTimeActivitiesByLastSync(authResponse === null || authResponse === void 0 ? void 0 : authResponse.accessToken, authResponse === null || authResponse === void 0 ? void 0 : authResponse.tenantID, authResponse === null || authResponse === void 0 ? void 0 : authResponse.refreshToken, companyDetails === null || companyDetails === void 0 ? void 0 : companyDetails.employeeLastSyncDate));
+                const newTimeActivities = yield (quickbooksClient_1.default === null || quickbooksClient_1.default === void 0 ? void 0 : quickbooksClient_1.default.getTimeActivitiesByLastSync(authResponse === null || authResponse === void 0 ? void 0 : authResponse.accessToken, authResponse === null || authResponse === void 0 ? void 0 : authResponse.tenantID, authResponse === null || authResponse === void 0 ? void 0 : authResponse.refreshToken, companyDetails === null || companyDetails === void 0 ? void 0 : companyDetails.timeActivitiesLastSyncDate));
                 // If new records found
                 let timeActivityArr = [];
                 if (newTimeActivities &&
@@ -263,33 +281,51 @@ class TimeActivityService {
                     // Filtered vendors, fetching employees only
                     const filteredEmployees = (_d = (_c = newTimeActivities === null || newTimeActivities === void 0 ? void 0 : newTimeActivities.QueryResponse) === null || _c === void 0 ? void 0 : _c.TimeActivity) === null || _d === void 0 ? void 0 : _d.filter((timeActivity) => timeActivity === null || timeActivity === void 0 ? void 0 : timeActivity.EmployeeRef);
                     timeActivityArr = yield Promise.all(filteredEmployees === null || filteredEmployees === void 0 ? void 0 : filteredEmployees.map((timeActivity) => __awaiter(this, void 0, void 0, function* () {
-                        var _e, _f, _g, _h, _j, _k, _l;
+                        var _e, _f, _g, _h, _j;
+                        let hours = '0';
+                        let minutes = '0';
+                        if ((timeActivity === null || timeActivity === void 0 ? void 0 : timeActivity.Hours) && (timeActivity === null || timeActivity === void 0 ? void 0 : timeActivity.Minutes)) {
+                            hours = timeActivity === null || timeActivity === void 0 ? void 0 : timeActivity.Hours;
+                            minutes = timeActivity === null || timeActivity === void 0 ? void 0 : timeActivity.Minutes;
+                        }
+                        else {
+                            const start = new Date(timeActivity === null || timeActivity === void 0 ? void 0 : timeActivity.StartTime);
+                            const end = new Date(timeActivity === null || timeActivity === void 0 ? void 0 : timeActivity.EndTime);
+                            const timeDifferenceMilliseconds = Math.abs(start - end);
+                            const millisecondsInMinute = 60 * 1000;
+                            const millisecondsInHour = 60 * millisecondsInMinute;
+                            hours = Math.floor(timeDifferenceMilliseconds / millisecondsInHour);
+                            minutes = Math.floor((timeDifferenceMilliseconds % millisecondsInHour) /
+                                millisecondsInMinute);
+                        }
                         const timeActivityData = {
                             timeActivityId: timeActivity === null || timeActivity === void 0 ? void 0 : timeActivity.Id,
                             classId: ((_e = timeActivity === null || timeActivity === void 0 ? void 0 : timeActivity.ClassRef) === null || _e === void 0 ? void 0 : _e.value) || null,
                             className: ((_f = timeActivity === null || timeActivity === void 0 ? void 0 : timeActivity.ClassRef) === null || _f === void 0 ? void 0 : _f.name) || null,
                             customerId: ((_g = timeActivity === null || timeActivity === void 0 ? void 0 : timeActivity.CustomerRef) === null || _g === void 0 ? void 0 : _g.value) || null,
                             customerName: ((_h = timeActivity === null || timeActivity === void 0 ? void 0 : timeActivity.CustomerRef) === null || _h === void 0 ? void 0 : _h.name) || null,
-                            hours: ((_j = timeActivity === null || timeActivity === void 0 ? void 0 : timeActivity.Hours) === null || _j === void 0 ? void 0 : _j.toString()) || '0',
-                            minute: ((_k = timeActivity === null || timeActivity === void 0 ? void 0 : timeActivity.Minutes) === null || _k === void 0 ? void 0 : _k.toString()) || '0',
+                            hours: (hours === null || hours === void 0 ? void 0 : hours.toString()) || '0',
+                            minute: (minutes === null || minutes === void 0 ? void 0 : minutes.toString()) || '0',
+                            // hours: timeActivity?.Hours?.toString() || '0',
+                            // minute: timeActivity?.Minutes?.toString() || '0',
                             activityDate: timeActivity === null || timeActivity === void 0 ? void 0 : timeActivity.TxnDate,
-                            employeeId: (_l = timeActivity === null || timeActivity === void 0 ? void 0 : timeActivity.EmployeeRef) === null || _l === void 0 ? void 0 : _l.value,
+                            employeeId: (_j = timeActivity === null || timeActivity === void 0 ? void 0 : timeActivity.EmployeeRef) === null || _j === void 0 ? void 0 : _j.value,
                         };
-                        // Update or create timeactivity in db
+                        // Update or create timeActivity in db
                         return yield timeActivityRepository_1.default.updateOrCreateTimeActivity(timeActivity === null || timeActivity === void 0 ? void 0 : timeActivity.Id, companyId, timeActivityData);
                     })));
-                    // Update time activity last sync date
-                    yield prisma_1.prisma.company.update({
-                        where: {
-                            id: companyId,
-                        },
-                        data: {
-                            timeActivitiesLastSyncDate: (0, moment_timezone_1.default)(new Date())
-                                .tz('America/Los_Angeles')
-                                .format(),
-                        },
-                    });
                 }
+                // Update time activity last sync date
+                yield prisma_1.prisma.company.update({
+                    where: {
+                        id: companyId,
+                    },
+                    data: {
+                        timeActivitiesLastSyncDate: (0, moment_timezone_1.default)(new Date())
+                            .tz('America/Los_Angeles')
+                            .format(),
+                    },
+                });
                 return timeActivityArr;
             }
             catch (err) {
@@ -309,6 +345,7 @@ class TimeActivityService {
             // Update time logs
             const updated = yield timeActivityRepository_1.default.updateTimeActivity({
                 timeActivityId: timeActivityId,
+                companyId: companyId,
                 hours: hours,
                 minute: minute,
             });
@@ -350,6 +387,83 @@ class TimeActivityService {
                 companyId: companyId,
             });
             return deleted;
+        });
+    }
+    // Export Time Activity
+    exportTimeActivity(companyId, search, classId, customerId, employeeId, startDate, endDate) {
+        return __awaiter(this, void 0, void 0, function* () {
+            // Check If company exists
+            const companyDetails = yield repositories_1.companyRepository.getDetails(companyId);
+            if (!companyDetails) {
+                throw new customError_1.CustomError(404, 'Company not found');
+            }
+            // Set filter conditions
+            const filteredData = [];
+            if (classId) {
+                filteredData.push({ classId: classId });
+            }
+            if (customerId) {
+                filteredData.push({ customerId: customerId });
+            }
+            if (employeeId) {
+                filteredData.push({
+                    employee: {
+                        id: employeeId,
+                    },
+                });
+            }
+            const filterConditions = (filteredData === null || filteredData === void 0 ? void 0 : filteredData.length) > 0
+                ? {
+                    AND: filteredData,
+                }
+                : {};
+            const dateFilters = startDate && endDate
+                ? {
+                    activityDate: {
+                        gte: startDate,
+                        lte: endDate,
+                    },
+                }
+                : {};
+            // Conditions for searching
+            const searchCondition = search
+                ? {
+                    OR: [
+                        {
+                            className: { contains: search, mode: 'insensitive' },
+                        },
+                        {
+                            customerName: { contains: search, mode: 'insensitive' },
+                        },
+                        {
+                            employee: {
+                                fullName: { contains: search, mode: 'insensitive' },
+                            },
+                        },
+                    ],
+                }
+                : {};
+            const getAllActivities = yield timeActivityRepository_1.default.getAllTimeActivityForExport({
+                companyId: companyId,
+                filterConditions: filterConditions,
+                searchCondition: searchCondition,
+                dateFilters: dateFilters,
+            });
+            const finalActivities = getAllActivities === null || getAllActivities === void 0 ? void 0 : getAllActivities.map((singleTimeActivity) => {
+                var _a;
+                return {
+                    'Activity Date': (0, moment_timezone_1.default)(singleTimeActivity.activityDate).format('MM/DD/YYYY'),
+                    'Employee Name': (_a = singleTimeActivity === null || singleTimeActivity === void 0 ? void 0 : singleTimeActivity.employee) === null || _a === void 0 ? void 0 : _a.fullName,
+                    Customer: (singleTimeActivity === null || singleTimeActivity === void 0 ? void 0 : singleTimeActivity.customerName)
+                        ? singleTimeActivity === null || singleTimeActivity === void 0 ? void 0 : singleTimeActivity.customerName
+                        : 'NA',
+                    Class: (singleTimeActivity === null || singleTimeActivity === void 0 ? void 0 : singleTimeActivity.className)
+                        ? singleTimeActivity === null || singleTimeActivity === void 0 ? void 0 : singleTimeActivity.className
+                        : 'NA',
+                    Hours: `${singleTimeActivity === null || singleTimeActivity === void 0 ? void 0 : singleTimeActivity.hours}:${singleTimeActivity === null || singleTimeActivity === void 0 ? void 0 : singleTimeActivity.minute}`,
+                };
+            });
+            return finalActivities;
         });
     }
 }
