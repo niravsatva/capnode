@@ -24,6 +24,7 @@ const configurationRepository_1 = __importDefault(require("../repositories/confi
 const employeeServices_1 = __importDefault(require("../services/employeeServices"));
 const quickbooksServices_1 = __importDefault(require("../services/quickbooksServices"));
 const timeActivityServices_1 = __importDefault(require("../services/timeActivityServices"));
+// import axios from 'axios';
 // import timeActivityServices from '../services/timeActivityServices';
 class QuickbooksController {
     // Get Quickbooks Auth URI
@@ -139,21 +140,38 @@ class QuickbooksController {
                     // 		},
                     // 	}
                     // );
+                    // const syncTimeActivities = await axios.post(
+                    // 	config.timeactivitySyncLambdaEndpoint,
+                    // 	{
+                    // 		accessToken: authToken.access_token,
+                    // 		refreshToken: authToken.refresh_token,
+                    // 		tenantID: authToken.realmId,
+                    // 		companyId: finalCompanyDetails?.id,
+                    // 	},
+                    // 	{
+                    // 		headers: {
+                    // 			'x-api-key': config.timeactivitySyncLambdaApiKey,
+                    // 			'Content-Type': 'application/json',
+                    // 		},
+                    // 	}
+                    // );
                     // LAMBDA FUNCTION CALL
+                    // Do not remove API for employee sync
                     const syncData = yield employeeServices_1.default.syncEmployeeFirstTime({
                         accessToken: authToken === null || authToken === void 0 ? void 0 : authToken.access_token,
                         refreshToken: authToken === null || authToken === void 0 ? void 0 : authToken.refresh_token,
                         tenantId: authToken === null || authToken === void 0 ? void 0 : authToken.realmId,
                         companyId: finalCompanyDetails === null || finalCompanyDetails === void 0 ? void 0 : finalCompanyDetails.id,
                     });
+                    // Do not remove API for employee sync
+                    // Do not remove API for timeativity sync
                     const syncTimeActivities = yield timeActivityServices_1.default.lambdaSyncFunction({
                         accessToken: authToken === null || authToken === void 0 ? void 0 : authToken.access_token,
                         refreshToken: authToken === null || authToken === void 0 ? void 0 : authToken.refresh_token,
                         tenantId: authToken === null || authToken === void 0 ? void 0 : authToken.realmId,
                         companyId: finalCompanyDetails === null || finalCompanyDetails === void 0 ? void 0 : finalCompanyDetails.id,
                     });
-                    // const syncTimeActivities =
-                    // 	await timeActivityServices.syncTimeActivities(companyId);
+                    // Do not remove API for timeativity sync
                     yield configurationRepository_1.default.initialFieldSectionCreate(finalCompanyDetails === null || finalCompanyDetails === void 0 ? void 0 : finalCompanyDetails.id);
                     const employees = yield repositories_1.employeeRepository.getAllEmployeesByCompanyId(finalCompanyDetails === null || finalCompanyDetails === void 0 ? void 0 : finalCompanyDetails.id);
                     const sectionWithFields = yield configurationRepository_1.default.getConfigurationField(finalCompanyDetails === null || finalCompanyDetails === void 0 ? void 0 : finalCompanyDetails.id);

@@ -10,6 +10,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const prisma_1 = require("../client/prisma");
+const customError_1 = require("../models/customError");
 class EmployeeCostRepository {
     // For get the monthly cost value per employee
     getMonthlyCost(companyId, date, offset, limit, searchCondition, sortCondition, isPercentage) {
@@ -37,8 +38,9 @@ class EmployeeCostRepository {
             }
         });
     }
-    getMonthlyCostExport(companyId, date, searchCondition, sortCondition) {
+    getMonthlyCostExport(companyId, date, searchCondition, sortCondition, isPercentage) {
         return __awaiter(this, void 0, void 0, function* () {
+            const isPercentageValue = isPercentage || false;
             try {
                 const dateCopy = new Date(date);
                 const employeesCostByMonth = yield prisma_1.prisma.employee.findMany(Object.assign({ where: Object.assign({ companyId: companyId }, searchCondition), include: {
@@ -53,6 +55,7 @@ class EmployeeCostRepository {
                                     where: {
                                         month: dateCopy.getMonth() + 1,
                                         year: dateCopy.getFullYear(),
+                                        isPercentage: isPercentageValue,
                                     },
                                 },
                             },
@@ -83,6 +86,15 @@ class EmployeeCostRepository {
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 const dateCopy = new Date(date);
+                const monthArr = yield prisma_1.prisma.monthYearTable.findMany({
+                    where: {
+                        year: dateCopy.getFullYear(),
+                        companyId: companyId,
+                    },
+                    orderBy: {
+                        month: 'desc',
+                    },
+                });
                 yield Promise.all(employees.map((singleEmployee) => __awaiter(this, void 0, void 0, function* () {
                     // Fetching all the fields of that employee
                     const employeeCostFields = yield prisma_1.prisma.employeeCostField.findMany({
@@ -114,6 +126,7 @@ class EmployeeCostRepository {
                         var _a, _b, _c;
                         if (((_b = (_a = singleEmployeeCostFields === null || singleEmployeeCostFields === void 0 ? void 0 : singleEmployeeCostFields.field) === null || _a === void 0 ? void 0 : _a.configurationSection) === null || _b === void 0 ? void 0 : _b.no) == 0) {
                             if (((_c = singleEmployeeCostFields === null || singleEmployeeCostFields === void 0 ? void 0 : singleEmployeeCostFields.field) === null || _c === void 0 ? void 0 : _c.jsonId) == 'f1') {
+                                // Employee Type field
                                 yield prisma_1.prisma.employeeCostValue.create({
                                     data: {
                                         employee: { connect: { id: singleEmployee.id } },
@@ -128,6 +141,57 @@ class EmployeeCostRepository {
                                 });
                             }
                             else {
+                                // find last months hour
+                                if (monthArr && monthArr.length > 1) {
+                                    const findEmployee = yield prisma_1.prisma.employeeCostValue.findFirst({
+                                        where: {
+                                            month: monthArr[1].month,
+                                            year: dateCopy.getFullYear(),
+                                            isPercentage: false,
+                                            employeeFieldId: singleEmployeeCostFields === null || singleEmployeeCostFields === void 0 ? void 0 : singleEmployeeCostFields.id,
+                                        },
+                                    });
+                                    // Maximum allocated hours
+                                    yield prisma_1.prisma.employeeCostValue.create({
+                                        data: {
+                                            employee: { connect: { id: singleEmployee.id } },
+                                            employeeCostField: {
+                                                connect: { id: singleEmployeeCostFields.id },
+                                            },
+                                            month: dateCopy.getMonth() + 1,
+                                            year: dateCopy.getFullYear(),
+                                            value: (findEmployee === null || findEmployee === void 0 ? void 0 : findEmployee.value) || '0:00',
+                                            isPercentage: false,
+                                        },
+                                    });
+                                }
+                                else {
+                                    yield prisma_1.prisma.employeeCostValue.create({
+                                        data: {
+                                            employee: { connect: { id: singleEmployee.id } },
+                                            employeeCostField: {
+                                                connect: { id: singleEmployeeCostFields.id },
+                                            },
+                                            month: dateCopy.getMonth() + 1,
+                                            year: dateCopy.getFullYear(),
+                                            value: '0:00',
+                                            isPercentage: false,
+                                        },
+                                    });
+                                }
+                            }
+                        }
+                        else {
+                            if (monthArr && monthArr.length > 1) {
+                                const findEmployee = yield prisma_1.prisma.employeeCostValue.findFirst({
+                                    where: {
+                                        month: monthArr[1].month,
+                                        year: dateCopy.getFullYear(),
+                                        isPercentage: false,
+                                        employeeFieldId: singleEmployeeCostFields === null || singleEmployeeCostFields === void 0 ? void 0 : singleEmployeeCostFields.id,
+                                    },
+                                });
+                                // For all other fields where value is default 0
                                 yield prisma_1.prisma.employeeCostValue.create({
                                     data: {
                                         employee: { connect: { id: singleEmployee.id } },
@@ -136,24 +200,24 @@ class EmployeeCostRepository {
                                         },
                                         month: dateCopy.getMonth() + 1,
                                         year: dateCopy.getFullYear(),
-                                        value: '0:00',
+                                        isPercentage: false,
+                                        value: findEmployee === null || findEmployee === void 0 ? void 0 : findEmployee.value,
+                                    },
+                                });
+                            }
+                            else {
+                                yield prisma_1.prisma.employeeCostValue.create({
+                                    data: {
+                                        employee: { connect: { id: singleEmployee.id } },
+                                        employeeCostField: {
+                                            connect: { id: singleEmployeeCostFields.id },
+                                        },
+                                        month: dateCopy.getMonth() + 1,
+                                        year: dateCopy.getFullYear(),
                                         isPercentage: false,
                                     },
                                 });
                             }
-                        }
-                        else {
-                            yield prisma_1.prisma.employeeCostValue.create({
-                                data: {
-                                    employee: { connect: { id: singleEmployee.id } },
-                                    employeeCostField: {
-                                        connect: { id: singleEmployeeCostFields.id },
-                                    },
-                                    month: dateCopy.getMonth() + 1,
-                                    year: dateCopy.getFullYear(),
-                                    isPercentage: false,
-                                },
-                            });
                         }
                     }));
                 })));
@@ -373,17 +437,54 @@ class EmployeeCostRepository {
         });
     }
     // For update the monthly cost value
-    updateMonthlyCost(employeeCostValueID, value) {
+    updateMonthlyCost(employeeCostValueID, value, date, isCalculatorValue) {
+        var _a;
         return __awaiter(this, void 0, void 0, function* () {
+            console.log(isCalculatorValue);
             try {
-                yield prisma_1.prisma.employeeCostValue.update({
+                const employeeCostValue = yield prisma_1.prisma.employeeCostValue.findFirst({
                     where: {
                         id: employeeCostValueID,
                     },
-                    data: {
-                        value: value,
+                    include: {
+                        employeeCostField: {
+                            include: {
+                                field: true,
+                            },
+                        },
                     },
                 });
+                console.log(employeeCostValue);
+                if (!employeeCostValue) {
+                    throw new customError_1.CustomError(404, 'Employee cost field not found');
+                }
+                if (((_a = employeeCostValue === null || employeeCostValue === void 0 ? void 0 : employeeCostValue.employeeCostField.field) === null || _a === void 0 ? void 0 : _a.type) === 'Yearly') {
+                    const year = new Date(date).getFullYear();
+                    yield prisma_1.prisma.employeeCostValue.updateMany({
+                        where: {
+                            year: year,
+                            isPercentage: false,
+                            employeeCostField: {
+                                id: employeeCostValue.employeeCostField.id,
+                            },
+                        },
+                        data: {
+                            value: value,
+                        },
+                    });
+                }
+                else {
+                    yield prisma_1.prisma.employeeCostValue.update({
+                        where: {
+                            id: employeeCostValueID,
+                        },
+                        data: {
+                            value: value,
+                            // isCalculatorValue: isCalculatorValue,
+                            // calculatorValue: value,
+                        },
+                    });
+                }
                 return 'Employee cost value updated successfully';
             }
             catch (error) {

@@ -215,6 +215,8 @@ model EmployeeCostValue {
   year              Int //2022
   value             String?           @default("0.00") // Employee 1 - March Fringe Expense = 10 
   isPercentage      Boolean // If percentage method is selected from configuration
+  isCalculatorValue Boolean?          @default(false)
+  calculatorValue   String?           @default("0.00")
   createdAt         DateTime          @default(now())
   updatedAt         DateTime          @updatedAt
 }

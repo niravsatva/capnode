@@ -61,7 +61,7 @@ class EmployeeConstController {
     updateMonthlyCost(req, res, next) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                const { employeeCostValueID, value } = req.body;
+                const { employeeCostValueID, value, selectedMonth, isCalculatorValue } = req.body;
                 (0, validationHelper_1.checkValidation)(req);
                 if (!employeeCostValueID) {
                     throw new customError_1.CustomError(400, 'Employee Cost value id is required');
@@ -69,7 +69,7 @@ class EmployeeConstController {
                 if (!value) {
                     throw new customError_1.CustomError(400, 'Value is required');
                 }
-                const updatedEmployeeCostValue = yield employeeCostServices_1.default.updateMonthlyCost(employeeCostValueID, value);
+                const updatedEmployeeCostValue = yield employeeCostServices_1.default.updateMonthlyCost(employeeCostValueID, value, selectedMonth, isCalculatorValue);
                 return (0, defaultResponseHelper_1.DefaultResponse)(res, 200, 'Configurations fetched successfully', updatedEmployeeCostValue);
             }
             catch (error) {
@@ -81,14 +81,14 @@ class EmployeeConstController {
         var _a;
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                const { companyId, date, search, type, sort } = req.query;
+                const { companyId, date, search, type, sort, isPercentage } = req.query;
                 if (!companyId) {
                     throw new customError_1.CustomError(400, 'Company id is required');
                 }
                 if (!date) {
                     throw new customError_1.CustomError(400, 'Date is required');
                 }
-                const employeesMonthlyCost = yield employeeCostServices_1.default.getMonthlyCostExport(companyId, date, search, type, sort);
+                const employeesMonthlyCost = yield employeeCostServices_1.default.getMonthlyCostExport(companyId, date, search, type, sort, Boolean(isPercentage));
                 const finalDataArr = (_a = employeesMonthlyCost === null || employeesMonthlyCost === void 0 ? void 0 : employeesMonthlyCost.employees) === null || _a === void 0 ? void 0 : _a.map((singleEmployee) => {
                     var _a;
                     const sortedData = (_a = singleEmployee === null || singleEmployee === void 0 ? void 0 : singleEmployee.employeeCostField) === null || _a === void 0 ? void 0 : _a.sort((a, b) => {

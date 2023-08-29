@@ -66,7 +66,7 @@ class EmployeeCostService {
             }
         });
     }
-    getMonthlyCostExport(companyId, date, search, type, sort) {
+    getMonthlyCostExport(companyId, date, search, type, sort, isPercentage) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 const company = yield repositories_1.companyRepository.getDetails(companyId);
@@ -95,7 +95,7 @@ class EmployeeCostService {
                         },
                     }
                     : {};
-                const employeesMonthlyCost = yield repositories_1.employeeCostRepository.getMonthlyCostExport(companyId, date, searchCondition, sortCondition);
+                const employeesMonthlyCost = yield repositories_1.employeeCostRepository.getMonthlyCostExport(companyId, date, searchCondition, sortCondition, isPercentage);
                 const count = yield repositories_1.employeeCostRepository.count(companyId, searchCondition);
                 return { employees: employeesMonthlyCost, count };
             }
@@ -131,10 +131,10 @@ class EmployeeCostService {
             }
         });
     }
-    updateMonthlyCost(employeeCostValueID, value) {
+    updateMonthlyCost(employeeCostValueID, value, date, isCalculatorValue) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                const updatedEmployeeCostValue = repositories_1.employeeCostRepository.updateMonthlyCost(employeeCostValueID, value);
+                const updatedEmployeeCostValue = repositories_1.employeeCostRepository.updateMonthlyCost(employeeCostValueID, value, date, isCalculatorValue);
                 return updatedEmployeeCostValue;
             }
             catch (error) {
