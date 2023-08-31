@@ -56,7 +56,7 @@ exports.DefaultAdminPermissions = [
         add: true,
     },
     {
-        permissionName: 'TimeLogs',
+        permissionName: 'Time Logs',
         sortId: 5,
         all: true,
         view: true,
@@ -65,7 +65,7 @@ exports.DefaultAdminPermissions = [
         add: true,
     },
     {
-        permissionName: 'TimeSheets',
+        permissionName: 'Time Sheets',
         sortId: 6,
         all: true,
         view: true,

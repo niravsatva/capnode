@@ -17,8 +17,7 @@ const validationHelper_1 = require("../helpers/validationHelper");
 const customError_1 = require("../models/customError");
 const repositories_1 = require("../repositories");
 const timeActivityServices_1 = __importDefault(require("../services/timeActivityServices"));
-const quickbooksServices_1 = __importDefault(require("../services/quickbooksServices"));
-const quickbooksClient_1 = __importDefault(require("../quickbooksClient/quickbooksClient"));
+const isAuthorizedUser_1 = require("../middlewares/isAuthorizedUser");
 const dataExporter = require('json2csv').Parser;
 class TimeActivityController {
     getAllTimeActivities(req, res, next) {
@@ -32,6 +31,14 @@ class TimeActivityController {
                 const companyDetails = yield repositories_1.companyRepository.getDetails(companyId);
                 if (!companyDetails) {
                     throw new customError_1.CustomError(404, 'Company not found');
+                }
+                // Checking is the user is permitted
+                const isPermitted = yield (0, isAuthorizedUser_1.checkPermission)(req, companyId, {
+                    permissionName: 'Time Logs',
+                    permission: ['view'],
+                });
+                if (!isPermitted) {
+                    throw new customError_1.CustomError(403, 'You are not authorized');
                 }
                 const timeActivities = yield timeActivityServices_1.default.getAllTimeActivitiesServices({
                     companyId: companyId,
@@ -64,6 +71,19 @@ class TimeActivityController {
                 if (!companyDetails) {
                     throw new customError_1.CustomError(404, 'Company not found');
                 }
+                // Checking is the user is permitted
+                const isAddPermitted = yield (0, isAuthorizedUser_1.checkPermission)(req, companyId, {
+                    permissionName: 'Time Logs',
+                    permission: ['add'],
+                });
+                // Checking is the user is permitted
+                const isEditPermitted = yield (0, isAuthorizedUser_1.checkPermission)(req, companyId, {
+                    permissionName: 'Time Logs',
+                    permission: ['edit'],
+                });
+                if (!isAddPermitted && !isEditPermitted) {
+                    throw new customError_1.CustomError(403, 'You are not authorized');
+                }
                 // Check if company is connected
                 if (companyDetails.isConnected == false) {
                     throw new customError_1.CustomError(400, 'Company is not connected');
@@ -86,6 +106,14 @@ class TimeActivityController {
             try {
                 (0, validationHelper_1.checkValidation)(req);
                 const { timeActivityId, companyId, hours, minute } = req.body;
+                // Checking is the user is permitted
+                const isPermitted = yield (0, isAuthorizedUser_1.checkPermission)(req, companyId, {
+                    permissionName: 'Time Logs',
+                    permission: ['edit'],
+                });
+                if (!isPermitted) {
+                    throw new customError_1.CustomError(403, 'You are not authorized');
+                }
                 // Update service
                 const updatedTimeActivity = yield timeActivityServices_1.default.updateTimeActivity({
                     timeActivityId,
@@ -105,6 +133,19 @@ class TimeActivityController {
             try {
                 (0, validationHelper_1.checkValidation)(req);
                 const { companyId, hours, minute, classId, className, customerId, customerName, activityDate, employeeId, } = req.body;
+                // Check If company exists
+                const companyDetails = yield repositories_1.companyRepository.getDetails(companyId);
+                if (!companyDetails) {
+                    throw new customError_1.CustomError(404, 'Company not found');
+                }
+                // Checking is the user is permitted
+                const isPermitted = yield (0, isAuthorizedUser_1.checkPermission)(req, companyId, {
+                    permissionName: 'Time Logs',
+                    permission: ['add'],
+                });
+                if (!isPermitted) {
+                    throw new customError_1.CustomError(403, 'You are not authorized');
+                }
                 // Create service
                 const createTimeActivity = yield timeActivityServices_1.default.createTimeActivity({
                     companyId,
@@ -129,26 +170,19 @@ class TimeActivityController {
             try {
                 (0, validationHelper_1.checkValidation)(req);
                 const { timeActivityId, companyId } = req.body;
+                // Checking is the user is permitted
+                const isPermitted = yield (0, isAuthorizedUser_1.checkPermission)(req, companyId, {
+                    permissionName: 'Time Logs',
+                    permission: ['delete'],
+                });
+                if (!isPermitted) {
+                    throw new customError_1.CustomError(403, 'You are not authorized');
+                }
                 yield timeActivityServices_1.default.deleteTimeActivity({
                     companyId: companyId,
                     timeActivityId: timeActivityId,
                 });
                 return (0, defaultResponseHelper_1.DefaultResponse)(res, 200, 'Time Activity deleted successfully');
-            }
-            catch (err) {
-                next(err);
-            }
-        });
-    }
-    testController(req, res, next) {
-        return __awaiter(this, void 0, void 0, function* () {
-            try {
-                const authResponse = yield quickbooksServices_1.default.getAccessToken(req.body.companyId);
-                console.log('AUTH RES: ', authResponse);
-                // Find all time activities from quickbooks
-                const timeActivities = yield quickbooksClient_1.default.getAllTimeActivities(authResponse.accessToken, authResponse.tenantID, authResponse.refreshToken);
-                console.log('TIME :', timeActivities);
-                return res.json(timeActivities);
             }
             catch (err) {
                 next(err);

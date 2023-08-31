@@ -120,7 +120,7 @@ class ConfigurationRepository {
                     yield Promise.all(monthsByCompanyId.map((singleMonthlyValue) => __awaiter(this, void 0, void 0, function* () {
                         const configurationFields = yield this.getConfigurationField(companyId);
                         const monthlyCost = yield employeeCostRepository_1.default.getMonthlyCost(companyId, new Date(`${singleMonthlyValue.month}/1/${singleMonthlyValue.year}`).toString(), 0, 1000, {}, {}, singleMethod);
-                        const tableData = monthlyCost.map((singleEmployeeData) => {
+                        monthlyCost.map((singleEmployeeData) => {
                             configurationFields.map((singleConfigurationSection) => __awaiter(this, void 0, void 0, function* () {
                                 if (singleConfigurationSection.no !== 0) {
                                     let total = 0;

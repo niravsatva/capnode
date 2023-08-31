@@ -190,7 +190,13 @@ class TimeActivityService {
                             const breakHours = timeActivity === null || timeActivity === void 0 ? void 0 : timeActivity.BreakHours; // Example break hours
                             const breakMinutes = timeActivity === null || timeActivity === void 0 ? void 0 : timeActivity.BreakMinutes; // Example break minutes
                             // Calculate the total time duration in milliseconds
-                            const totalTimeInMillis = end - start;
+                            let totalTimeInMillis = end - start;
+                            // If the start date is greater than end date
+                            if (start > end) {
+                                const nextDay = new Date(start);
+                                nextDay.setDate(nextDay.getDate() + 1);
+                                totalTimeInMillis += nextDay - start;
+                            }
                             // Calculate the break time in milliseconds
                             const breakTimeInMillis = (breakHours * 60 + breakMinutes) * 60 * 1000;
                             // Calculate the effective work duration
@@ -296,7 +302,13 @@ class TimeActivityService {
                             const breakHours = timeActivity === null || timeActivity === void 0 ? void 0 : timeActivity.BreakHours; // Example break hours
                             const breakMinutes = timeActivity === null || timeActivity === void 0 ? void 0 : timeActivity.BreakMinutes; // Example break minutes
                             // Calculate the total time duration in milliseconds
-                            const totalTimeInMillis = end - start;
+                            let totalTimeInMillis = end - start;
+                            // If the start date is greater than end date
+                            if (start > end) {
+                                const nextDay = new Date(start);
+                                nextDay.setDate(nextDay.getDate() + 1);
+                                totalTimeInMillis += nextDay - start;
+                            }
                             // Calculate the break time in milliseconds
                             const breakTimeInMillis = (breakHours * 60 + breakMinutes) * 60 * 1000;
                             // Calculate the effective work duration

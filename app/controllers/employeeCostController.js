@@ -16,6 +16,7 @@ const defaultResponseHelper_1 = require("../helpers/defaultResponseHelper");
 const validationHelper_1 = require("../helpers/validationHelper");
 const customError_1 = require("../models/customError");
 const employeeCostServices_1 = __importDefault(require("../services/employeeCostServices"));
+const isAuthorizedUser_1 = require("../middlewares/isAuthorizedUser");
 const dataExporter = require('json2csv').Parser;
 class EmployeeConstController {
     // For get the cost by month
@@ -28,6 +29,14 @@ class EmployeeConstController {
                 }
                 if (!date) {
                     throw new customError_1.CustomError(400, 'Date is required');
+                }
+                // Checking is the user is permitted
+                const isPermitted = yield (0, isAuthorizedUser_1.checkPermission)(req, companyId, {
+                    permissionName: 'Employee Cost',
+                    permission: ['view'],
+                });
+                if (!isPermitted) {
+                    throw new customError_1.CustomError(403, 'You are not authorized');
                 }
                 const employeesMonthlyCost = yield employeeCostServices_1.default.getMonthlyCost(companyId, date, Number(page), Number(limit), search, type, sort);
                 return (0, defaultResponseHelper_1.DefaultResponse)(res, 200, 'Configurations fetched successfully', employeesMonthlyCost);
