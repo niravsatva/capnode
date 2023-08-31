@@ -78,7 +78,7 @@ class ConfigurationController {
     getFieldsSection(req, res, next) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                const { companyId } = req.params;
+                const { companyId } = req.query;
                 const sections = yield configurationServices_1.default.getFieldsSection(companyId);
                 return (0, defaultResponseHelper_1.DefaultResponse)(res, 200, 'Section fields fetched successfully', sections);
             }

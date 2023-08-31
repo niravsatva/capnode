@@ -22,7 +22,7 @@ const tokenRepository_1 = __importDefault(require("../repositories/tokenReposito
 const userRepository_1 = __importDefault(require("../repositories/userRepository"));
 class AuthServices {
     login(email, password, machineId) {
-        var _a;
+        var _a, _b;
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 // Check if user exists
@@ -57,7 +57,14 @@ class AuthServices {
                         return true;
                     }
                 });
+                const isValidForLoginWithRole = (_b = user === null || user === void 0 ? void 0 : user.companies) === null || _b === void 0 ? void 0 : _b.some((singleCompany) => {
+                    var _a;
+                    return (_a = singleCompany === null || singleCompany === void 0 ? void 0 : singleCompany.role) === null || _a === void 0 ? void 0 : _a.status;
+                });
                 if (!isValidForLogin) {
+                    throw new customError_1.CustomError(401, 'You are not authorized to access the system please contact your administrator.');
+                }
+                if (!isValidForLoginWithRole) {
                     throw new customError_1.CustomError(401, 'You are not authorized to access the system please contact your administrator.');
                 }
                 //   Credentials Valid
