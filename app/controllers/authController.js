@@ -145,7 +145,7 @@ class AuthController {
     }
     // Fetch Profile
     fetchProfile(req, res, next) {
-        var _a, _b;
+        var _a, _b, _c;
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 const profile = yield repositories_1.userRepository.getById(req.user.id);
@@ -165,6 +165,17 @@ class AuthController {
                 else {
                     profileData = Object.assign(Object.assign({}, profile), { isFirstCompanyAdmin: false });
                 }
+                const userByEmail = yield repositories_1.userRepository.getByEmail(profileData === null || profileData === void 0 ? void 0 : profileData.email);
+                if ((userByEmail === null || userByEmail === void 0 ? void 0 : userByEmail.companies.length) > 0) {
+                    const isValidForLoginWithRole = (_c = userByEmail === null || userByEmail === void 0 ? void 0 : userByEmail.companies) === null || _c === void 0 ? void 0 : _c.some((singleCompany) => {
+                        var _a;
+                        return (_a = singleCompany === null || singleCompany === void 0 ? void 0 : singleCompany.role) === null || _a === void 0 ? void 0 : _a.status;
+                    });
+                    if (!isValidForLoginWithRole) {
+                        throw new customError_1.CustomError(204, 'You are not authorized to access the system please contact your administrator.');
+                    }
+                }
+                console.log('Profile data: ' + profileData);
                 return (0, defaultResponseHelper_1.DefaultResponse)(res, 200, 'Profile fetched successfully', profileData);
             }
             catch (err) {
