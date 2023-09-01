@@ -174,6 +174,28 @@ class QuickbooksController {
                         companyId: finalCompanyDetails === null || finalCompanyDetails === void 0 ? void 0 : finalCompanyDetails.id,
                     });
                     // Do not remove API for timeativity sync
+                    // Update employee last sync date
+                    yield prisma_1.prisma.company.update({
+                        where: {
+                            id: finalCompanyDetails === null || finalCompanyDetails === void 0 ? void 0 : finalCompanyDetails.id,
+                        },
+                        data: {
+                            employeeLastSyncDate: (0, moment_1.default)(new Date())
+                                .tz('America/Los_Angeles')
+                                .format(),
+                        },
+                    });
+                    // Update employee last sync date
+                    yield prisma_1.prisma.company.update({
+                        where: {
+                            id: finalCompanyDetails === null || finalCompanyDetails === void 0 ? void 0 : finalCompanyDetails.id,
+                        },
+                        data: {
+                            timeActivitiesLastSyncDate: (0, moment_1.default)(new Date())
+                                .tz('America/Los_Angeles')
+                                .format(),
+                        },
+                    });
                     yield configurationRepository_1.default.initialFieldSectionCreate(finalCompanyDetails === null || finalCompanyDetails === void 0 ? void 0 : finalCompanyDetails.id);
                     const employees = yield repositories_1.employeeRepository.getAllEmployeesByCompanyId(finalCompanyDetails === null || finalCompanyDetails === void 0 ? void 0 : finalCompanyDetails.id);
                     const sectionWithFields = yield configurationRepository_1.default.getConfigurationField(finalCompanyDetails === null || finalCompanyDetails === void 0 ? void 0 : finalCompanyDetails.id);
