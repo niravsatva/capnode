@@ -91,13 +91,14 @@ class EmployeeConstController {
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 const { companyId, date, search, type, sort, isPercentage } = req.query;
+                const percentage = isPercentage === 'false' ? false : true;
                 if (!companyId) {
                     throw new customError_1.CustomError(400, 'Company id is required');
                 }
                 if (!date) {
                     throw new customError_1.CustomError(400, 'Date is required');
                 }
-                const employeesMonthlyCost = yield employeeCostServices_1.default.getMonthlyCostExport(companyId, date, search, type, sort, Boolean(isPercentage));
+                const employeesMonthlyCost = yield employeeCostServices_1.default.getMonthlyCostExport(companyId, date, search, type, sort, Boolean(percentage));
                 const finalDataArr = (_a = employeesMonthlyCost === null || employeesMonthlyCost === void 0 ? void 0 : employeesMonthlyCost.employees) === null || _a === void 0 ? void 0 : _a.map((singleEmployee) => {
                     var _a;
                     const sortedData = (_a = singleEmployee === null || singleEmployee === void 0 ? void 0 : singleEmployee.employeeCostField) === null || _a === void 0 ? void 0 : _a.sort((a, b) => {
