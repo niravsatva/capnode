@@ -24,6 +24,8 @@ const configurationRepository_1 = __importDefault(require("../repositories/confi
 const employeeServices_1 = __importDefault(require("../services/employeeServices"));
 const quickbooksServices_1 = __importDefault(require("../services/quickbooksServices"));
 const timeActivityServices_1 = __importDefault(require("../services/timeActivityServices"));
+const prisma_1 = require("../client/prisma");
+const moment_1 = __importDefault(require("moment"));
 // import axios from 'axios';
 // import timeActivityServices from '../services/timeActivityServices';
 class QuickbooksController {
@@ -301,6 +303,16 @@ class QuickbooksController {
                 if ((authResponse === null || authResponse === void 0 ? void 0 : authResponse.status) == true) {
                     // Get All Customers from Quickbooks
                     const customers = yield quickbooksClient_1.default.getAllCustomers(authResponse === null || authResponse === void 0 ? void 0 : authResponse.accessToken, authResponse === null || authResponse === void 0 ? void 0 : authResponse.tenantID, authResponse === null || authResponse === void 0 ? void 0 : authResponse.refreshToken);
+                    yield prisma_1.prisma.company.update({
+                        where: {
+                            id: companyId,
+                        },
+                        data: {
+                            customerLastSyncDate: (0, moment_1.default)(new Date())
+                                .tz('America/Los_Angeles')
+                                .format(),
+                        },
+                    });
                     return (0, defaultResponseHelper_1.DefaultResponse)(res, 200, 'All accounts fetched successfully', (_a = customers === null || customers === void 0 ? void 0 : customers.QueryResponse) === null || _a === void 0 ? void 0 : _a.Customer);
                 }
                 else {
@@ -326,6 +338,16 @@ class QuickbooksController {
                     // Get All Classes From Quickbooks
                     const classes = yield quickbooksClient_1.default.getAllClasses(authResponse === null || authResponse === void 0 ? void 0 : authResponse.accessToken, authResponse === null || authResponse === void 0 ? void 0 : authResponse.tenantID, authResponse === null || authResponse === void 0 ? void 0 : authResponse.refreshToken);
                     const finalClasses = (_b = (_a = classes === null || classes === void 0 ? void 0 : classes.QueryResponse) === null || _a === void 0 ? void 0 : _a.Class) === null || _b === void 0 ? void 0 : _b.filter((item) => (item === null || item === void 0 ? void 0 : item.SubClass) === true);
+                    yield prisma_1.prisma.company.update({
+                        where: {
+                            id: companyId,
+                        },
+                        data: {
+                            classLastSyncDate: (0, moment_1.default)(new Date())
+                                .tz('America/Los_Angeles')
+                                .format(),
+                        },
+                    });
                     return (0, defaultResponseHelper_1.DefaultResponse)(res, 200, 'All classes fetched successfully', finalClasses);
                 }
                 else {

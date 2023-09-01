@@ -21,4 +21,6 @@ router.post('/create', authMiddleware_1.isAuthenticated, validators_1.createTime
 router.delete('/', authMiddleware_1.isAuthenticated, validators_1.deleteTimeActivityValidation, controllers_1.timeActivityController === null || controllers_1.timeActivityController === void 0 ? void 0 : controllers_1.timeActivityController.deleteTimeActivity);
 // Export time activity
 router.get('/export', authMiddleware_1.isAuthenticated, controllers_1.timeActivityController.exportTimeActivity);
+// Export time activity
+router.post('/exportpdf', authMiddleware_1.isAuthenticated, controllers_1.timeActivityController.exportTimeActivityPdf);
 exports.default = router;

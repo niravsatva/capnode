@@ -41,13 +41,11 @@ class EmployeeCostService {
                     }
                     : {};
                 // Conditions for sort
-                const sortCondition = sort
-                    ? {
-                        orderBy: {
-                            fullName: sort !== null && sort !== void 0 ? sort : 'asc',
-                        },
-                    }
-                    : {};
+                const sortCondition = {
+                    orderBy: {
+                        fullName: sort ? sort : 'asc',
+                    },
+                };
                 // Check which method is activate in company configuration - Hourly Or Percentage
                 const configurations = yield configurationRepository_1.default.getCompanyConfiguration(companyId);
                 let isPercentage;
@@ -88,13 +86,11 @@ class EmployeeCostService {
                     }
                     : {};
                 // Conditions for sort
-                const sortCondition = sort
-                    ? {
-                        orderBy: {
-                            fullName: sort !== null && sort !== void 0 ? sort : 'asc',
-                        },
-                    }
-                    : {};
+                const sortCondition = {
+                    orderBy: {
+                        fullName: sort ? sort : 'asc',
+                    },
+                };
                 const employeesMonthlyCost = yield repositories_1.employeeCostRepository.getMonthlyCostExport(companyId, date, searchCondition, sortCondition, isPercentage);
                 const count = yield repositories_1.employeeCostRepository.count(companyId, searchCondition);
                 return { employees: employeesMonthlyCost, count };

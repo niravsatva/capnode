@@ -85,6 +85,13 @@ class TimeActivityService {
                         activityDate: 'desc',
                     },
                 };
+            if (sort === 'employee') {
+                sortCondition['orderBy'] = {
+                    employee: {
+                        fullName: type,
+                    },
+                };
+            }
             // Check if company exists or not
             const companyDetails = yield repositories_1.companyRepository.getDetails(companyId);
             if (!companyDetails) {

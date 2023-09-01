@@ -18,6 +18,7 @@ const customError_1 = require("../models/customError");
 const repositories_1 = require("../repositories");
 const timeActivityServices_1 = __importDefault(require("../services/timeActivityServices"));
 const isAuthorizedUser_1 = require("../middlewares/isAuthorizedUser");
+const axios_1 = __importDefault(require("axios"));
 const dataExporter = require('json2csv').Parser;
 class TimeActivityController {
     getAllTimeActivities(req, res, next) {
@@ -209,6 +210,24 @@ class TimeActivityController {
                 res.setHeader('Content-Type', 'text/csv');
                 res.setHeader('Content-Disposition', 'attachment; filename=sample_data.csv');
                 return res.status(200).end(csvData);
+            }
+            catch (err) {
+                next(err);
+            }
+        });
+    }
+    // Export Pdf
+    exportTimeActivityPdf(req, res, next) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                const htmlData = req.body.html;
+                const response = yield axios_1.default.post('https://pdf.satvasolutions.com/api/ConvertHtmlToPdf', {
+                    FileName: 'timeactivity.pdf',
+                    HtmlData: htmlData,
+                });
+                return res.status(200).json({
+                    data: response.data,
+                });
             }
             catch (err) {
                 next(err);
