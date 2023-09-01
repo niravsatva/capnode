@@ -355,12 +355,12 @@ exports.sections = [
         no: 1,
         fields: [
             {
-                name: 'Salary',
+                name: 'Gross Wage',
                 type: 'Monthly',
                 jsonId: 'f1',
             },
             {
-                name: 'Gross Wage',
+                name: 'Vacation/PTO',
                 type: 'Monthly',
                 jsonId: 'f2',
             },

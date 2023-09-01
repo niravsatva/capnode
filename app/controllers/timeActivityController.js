@@ -221,8 +221,9 @@ class TimeActivityController {
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 const htmlData = req.body.html;
+                const fileName = req.body.fileName;
                 const response = yield axios_1.default.post('https://pdf.satvasolutions.com/api/ConvertHtmlToPdf', {
-                    FileName: 'timeactivity.pdf',
+                    FileName: fileName,
                     HtmlData: htmlData,
                 });
                 return res.status(200).json({
