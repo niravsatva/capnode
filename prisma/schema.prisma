@@ -148,7 +148,7 @@ model Configuration {
 
 model Employee {
   id                String              @id @default(uuid())
-  employeeId        String              @unique
+  employeeId        String
   fullName          String
   email             String?
   phone             String?

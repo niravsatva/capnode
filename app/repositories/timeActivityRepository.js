@@ -60,8 +60,11 @@ class TimeActivityRepository {
                 });
                 let updatedTimeActivities;
                 if (timeActivities) {
-                    const employee = yield prisma_1.prisma.employee.findUnique({
-                        where: { employeeId: timeActivityData === null || timeActivityData === void 0 ? void 0 : timeActivityData.employeeId },
+                    const employee = yield prisma_1.prisma.employee.findFirst({
+                        where: {
+                            employeeId: timeActivityData === null || timeActivityData === void 0 ? void 0 : timeActivityData.employeeId,
+                            companyId: companyId,
+                        },
                     });
                     const data = {
                         classId: timeActivityData === null || timeActivityData === void 0 ? void 0 : timeActivityData.classId,
@@ -92,9 +95,11 @@ class TimeActivityRepository {
                     updatedTimeActivities = updated[0];
                 }
                 else {
-                    console.log('INSIDE ELSE: ', timeActivityData);
-                    const employee = yield prisma_1.prisma.employee.findUnique({
-                        where: { employeeId: timeActivityData === null || timeActivityData === void 0 ? void 0 : timeActivityData.employeeId },
+                    const employee = yield prisma_1.prisma.employee.findFirst({
+                        where: {
+                            employeeId: timeActivityData === null || timeActivityData === void 0 ? void 0 : timeActivityData.employeeId,
+                            companyId: companyId,
+                        },
                     });
                     const data = {
                         timeActivityId: timeActivityData === null || timeActivityData === void 0 ? void 0 : timeActivityData.timeActivityId,
@@ -157,13 +162,16 @@ class TimeActivityRepository {
         });
     }
     // Create a new time activity at first time sync
-    createTimeActivitySync(timeActivityData) {
+    createTimeActivitySync(timeActivityData, companyId) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 let employee = null;
                 if (timeActivityData === null || timeActivityData === void 0 ? void 0 : timeActivityData.employeeId) {
-                    employee = yield prisma_1.prisma.employee.findUnique({
-                        where: { employeeId: timeActivityData === null || timeActivityData === void 0 ? void 0 : timeActivityData.employeeId },
+                    employee = yield prisma_1.prisma.employee.findFirst({
+                        where: {
+                            employeeId: timeActivityData === null || timeActivityData === void 0 ? void 0 : timeActivityData.employeeId,
+                            companyId: companyId,
+                        },
                     });
                 }
                 const data = {

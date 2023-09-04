@@ -130,6 +130,15 @@ class EmployeeConstController {
                             Number(finalObject['Total Fringe']) +
                             Number(finalObject['Total Payroll Taxes']) });
                 });
+                console.log('My percentage: ', percentage);
+                if (percentage) {
+                    finalDataArr.forEach((singleEmployee) => {
+                        delete singleEmployee['Employee Type'];
+                        delete singleEmployee['Maximum allocate hours per year'];
+                        delete singleEmployee['Maximum Vacation/PTO hours per year'];
+                    });
+                }
+                console.log('My final array : ', finalDataArr);
                 const fileHeader = ['Employee Name', 'Employee Type'];
                 const jsonData = new dataExporter({ fileHeader });
                 const csvData = jsonData.parse(finalDataArr);

@@ -236,7 +236,7 @@ class TimeActivityService {
                             companyId: companyId,
                         };
                         // Dump time activity in the database for the first time
-                        return yield timeActivityRepository_1.default.createTimeActivitySync(data);
+                        return yield timeActivityRepository_1.default.createTimeActivitySync(data, companyId);
                     })));
                     yield prisma_1.prisma.company.update({
                         where: {
