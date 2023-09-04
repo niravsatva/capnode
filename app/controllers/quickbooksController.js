@@ -205,7 +205,6 @@ class QuickbooksController {
                     }, []);
                     yield repositories_1.employeeCostRepository.createInitialValues(employees, sectionFields, finalCompanyDetails === null || finalCompanyDetails === void 0 ? void 0 : finalCompanyDetails.id);
                     console.log('Sync data in create: ', syncData);
-                    console.log('Sync activities in create: ', syncTimeActivities);
                     // await employeeServices.syncEmployeesByLastSync(companyId);
                 }
                 return (0, defaultResponseHelper_1.DefaultResponse)(res, 200, 'Company connected successfully', finalCompanyDetails);

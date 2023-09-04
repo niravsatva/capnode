@@ -185,9 +185,12 @@ class TimeActivityService {
                     const filteredEmployees = (_d = (_c = timeActivities === null || timeActivities === void 0 ? void 0 : timeActivities.QueryResponse) === null || _c === void 0 ? void 0 : _c.TimeActivity) === null || _d === void 0 ? void 0 : _d.filter((timeActivity) => timeActivity === null || timeActivity === void 0 ? void 0 : timeActivity.EmployeeRef);
                     yield Promise.all(filteredEmployees === null || filteredEmployees === void 0 ? void 0 : filteredEmployees.map((timeActivity) => __awaiter(this, void 0, void 0, function* () {
                         var _e, _f, _g, _h, _j, _k, _l;
-                        let hours = '0';
-                        let minutes = '0';
-                        if ((timeActivity === null || timeActivity === void 0 ? void 0 : timeActivity.Hours) && (timeActivity === null || timeActivity === void 0 ? void 0 : timeActivity.Minutes)) {
+                        let hours = 0;
+                        let minutes = 0;
+                        if ((timeActivity === null || timeActivity === void 0 ? void 0 : timeActivity.Hours) !== null &&
+                            (timeActivity === null || timeActivity === void 0 ? void 0 : timeActivity.Hours) !== undefined &&
+                            (timeActivity === null || timeActivity === void 0 ? void 0 : timeActivity.Minutes) !== null &&
+                            (timeActivity === null || timeActivity === void 0 ? void 0 : timeActivity.Minutes) !== undefined) {
                             hours = timeActivity === null || timeActivity === void 0 ? void 0 : timeActivity.Hours;
                             minutes = timeActivity === null || timeActivity === void 0 ? void 0 : timeActivity.Minutes;
                         }
@@ -303,7 +306,10 @@ class TimeActivityService {
                         var _e, _f, _g, _h, _j, _k, _l;
                         let hours = '0';
                         let minutes = '0';
-                        if ((timeActivity === null || timeActivity === void 0 ? void 0 : timeActivity.Hours) && (timeActivity === null || timeActivity === void 0 ? void 0 : timeActivity.Minutes)) {
+                        if ((timeActivity === null || timeActivity === void 0 ? void 0 : timeActivity.Hours) !== null &&
+                            (timeActivity === null || timeActivity === void 0 ? void 0 : timeActivity.Hours) !== undefined &&
+                            (timeActivity === null || timeActivity === void 0 ? void 0 : timeActivity.Minutes) !== null &&
+                            (timeActivity === null || timeActivity === void 0 ? void 0 : timeActivity.Minutes) !== undefined) {
                             hours = timeActivity === null || timeActivity === void 0 ? void 0 : timeActivity.Hours;
                             minutes = timeActivity === null || timeActivity === void 0 ? void 0 : timeActivity.Minutes;
                         }
