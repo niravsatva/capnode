@@ -329,8 +329,6 @@ class EmployeeCostRepository {
     // Creating the initial value
     createInitialValues(listOfEmployee, listOfFields, companyId) {
         return __awaiter(this, void 0, void 0, function* () {
-            console.log('Emp: ', listOfEmployee);
-            console.log('Fields: ', listOfFields);
             try {
                 yield Promise.all(listOfEmployee.map((singleEmployee) => __awaiter(this, void 0, void 0, function* () {
                     listOfFields.map((singleField) => __awaiter(this, void 0, void 0, function* () {
@@ -464,7 +462,6 @@ class EmployeeCostRepository {
     updateMonthlyCost(employeeCostValueID, value, date, isCalculatorValue) {
         var _a;
         return __awaiter(this, void 0, void 0, function* () {
-            console.log(isCalculatorValue);
             try {
                 const employeeCostValue = yield prisma_1.prisma.employeeCostValue.findFirst({
                     where: {
@@ -478,7 +475,6 @@ class EmployeeCostRepository {
                         },
                     },
                 });
-                console.log(employeeCostValue);
                 if (!employeeCostValue) {
                     throw new customError_1.CustomError(404, 'Employee cost field not found');
                 }

@@ -44,6 +44,7 @@
 		"@typescript-eslint/eslint-plugin": "^6.1.0",
 		"@typescript-eslint/parser": "^6.1.0",
 		"eslint": "^8.45.0",
+		"excel4node": "^1.8.2",
 		"joi": "^17.9.2",
 		"prisma": "^4.16.2",
 		"ts-node": "^10.9.1",

@@ -29,7 +29,6 @@ class QuickbooksService {
                 const currentDateTime = (0, moment_timezone_1.default)(new Date());
                 const minutes = currentDateTime.diff(accessTokenUTCDate, 'minutes');
                 if (minutes >= 45) {
-                    console.log('Inside 45');
                     const utc = moment_timezone_1.default.utc().valueOf();
                     const authResponse = yield quickbooksAuthClient_1.default.refreshToken(companyDetails === null || companyDetails === void 0 ? void 0 : companyDetails.refreshToken);
                     if (authResponse != null) {

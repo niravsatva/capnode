@@ -47,14 +47,36 @@ class TimeActivityService {
                     AND: filteredData,
                 }
                 : {};
-            const dateFilters = startDate && endDate
-                ? {
-                    activityDate: {
-                        gte: startDate,
-                        lte: endDate,
-                    },
+            let dateFilters = {};
+            if (startDate && endDate) {
+                if (startDate === endDate) {
+                    dateFilters = {
+                        activityDate: {
+                            equals: startDate,
+                        },
+                    };
                 }
-                : {};
+                else {
+                    dateFilters = {
+                        activityDate: {
+                            gte: startDate,
+                            lte: endDate,
+                        },
+                    };
+                }
+            }
+            else {
+                dateFilters = {};
+            }
+            // const dateFilters =
+            // 	startDate && endDate
+            // 		? {
+            // 				activityDate: {
+            // 					gte: startDate,
+            // 					lte: endDate,
+            // 				},
+            // 		  }
+            // 		: {};
             // Conditions for searching
             const searchCondition = search
                 ? {
@@ -133,20 +155,18 @@ class TimeActivityService {
                     ((_b = (_a = timeActivities === null || timeActivities === void 0 ? void 0 : timeActivities.QueryResponse) === null || _a === void 0 ? void 0 : _a.TimeActivity) === null || _b === void 0 ? void 0 : _b.length) > 0) {
                     // Filtered vendors, fetching employees only
                     const filteredEmployees = (_d = (_c = timeActivities === null || timeActivities === void 0 ? void 0 : timeActivities.QueryResponse) === null || _c === void 0 ? void 0 : _c.TimeActivity) === null || _d === void 0 ? void 0 : _d.filter((timeActivity) => timeActivity === null || timeActivity === void 0 ? void 0 : timeActivity.EmployeeRef);
-                    console.log('Filtererd : ' + filteredEmployees);
                     yield Promise.all(filteredEmployees === null || filteredEmployees === void 0 ? void 0 : filteredEmployees.map((timeActivity) => __awaiter(this, void 0, void 0, function* () {
-                        var _f, _g, _h, _j, _k, _l, _m, _o;
-                        console.log('TIME: ', (_f = timeActivity === null || timeActivity === void 0 ? void 0 : timeActivity.EmployeeRef) === null || _f === void 0 ? void 0 : _f.value);
+                        var _f, _g, _h, _j, _k, _l, _m;
                         const data = {
                             timeActivityId: timeActivity === null || timeActivity === void 0 ? void 0 : timeActivity.Id,
-                            classId: ((_g = timeActivity === null || timeActivity === void 0 ? void 0 : timeActivity.ClassRef) === null || _g === void 0 ? void 0 : _g.value) || null,
-                            className: ((_h = timeActivity === null || timeActivity === void 0 ? void 0 : timeActivity.ClassRef) === null || _h === void 0 ? void 0 : _h.name) || null,
-                            customerId: ((_j = timeActivity === null || timeActivity === void 0 ? void 0 : timeActivity.CustomerRef) === null || _j === void 0 ? void 0 : _j.value) || null,
-                            customerName: ((_k = timeActivity === null || timeActivity === void 0 ? void 0 : timeActivity.CustomerRef) === null || _k === void 0 ? void 0 : _k.name) || null,
-                            hours: ((_l = timeActivity === null || timeActivity === void 0 ? void 0 : timeActivity.Hours) === null || _l === void 0 ? void 0 : _l.toString()) || '0',
-                            minute: ((_m = timeActivity === null || timeActivity === void 0 ? void 0 : timeActivity.Minutes) === null || _m === void 0 ? void 0 : _m.toString()) || '0',
+                            classId: ((_f = timeActivity === null || timeActivity === void 0 ? void 0 : timeActivity.ClassRef) === null || _f === void 0 ? void 0 : _f.value) || null,
+                            className: ((_g = timeActivity === null || timeActivity === void 0 ? void 0 : timeActivity.ClassRef) === null || _g === void 0 ? void 0 : _g.name) || null,
+                            customerId: ((_h = timeActivity === null || timeActivity === void 0 ? void 0 : timeActivity.CustomerRef) === null || _h === void 0 ? void 0 : _h.value) || null,
+                            customerName: ((_j = timeActivity === null || timeActivity === void 0 ? void 0 : timeActivity.CustomerRef) === null || _j === void 0 ? void 0 : _j.name) || null,
+                            hours: ((_k = timeActivity === null || timeActivity === void 0 ? void 0 : timeActivity.Hours) === null || _k === void 0 ? void 0 : _k.toString()) || '0',
+                            minute: ((_l = timeActivity === null || timeActivity === void 0 ? void 0 : timeActivity.Minutes) === null || _l === void 0 ? void 0 : _l.toString()) || '0',
                             activityDate: timeActivity === null || timeActivity === void 0 ? void 0 : timeActivity.TxnDate,
-                            employeeId: (_o = timeActivity === null || timeActivity === void 0 ? void 0 : timeActivity.EmployeeRef) === null || _o === void 0 ? void 0 : _o.value,
+                            employeeId: (_m = timeActivity === null || timeActivity === void 0 ? void 0 : timeActivity.EmployeeRef) === null || _m === void 0 ? void 0 : _m.value,
                         };
                         // update or create time activity
                         return yield timeActivityRepository_1.default.updateOrCreateTimeActivity(timeActivity === null || timeActivity === void 0 ? void 0 : timeActivity.Id, companyId, data);
@@ -162,7 +182,6 @@ class TimeActivityService {
                         tenantID: authResponse === null || authResponse === void 0 ? void 0 : authResponse.tenantID,
                         companyId: companyId,
                     });
-                    console.log('Time activities: ', timeActivities);
                 }
             }
         });
@@ -257,7 +276,6 @@ class TimeActivityService {
             const { accessToken, refreshToken, tenantID } = timeActivityData;
             // Find all time activities from quickbooks
             const timeActivities = yield quickbooksClient_1.default.getAllTimeActivities(accessToken, tenantID, refreshToken);
-            console.log('TIME :', timeActivities);
             return timeActivities;
             // Dump all time activities in db
         });

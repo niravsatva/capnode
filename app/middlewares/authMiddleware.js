@@ -138,7 +138,6 @@ const isAuthenticated = (req, res, next) => __awaiter(void 0, void 0, void 0, fu
             const refreshToken = (_h = (_g = req === null || req === void 0 ? void 0 : req.headers) === null || _g === void 0 ? void 0 : _g.refreshtoken) === null || _h === void 0 ? void 0 : _h.split(' ')[1];
             (0, exports.refreshAccessToken)(accessToken, refreshToken)
                 .then((data) => {
-                console.log('Data : ', data);
                 // req.session.accessToken = data?.newAccessToken;
                 // req.session.refreshToken = data?.newRefreshToken;
                 next();

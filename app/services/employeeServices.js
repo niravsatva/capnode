@@ -66,7 +66,6 @@ class EmployeeServices {
                         },
                     }
                     : {};
-                console.log('Details: ', offset, filterConditions, searchCondition, sortCondition);
                 // Get all employees by company id
                 const employees = yield repositories_1.employeeRepository.getAllEmployeesByCompanyId(companyId);
                 return employees;
@@ -84,12 +83,12 @@ class EmployeeServices {
             let employeeArr = [];
             if (employees && ((_b = (_a = employees === null || employees === void 0 ? void 0 : employees.QueryResponse) === null || _a === void 0 ? void 0 : _a.Employee) === null || _b === void 0 ? void 0 : _b.length) > 0) {
                 employeeArr = yield Promise.all((_d = (_c = employees === null || employees === void 0 ? void 0 : employees.QueryResponse) === null || _c === void 0 ? void 0 : _c.Employee) === null || _d === void 0 ? void 0 : _d.map((employee) => __awaiter(this, void 0, void 0, function* () {
-                    var _e, _f, _g, _h;
+                    var _e, _f, _g, _h, _j;
                     const data = {
                         employeeId: employee === null || employee === void 0 ? void 0 : employee.Id,
-                        fullName: employee === null || employee === void 0 ? void 0 : employee.DisplayName,
-                        email: (_f = (_e = employee === null || employee === void 0 ? void 0 : employee.PrimaryEmailAddr) === null || _e === void 0 ? void 0 : _e.Address) !== null && _f !== void 0 ? _f : '',
-                        phone: (_h = (_g = employee === null || employee === void 0 ? void 0 : employee.PrimaryPhone) === null || _g === void 0 ? void 0 : _g.FreeFormNumber) !== null && _h !== void 0 ? _h : '',
+                        fullName: (_e = employee === null || employee === void 0 ? void 0 : employee.DisplayName) === null || _e === void 0 ? void 0 : _e.replace(' (deleted)', ''),
+                        email: (_g = (_f = employee === null || employee === void 0 ? void 0 : employee.PrimaryEmailAddr) === null || _f === void 0 ? void 0 : _f.Address) !== null && _g !== void 0 ? _g : '',
+                        phone: (_j = (_h = employee === null || employee === void 0 ? void 0 : employee.PrimaryPhone) === null || _h === void 0 ? void 0 : _h.FreeFormNumber) !== null && _j !== void 0 ? _j : '',
                         active: employee === null || employee === void 0 ? void 0 : employee.Active,
                         companyId: employeeData === null || employeeData === void 0 ? void 0 : employeeData.companyId,
                     };
@@ -155,12 +154,12 @@ class EmployeeServices {
                         return accumulator;
                     }, []);
                     employeeArr = yield Promise.all((_d = (_c = newEmployees === null || newEmployees === void 0 ? void 0 : newEmployees.QueryResponse) === null || _c === void 0 ? void 0 : _c.Employee) === null || _d === void 0 ? void 0 : _d.map((employee) => __awaiter(this, void 0, void 0, function* () {
-                        var _e, _f, _g, _h;
+                        var _e, _f, _g, _h, _j;
                         const employeeData = {
                             employeeId: employee === null || employee === void 0 ? void 0 : employee.Id,
-                            fullName: employee === null || employee === void 0 ? void 0 : employee.DisplayName,
-                            email: (_f = (_e = employee === null || employee === void 0 ? void 0 : employee.PrimaryEmailAddr) === null || _e === void 0 ? void 0 : _e.Address) !== null && _f !== void 0 ? _f : '',
-                            phone: (_h = (_g = employee === null || employee === void 0 ? void 0 : employee.PrimaryPhone) === null || _g === void 0 ? void 0 : _g.FreeFormNumber) !== null && _h !== void 0 ? _h : '',
+                            fullName: (_e = employee === null || employee === void 0 ? void 0 : employee.DisplayName) === null || _e === void 0 ? void 0 : _e.replace(' (deleted)', ''),
+                            email: (_g = (_f = employee === null || employee === void 0 ? void 0 : employee.PrimaryEmailAddr) === null || _f === void 0 ? void 0 : _f.Address) !== null && _g !== void 0 ? _g : '',
+                            phone: (_j = (_h = employee === null || employee === void 0 ? void 0 : employee.PrimaryPhone) === null || _h === void 0 ? void 0 : _h.FreeFormNumber) !== null && _j !== void 0 ? _j : '',
                             active: employee === null || employee === void 0 ? void 0 : employee.Active,
                             companyId: companyId,
                         };

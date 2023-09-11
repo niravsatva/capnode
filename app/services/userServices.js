@@ -176,7 +176,8 @@ class UserServices {
                     const companyName = yield repositories_1.companyRepository.getDetails(company);
                     // Mail send to the invited user
                     const emailContent = (0, emailTemplateHelper_1.getInvitationEmailUserExistTemplate)({
-                        email,
+                        firstName: user.firstName,
+                        lastName: user.lastName,
                         companyName: companyName === null || companyName === void 0 ? void 0 : companyName.tenantName,
                         url: config_1.default === null || config_1.default === void 0 ? void 0 : config_1.default.reactAppBaseUrl,
                     });
@@ -191,7 +192,8 @@ class UserServices {
                     // Mail send to admin
                     const adminEmailContent = (0, emailTemplateHelper_1.getInvitationAdminMailTemplate)({
                         invitedByEmail,
-                        email,
+                        firstName: user.firstName,
+                        lastName: user.lastName,
                         companyName: companyName === null || companyName === void 0 ? void 0 : companyName.tenantName,
                         url: config_1.default === null || config_1.default === void 0 ? void 0 : config_1.default.reactAppBaseUrl,
                     });
@@ -271,7 +273,8 @@ class UserServices {
                     // Verify token url
                     const url = `${config_1.default === null || config_1.default === void 0 ? void 0 : config_1.default.reactAppBaseUrl}/reset-password?token=${resetPasswordToken}&first=true`;
                     const emailContent = (0, emailTemplateHelper_1.getInvitationEmailUserTemplate)({
-                        email,
+                        firstName: createdUser.firstName,
+                        lastName: createdUser.lastName,
                         companyName: companyName === null || companyName === void 0 ? void 0 : companyName.tenantName,
                         url,
                     });

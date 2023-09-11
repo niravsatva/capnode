@@ -123,14 +123,17 @@ class EmployeeConstController {
                     });
                     let finalObject = {};
                     sortedData.forEach((item) => {
-                        var _a, _b;
-                        finalObject = Object.assign(Object.assign({}, finalObject), { [(_a = item === null || item === void 0 ? void 0 : item.field) === null || _a === void 0 ? void 0 : _a.name]: (_b = item === null || item === void 0 ? void 0 : item.costValue[0]) === null || _b === void 0 ? void 0 : _b.value });
+                        var _a, _b, _c, _d;
+                        finalObject = Object.assign(Object.assign({}, finalObject), { [(_a = item === null || item === void 0 ? void 0 : item.field) === null || _a === void 0 ? void 0 : _a.name]: ((_b = item === null || item === void 0 ? void 0 : item.costValue[0]) === null || _b === void 0 ? void 0 : _b.value) === 'salaried_exempt'
+                                ? 'Salaried Exempt'
+                                : ((_c = item === null || item === void 0 ? void 0 : item.costValue[0]) === null || _c === void 0 ? void 0 : _c.value) === 'salaried_non_exempt'
+                                    ? 'Salaried Non Exempt'
+                                    : (_d = item === null || item === void 0 ? void 0 : item.costValue[0]) === null || _d === void 0 ? void 0 : _d.value });
                     });
                     return Object.assign(Object.assign({ 'Employee Name': singleEmployee === null || singleEmployee === void 0 ? void 0 : singleEmployee.fullName }, finalObject), { 'Total Labor Burden': Number(finalObject['Total Salary']) +
                             Number(finalObject['Total Fringe']) +
                             Number(finalObject['Total Payroll Taxes']) });
                 });
-                console.log('My percentage: ', percentage);
                 if (percentage) {
                     finalDataArr.forEach((singleEmployee) => {
                         delete singleEmployee['Employee Type'];
@@ -138,7 +141,6 @@ class EmployeeConstController {
                         delete singleEmployee['Maximum Vacation/PTO hours per year'];
                     });
                 }
-                console.log('My final array : ', finalDataArr);
                 const fileHeader = ['Employee Name', 'Employee Type'];
                 const jsonData = new dataExporter({ fileHeader });
                 const csvData = jsonData.parse(finalDataArr);

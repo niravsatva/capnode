@@ -19,6 +19,8 @@ const repositories_1 = require("../repositories");
 const timeActivityServices_1 = __importDefault(require("../services/timeActivityServices"));
 const isAuthorizedUser_1 = require("../middlewares/isAuthorizedUser");
 const axios_1 = __importDefault(require("axios"));
+const Excel = require('excel4node');
+// import moment from 'moment';
 const dataExporter = require('json2csv').Parser;
 class TimeActivityController {
     getAllTimeActivities(req, res, next) {
@@ -28,6 +30,18 @@ class TimeActivityController {
                 (0, validationHelper_1.checkValidation)(req);
                 const { page = 1, limit = 10, search = '', classId = '', customerId = '', employeeId = '', type = '', sort = '', startDate = '', endDate = '', } = req.query;
                 const companyId = (_a = req.body) === null || _a === void 0 ? void 0 : _a.companyId;
+                let formattedStartDate = '';
+                let formattedEndDate = '';
+                if (startDate && endDate) {
+                    // Format start date
+                    const newStart = new Date(startDate);
+                    newStart.setUTCHours(0, 0, 0, 0);
+                    formattedStartDate = newStart.toISOString();
+                    // Format end date
+                    const newEnd = new Date(endDate);
+                    newEnd.setUTCHours(0, 0, 0, 0);
+                    formattedEndDate = newEnd.toISOString();
+                }
                 // Check If company exists
                 const companyDetails = yield repositories_1.companyRepository.getDetails(companyId);
                 if (!companyDetails) {
@@ -51,8 +65,8 @@ class TimeActivityController {
                     employeeId: String(employeeId),
                     type: String(type),
                     sort: String(sort),
-                    startDate: String(startDate),
-                    endDate: String(endDate),
+                    startDate: String(formattedStartDate),
+                    endDate: String(formattedEndDate),
                 });
                 return (0, defaultResponseHelper_1.DefaultResponse)(res, 200, 'Time Activities fetched successfully', timeActivities);
             }
@@ -195,8 +209,19 @@ class TimeActivityController {
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 const { companyId, search = '', classId = '', customerId = '', employeeId = '', startDate = '', endDate = '', } = req.query;
-                console.log('Search: ', search, classId, customerId, employeeId, startDate, endDate);
-                const timeActivities = yield timeActivityServices_1.default.exportTimeActivity(companyId, search, classId, customerId, employeeId, startDate, endDate);
+                let formattedStartDate = '';
+                let formattedEndDate = '';
+                if (startDate && endDate) {
+                    // Format start date
+                    const newStart = new Date(startDate);
+                    newStart.setUTCHours(0, 0, 0, 0);
+                    formattedStartDate = newStart.toISOString();
+                    // Format end date
+                    const newEnd = new Date(endDate);
+                    newEnd.setUTCHours(0, 0, 0, 0);
+                    formattedEndDate = newEnd.toISOString();
+                }
+                const timeActivities = yield timeActivityServices_1.default.exportTimeActivity(companyId, search, classId, customerId, employeeId, formattedStartDate, formattedEndDate);
                 const timeActivityData = JSON.parse(JSON.stringify(timeActivities));
                 const fileHeader = [
                     'Activity Date',
@@ -228,6 +253,82 @@ class TimeActivityController {
                 });
                 return res.status(200).json({
                     data: response.data,
+                });
+            }
+            catch (err) {
+                next(err);
+            }
+        });
+    }
+    // Export Excel
+    exportTimeActivityExcel(req, res, next) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                const { companyId, search = '', classId = '', customerId = '', employeeId = '', startDate = '', endDate = '', } = req.query;
+                let formattedStartDate = '';
+                let formattedEndDate = '';
+                if (startDate && endDate) {
+                    // Format start date
+                    const newStart = new Date(startDate);
+                    newStart.setUTCHours(0, 0, 0, 0);
+                    formattedStartDate = newStart.toISOString();
+                    // Format end date
+                    const newEnd = new Date(endDate);
+                    newEnd.setUTCHours(0, 0, 0, 0);
+                    formattedEndDate = newEnd.toISOString();
+                }
+                const timeActivities = yield timeActivityServices_1.default.exportTimeActivity(companyId, search, classId, customerId, employeeId, formattedStartDate, formattedEndDate);
+                // Create a new Excel workbook and worksheet
+                const wb = new Excel.Workbook();
+                const ws = wb.addWorksheet('Sheet 1');
+                // Define Excel styles
+                const boldTitleStyle = wb.createStyle({
+                    font: {
+                        bold: true,
+                        size: 14,
+                    },
+                    alignment: {
+                        horizontal: 'center',
+                    },
+                });
+                // Add the title (with bold formatting)
+                ws.cell(1, 1, 1, 3, true)
+                    .string('My Excel Spreadsheet')
+                    .style(boldTitleStyle);
+                // Add headers
+                ws.cell(3, 1).string('Activity Date').style(boldTitleStyle);
+                ws.cell(3, 2).string('Employee').style(boldTitleStyle);
+                ws.cell(3, 3).string('Customer').style(boldTitleStyle);
+                ws.cell(3, 4).string('Class').style(boldTitleStyle);
+                ws.cell(3, 5).string('Hrs').style(boldTitleStyle);
+                // Add data from JSON
+                timeActivities.forEach((item, index) => {
+                    ws.cell(index + 4, 1).string(item['Activity Date']);
+                    ws.cell(index + 4, 2).string(item['Class']);
+                    ws.cell(index + 4, 3).string(item['Customer']);
+                    ws.cell(index + 4, 4).string(item['Employee Name']);
+                    ws.cell(index + 4, 5).string(item['Hours']);
+                });
+                // Generate Excel file
+                const excelFileName = 'output343334.xlsx';
+                wb.write(excelFileName, (err) => {
+                    if (err) {
+                        console.error('Error writing Excel file:', err);
+                        res.status(500).json({ error: 'Error generating Excel file' });
+                    }
+                    else {
+                        console.log('Excel file generated:', excelFileName);
+                        res.download(excelFileName, (err) => {
+                            if (err) {
+                                console.error('Error sending Excel file:', err);
+                                res.status(500).json({ error: 'Error sending Excel file' });
+                            }
+                            else {
+                                // Clean up the Excel file after it's sent
+                                // fs.unlinkSync(excelFileName);
+                            }
+                        });
+                    }
                 });
             }
             catch (err) {

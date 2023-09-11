@@ -86,7 +86,6 @@ class AuthController {
                 (0, validationHelper_1.checkValidation)(req);
                 const { email, password, machineId } = req.body;
                 const { accessToken, refreshToken, user } = yield authServices_1.default.login(email === null || email === void 0 ? void 0 : email.toLowerCase(), password, machineId);
-                console.log('Access token: ' + accessToken + ' refresh token: ' + refreshToken);
                 // req.session.accessToken = accessToken;
                 // req.session.refreshToken = refreshToken;
                 const { password: userPassword, forgotPasswordToken, forgotPasswordTokenExpiresAt, isVerified, companies } = user, finalUser = __rest(user, ["password", "forgotPasswordToken", "forgotPasswordTokenExpiresAt", "isVerified", "companies"]);
@@ -175,7 +174,6 @@ class AuthController {
                         throw new customError_1.CustomError(204, 'You are not authorized to access the system please contact your administrator.');
                     }
                 }
-                console.log('Profile data: ' + profileData);
                 return (0, defaultResponseHelper_1.DefaultResponse)(res, 200, 'Profile fetched successfully', profileData);
             }
             catch (err) {

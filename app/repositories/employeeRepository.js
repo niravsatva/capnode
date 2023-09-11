@@ -66,7 +66,6 @@ class EmployeeRepository {
                             company: { connect: { id: employeeData === null || employeeData === void 0 ? void 0 : employeeData.companyId } },
                         },
                     });
-                    console.log('List of fields: ' + listOfFields);
                     // This is new code for creating fields for employees after syncing
                     if (listOfFields && (listOfFields === null || listOfFields === void 0 ? void 0 : listOfFields.length) > 0) {
                         yield Promise.all(yield listOfFields.map((singleField) => __awaiter(this, void 0, void 0, function* () {

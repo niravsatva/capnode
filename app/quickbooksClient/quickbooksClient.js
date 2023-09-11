@@ -38,7 +38,9 @@ class QuickbooksClient {
         return __awaiter(this, void 0, void 0, function* () {
             return new Promise((resolve, reject) => {
                 const qbo = new QuickBooks(config_1.default.quickbooksClientId, config_1.default.quickbooksClientSecret, accessToken, true, realmId, config_1.default.quickbooksEnvironment == 'sandbox' ? true : false, true, null, '2.0', refreshToken);
-                qbo.findEmployees([{ field: 'fetchAll', value: true }], function (err, response) {
+                qbo.findEmployees([{ field: 'Active', value: [true, false], operator: 'IN' }], 
+                // [{ field: 'fetchAll', value: true }],
+                function (err, response) {
                     return __awaiter(this, void 0, void 0, function* () {
                         if (err) {
                             reject(err);
@@ -164,19 +166,19 @@ class QuickbooksClient {
                 return new Promise((resolve, reject) => {
                     const qbo = new QuickBooks(config_1.default.quickbooksClientId, config_1.default.quickbooksClientSecret, accessToken, true, realmId, config_1.default.quickbooksEnvironment == 'sandbox' ? true : false, true, null, '2.0', refreshToken);
                     qbo.findEmployees([
+                        { field: 'Active', value: [true, false], operator: 'IN' },
                         {
                             field: 'MetaData.LastUpdatedTime',
                             value: (0, moment_timezone_1.default)(lastSyncDate).tz('America/Los_Angeles').format(),
                             operator: '>=',
                         },
-                        { field: 'fetchAll', value: true },
+                        // { field: 'fetchAll', value: true },
                     ], function (err, timeActivities) {
                         return __awaiter(this, void 0, void 0, function* () {
                             if (err) {
                                 reject(err);
                             }
                             else {
-                                console.log(timeActivities);
                                 resolve(timeActivities);
                             }
                         });
@@ -207,7 +209,6 @@ class QuickbooksClient {
                                 reject(err);
                             }
                             else {
-                                console.log(timeActivities);
                                 resolve(timeActivities);
                             }
                         });

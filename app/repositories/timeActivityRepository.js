@@ -194,12 +194,9 @@ class TimeActivityRepository {
                     delete data.customerId;
                     delete data.customerName;
                 }
-                console.log(timeActivityData);
                 if (!(employee === null || employee === void 0 ? void 0 : employee.id)) {
-                    console.log(timeActivityData === null || timeActivityData === void 0 ? void 0 : timeActivityData.employeeId);
                     delete data.employee;
                 }
-                console.log('END');
                 const createdTimeActivity = yield prisma_1.prisma.timeActivities.create({
                     data: data,
                     include: {
@@ -248,12 +245,9 @@ class TimeActivityRepository {
                     delete data.customerId;
                     delete data.customerName;
                 }
-                console.log(timeActivityData);
                 if (!(employee === null || employee === void 0 ? void 0 : employee.id)) {
-                    console.log(timeActivityData === null || timeActivityData === void 0 ? void 0 : timeActivityData.employeeId);
                     delete data.employee;
                 }
-                console.log('END');
                 const createdTimeActivity = yield prisma_1.prisma.timeActivities.create({
                     data: data,
                     include: {

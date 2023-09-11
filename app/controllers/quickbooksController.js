@@ -12,7 +12,6 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-const config_1 = __importDefault(require("../../config"));
 const defaultResponseHelper_1 = require("../helpers/defaultResponseHelper");
 const validationHelper_1 = require("../helpers/validationHelper");
 const isAuthorizedUser_1 = require("../middlewares/isAuthorizedUser");
@@ -85,7 +84,6 @@ class QuickbooksController {
                         tenantID: authToken.realmId,
                         fiscalYear: qboCompanyInfo === null || qboCompanyInfo === void 0 ? void 0 : qboCompanyInfo.FiscalYearStartMonth,
                     });
-                    console.log('MY data: ', authToken.access_token, authToken.refresh_token, authToken.realmId, companyId, companyDetails === null || companyDetails === void 0 ? void 0 : companyDetails.employeeLastSyncDate);
                     // const syncData = await axios.post(
                     // 	'https://vwarjgvafl.execute-api.us-east-1.amazonaws.com/default/cost-allocation-pro-dev-employeeDump',
                     // 	{
@@ -124,7 +122,6 @@ class QuickbooksController {
                     finalCompanyDetails = yield repositories_1.companyRepository.create(data);
                     yield (repositories_1.companyRepository === null || repositories_1.companyRepository === void 0 ? void 0 : repositories_1.companyRepository.connectCompany(userId, finalCompanyDetails === null || finalCompanyDetails === void 0 ? void 0 : finalCompanyDetails.id));
                     yield configurationRepository_1.default.createDefaultConfiguration(finalCompanyDetails === null || finalCompanyDetails === void 0 ? void 0 : finalCompanyDetails.id);
-                    console.log('LAMBDA details: ', config_1.default.employeeSyncLambdaEndpoint, config_1.default.employeeSyncLambdaApiKey);
                     // DO NOT REMOVE THIS CODE
                     // LAMBDA FUNCTION CALL
                     // const syncData = await axios.post(
@@ -204,7 +201,6 @@ class QuickbooksController {
                         return accumulator;
                     }, []);
                     yield repositories_1.employeeCostRepository.createInitialValues(employees, sectionFields, finalCompanyDetails === null || finalCompanyDetails === void 0 ? void 0 : finalCompanyDetails.id);
-                    console.log('Sync data in create: ', syncData);
                     // await employeeServices.syncEmployeesByLastSync(companyId);
                 }
                 return (0, defaultResponseHelper_1.DefaultResponse)(res, 200, 'Company connected successfully', finalCompanyDetails);
@@ -299,7 +295,6 @@ class QuickbooksController {
                             return account;
                         }
                     });
-                    console.log('Accounts: ', finalAccounts);
                     return (0, defaultResponseHelper_1.DefaultResponse)(res, 200, 'All accounts fetched successfully', finalAccounts);
                 }
                 else {

@@ -134,7 +134,8 @@ class UserController {
                     userName = userDetails === null || userDetails === void 0 ? void 0 : userDetails.email;
                 }
                 const userEmailContent = (0, emailTemplateHelper_1.getUserEmailOnDeleteTemplate)({
-                    userName,
+                    firstName: userDetails === null || userDetails === void 0 ? void 0 : userDetails.firstName,
+                    lastName: userDetails === null || userDetails === void 0 ? void 0 : userDetails.lastName,
                     companyName: companyDetails === null || companyDetails === void 0 ? void 0 : companyDetails.tenantName,
                 });
                 // Send email to the user who is deleted
@@ -157,7 +158,8 @@ class UserController {
                     }
                     const emailContent = (0, emailTemplateHelper_1.getAdminEmailOnUserDeleteTemplate)({
                         adminUserName,
-                        userName,
+                        userName: userDetails === null || userDetails === void 0 ? void 0 : userDetails.firstName,
+                        lastName: userDetails === null || userDetails === void 0 ? void 0 : userDetails.lastName,
                         companyName: companyDetails === null || companyDetails === void 0 ? void 0 : companyDetails.tenantName,
                         url: config_1.default === null || config_1.default === void 0 ? void 0 : config_1.default.reactAppBaseUrl,
                     });
