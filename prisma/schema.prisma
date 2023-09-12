@@ -269,7 +269,7 @@ model SplitTimeActivities {
   employeeId     String
   employee       Employee        @relation(fields: [employeeId], references: [id])
   timeActivityId String
-  timeActivity   TimeActivities? @relation(fields: [timeActivityId], references: [id])
+  timeActivity   TimeActivities? @relation(fields: [timeActivityId], references: [id], onDelete: Cascade)
   activityDate   DateTime
   createdAt      DateTime        @default(now())
   updatedAt      DateTime        @updatedAt
@@ -287,6 +287,8 @@ model TimeSheets {
   company       Company          @relation(fields: [companyId], references: [id])
   userId        String
   createdBy     User             @relation(fields: [userId], references: [id])
+  // startDate     DateTime?
+  // endDate       DateTime?
   SubmitedOn    DateTime
   createdAt     DateTime         @default(now())
   updatedAt     DateTime         @updatedAt

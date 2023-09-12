@@ -35,6 +35,11 @@ const refreshAccessToken = (accessToken, refreshToken) => __awaiter(void 0, void
             id: verified === null || verified === void 0 ? void 0 : verified.id,
             email: verified === null || verified === void 0 ? void 0 : verified.email,
         });
+        const isValid = yield (0, tokenHelper_1.checkTokens)(verified === null || verified === void 0 ? void 0 : verified.id, accessToken, refreshToken);
+        if (!isValid) {
+            const error = new customError_1.CustomError(401, 'Token expired');
+            throw error;
+        }
         yield (tokenRepository_1.default === null || tokenRepository_1.default === void 0 ? void 0 : tokenRepository_1.default.updateTokens(verified === null || verified === void 0 ? void 0 : verified.id, accessToken, refreshToken, newAccessToken, newRefreshToken));
         return { newAccessToken, newRefreshToken };
     }
@@ -137,9 +142,7 @@ const isAuthenticated = (req, res, next) => __awaiter(void 0, void 0, void 0, fu
             const accessToken = (_f = (_e = req === null || req === void 0 ? void 0 : req.headers) === null || _e === void 0 ? void 0 : _e.authorization) === null || _f === void 0 ? void 0 : _f.split(' ')[1];
             const refreshToken = (_h = (_g = req === null || req === void 0 ? void 0 : req.headers) === null || _g === void 0 ? void 0 : _g.refreshtoken) === null || _h === void 0 ? void 0 : _h.split(' ')[1];
             (0, exports.refreshAccessToken)(accessToken, refreshToken)
-                .then((data) => {
-                // req.session.accessToken = data?.newAccessToken;
-                // req.session.refreshToken = data?.newRefreshToken;
+                .then(() => {
                 next();
             })
                 .catch((err) => {

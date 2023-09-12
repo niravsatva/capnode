@@ -1,6 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.employeeCostUpdateValidation = exports.employeeCostCreateValidation = exports.deleteConfigurationFieldValidation = exports.updateConfigurationFieldValidation = exports.addConfigurationFieldValidation = exports.deleteTimeActivityValidation = exports.createTimeActivityValidation = exports.updateTimeActivityValidation = exports.timeActivityValidation = exports.employeeValidation = exports.companyConfigurationValidation = exports.companyGetConfigurationValidation = exports.quickbooksTimeActivityValidation = exports.quickbooksAccountsValidation = exports.quickbooksCustomersValidation = exports.quickbooksClassValidation = exports.quickbooksEmployeeValidation = exports.updateUserByAdminValidation = exports.permissionRoleValidationRules = exports.deleteRoleValidationRules = exports.updateRoleValidationRules = exports.createRoleValidationRules = exports.companyIdValidationRules = exports.updateProfileValidationRules = exports.deleteUserFromCompanyRules = exports.inviteUserValidationRules = exports.changePasswordValidationRules = exports.forgotPasswordValidationRules = exports.loginValidationRules = exports.companyIdValidation = void 0;
+exports.createTimeSheetValidator = exports.deleteSplitTimeActivity = exports.createSplitTimeActivity = exports.employeeCostUpdateValidation = exports.employeeCostCreateValidation = exports.deleteConfigurationFieldValidation = exports.updateConfigurationFieldValidation = exports.addConfigurationFieldValidation = exports.deleteTimeActivityValidation = exports.createTimeActivityValidation = exports.updateTimeActivityValidation = exports.timeActivityValidation = exports.employeeValidation = exports.companyConfigurationValidation = exports.companyGetConfigurationValidation = exports.quickbooksTimeActivityValidation = exports.quickbooksAccountsValidation = exports.quickbooksCustomersValidation = exports.quickbooksClassValidation = exports.quickbooksEmployeeValidation = exports.updateUserByAdminValidation = exports.permissionRoleValidationRules = exports.deleteRoleValidationRules = exports.updateRoleValidationRules = exports.createRoleValidationRules = exports.companyIdValidationRules = exports.updateProfileValidationRules = exports.deleteUserFromCompanyRules = exports.inviteUserValidationRules = exports.changePasswordValidationRules = exports.forgotPasswordValidationRules = exports.loginValidationRules = exports.companyIdValidation = void 0;
+const client_1 = require("@prisma/client");
 /* eslint-disable @typescript-eslint/no-var-requires */
 const { body } = require('express-validator');
 // CompanyId Validation
@@ -206,4 +207,29 @@ exports.employeeCostUpdateValidation = [
         .notEmpty()
         .withMessage('Employee costID is required'),
     body('value').notEmpty().withMessage('value is required'),
+];
+exports.createSplitTimeActivity = [
+    body('parentActivityId')
+        .notEmpty()
+        .withMessage('Parent activity id is required'),
+    body('employeeId').notEmpty().withMessage('Employee id is required'),
+    body('timeActivityData')
+        .isArray()
+        .withMessage('Time activity data is required'),
+];
+exports.deleteSplitTimeActivity = [
+    body('splitTimeActivityId')
+        .notEmpty()
+        .withMessage('Split time activity id is required'),
+];
+exports.createTimeSheetValidator = [
+    ...exports.companyIdValidation,
+    body('name').notEmpty().withMessage('Time sheet name is required'),
+    body('status').notEmpty().withMessage('Time sheet status is required'),
+    body('status')
+        .isIn(client_1.TimeSheetsStatus)
+        .withMessage('Time sheet status is invalid'),
+    body('startDate').notEmpty().withMessage('Time sheet start date is required'),
+    body('endDate').notEmpty().withMessage('Time sheet end date is required'),
+    body('notes').notEmpty().withMessage('Time sheet notes required'),
 ];

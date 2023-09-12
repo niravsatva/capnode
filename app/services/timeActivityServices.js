@@ -128,6 +128,25 @@ class TimeActivityService {
                 sortCondition: sortCondition,
                 dateFilters: dateFilters,
             });
+            // const finalData = await Promise.all(
+            // 	await timeActivities?.map(async (singleActivity) => {
+            // 		const field = await prisma.field.findFirst({
+            // 			where: {
+            // 				companyId: singleActivity?.companyId as string,
+            // 				name: 'Maximum allocate hours per year',
+            // 			},
+            // 		});
+            // 		const data = {
+            // 			employeeId: singleActivity?.employeeId,
+            // 			companyId: singleActivity?.companyId,
+            // 			year: new Date(singleActivity.activityDate).getFullYear(),
+            // 			fieldId: field?.id,
+            // 		};
+            // 		const hours = await timeActivityRepository.getEmployeeHours(data);
+            // 		return hours;
+            // 	})
+            // );
+            // console.log('Final data: ', finalData);
             const timeActivitiesCount = yield timeActivityRepository_1.default.getAllTimeActivitiesCount({
                 companyId: companyId,
             });
@@ -182,6 +201,7 @@ class TimeActivityService {
                         tenantID: authResponse === null || authResponse === void 0 ? void 0 : authResponse.tenantID,
                         companyId: companyId,
                     });
+                    console.log('Time Activities: ', timeActivities);
                 }
             }
         });

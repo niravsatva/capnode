@@ -78,7 +78,7 @@ class TokenRepository {
                         refreshToken: refreshToken,
                     },
                 });
-                if (token) {
+                if (token && (token === null || token === void 0 ? void 0 : token.length) > 0) {
                     return true;
                 }
                 else {
