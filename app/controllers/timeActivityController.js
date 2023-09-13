@@ -19,6 +19,8 @@ const repositories_1 = require("../repositories");
 const timeActivityServices_1 = __importDefault(require("../services/timeActivityServices"));
 const isAuthorizedUser_1 = require("../middlewares/isAuthorizedUser");
 const axios_1 = __importDefault(require("axios"));
+const moment_1 = __importDefault(require("moment"));
+const fs_1 = __importDefault(require("fs"));
 const Excel = require('excel4node');
 // import moment from 'moment';
 const dataExporter = require('json2csv').Parser;
@@ -28,7 +30,7 @@ class TimeActivityController {
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 (0, validationHelper_1.checkValidation)(req);
-                const { page = 1, limit = 10, search = '', classId = '', customerId = '', employeeId = '', type = '', sort = '', startDate = '', endDate = '', } = req.query;
+                const { page = 1, limit = 10, search = '', classId = '', customerId = '', employeeId = '', type = '', sort = '', startDate = '', endDate = '', isOverHours = false, } = req.query;
                 const companyId = (_a = req.body) === null || _a === void 0 ? void 0 : _a.companyId;
                 let formattedStartDate = '';
                 let formattedEndDate = '';
@@ -55,7 +57,7 @@ class TimeActivityController {
                 if (!isPermitted) {
                     throw new customError_1.CustomError(403, 'You are not authorized');
                 }
-                const timeActivities = yield timeActivityServices_1.default.getAllTimeActivitiesServices({
+                const { timeActivitiesWithHours, timeActivitiesCount } = yield timeActivityServices_1.default.getAllTimeActivitiesServices({
                     companyId: companyId,
                     page: Number(page),
                     limit: Number(limit),
@@ -67,8 +69,12 @@ class TimeActivityController {
                     sort: String(sort),
                     startDate: String(formattedStartDate),
                     endDate: String(formattedEndDate),
+                    isOverHours: Boolean(isOverHours),
                 });
-                return (0, defaultResponseHelper_1.DefaultResponse)(res, 200, 'Time Activities fetched successfully', timeActivities);
+                return (0, defaultResponseHelper_1.DefaultResponse)(res, 200, 'Time Activities fetched successfully', {
+                    timeActivities: timeActivitiesWithHours,
+                    timeActivitiesCount: timeActivitiesCount,
+                });
             }
             catch (err) {
                 next(err);
@@ -221,7 +227,7 @@ class TimeActivityController {
                     newEnd.setUTCHours(0, 0, 0, 0);
                     formattedEndDate = newEnd.toISOString();
                 }
-                const timeActivities = yield timeActivityServices_1.default.exportTimeActivity(companyId, search, classId, customerId, employeeId, formattedStartDate, formattedEndDate);
+                const { timeActivities, companyDetails } = yield timeActivityServices_1.default.exportTimeActivity(companyId, search, classId, customerId, employeeId, formattedStartDate, formattedEndDate);
                 const timeActivityData = JSON.parse(JSON.stringify(timeActivities));
                 const fileHeader = [
                     'Activity Date',
@@ -231,10 +237,26 @@ class TimeActivityController {
                     'Hours',
                 ];
                 const jsonData = new dataExporter({ fileHeader });
+                let dateRange;
+                if (startDate && endDate) {
+                    if (startDate === endDate) {
+                        dateRange = `${(0, moment_1.default)(formattedStartDate).format('MM/DD/YYYY')} `;
+                    }
+                    else {
+                        dateRange = `${(0, moment_1.default)(formattedStartDate).format('MM/DD/YYYY')} to ${(0, moment_1.default)(formattedEndDate).format('MM/DD/YYYY')}`;
+                    }
+                }
+                else {
+                    dateRange = 'All';
+                }
+                const extraData = `Report Name ,Time Activity\n` +
+                    `Period ,${dateRange}\n` +
+                    `QBO Company's Name ,${companyDetails === null || companyDetails === void 0 ? void 0 : companyDetails.tenantName}\n` +
+                    `\n`;
                 const csvData = jsonData.parse(timeActivityData);
                 res.setHeader('Content-Type', 'text/csv');
                 res.setHeader('Content-Disposition', 'attachment; filename=sample_data.csv');
-                return res.status(200).end(csvData);
+                return res.status(200).end(extraData + csvData);
             }
             catch (err) {
                 next(err);
@@ -277,7 +299,7 @@ class TimeActivityController {
                     newEnd.setUTCHours(0, 0, 0, 0);
                     formattedEndDate = newEnd.toISOString();
                 }
-                const timeActivities = yield timeActivityServices_1.default.exportTimeActivity(companyId, search, classId, customerId, employeeId, formattedStartDate, formattedEndDate);
+                const { timeActivities, companyDetails } = yield timeActivityServices_1.default.exportTimeActivity(companyId, search, classId, customerId, employeeId, formattedStartDate, formattedEndDate);
                 // Create a new Excel workbook and worksheet
                 const wb = new Excel.Workbook();
                 const ws = wb.addWorksheet('Sheet 1');
@@ -291,26 +313,45 @@ class TimeActivityController {
                         horizontal: 'center',
                     },
                 });
+                let fileName = '';
+                let dateRange = '';
+                if (startDate && endDate) {
+                    fileName =
+                        formattedStartDate === formattedEndDate
+                            ? `${(0, moment_1.default)(formattedEndDate).format('MM-DD-YYYY')}`
+                            : `${(0, moment_1.default)(formattedStartDate).format('MM-DD-YYYY')} - ${(0, moment_1.default)(formattedEndDate).format('MM-DD-YYYY')}`;
+                    dateRange =
+                        formattedStartDate === formattedEndDate
+                            ? `${(0, moment_1.default)(formattedEndDate).format('MM-DD-YYYY')}`
+                            : `${(0, moment_1.default)(formattedStartDate).format('MM-DD-YYYY')} - ${(0, moment_1.default)(formattedEndDate).format('MM-DD-YYYY')}`;
+                }
+                else {
+                    fileName = (0, moment_1.default)().format('MM-DD-YYYY');
+                    dateRange = 'All';
+                }
                 // Add the title (with bold formatting)
-                ws.cell(1, 1, 1, 3, true)
-                    .string('My Excel Spreadsheet')
-                    .style(boldTitleStyle);
+                ws.cell(1, 1, true).string('Report Name:');
+                ws.cell(1, 2, true).string('Time Log Activity');
+                ws.cell(2, 1).string('Period');
+                ws.cell(2, 2).string(dateRange);
+                ws.cell(3, 1).string("QBO Company's Name");
+                ws.cell(3, 2).string(companyDetails === null || companyDetails === void 0 ? void 0 : companyDetails.tenantName);
                 // Add headers
-                ws.cell(3, 1).string('Activity Date').style(boldTitleStyle);
-                ws.cell(3, 2).string('Employee').style(boldTitleStyle);
-                ws.cell(3, 3).string('Customer').style(boldTitleStyle);
-                ws.cell(3, 4).string('Class').style(boldTitleStyle);
-                ws.cell(3, 5).string('Hrs').style(boldTitleStyle);
+                ws.cell(5, 1).string('Activity Date').style(boldTitleStyle);
+                ws.cell(5, 2).string('Employee').style(boldTitleStyle);
+                ws.cell(5, 3).string('Customer').style(boldTitleStyle);
+                ws.cell(5, 4).string('Class').style(boldTitleStyle);
+                ws.cell(5, 5).string('Hours').style(boldTitleStyle);
                 // Add data from JSON
                 timeActivities.forEach((item, index) => {
-                    ws.cell(index + 4, 1).string(item['Activity Date']);
-                    ws.cell(index + 4, 2).string(item['Class']);
-                    ws.cell(index + 4, 3).string(item['Customer']);
-                    ws.cell(index + 4, 4).string(item['Employee Name']);
-                    ws.cell(index + 4, 5).string(item['Hours']);
+                    ws.cell(index + 6, 1).string(item['Activity Date']);
+                    ws.cell(index + 6, 2).string(item['Class']);
+                    ws.cell(index + 6, 3).string(item['Customer']);
+                    ws.cell(index + 6, 4).string(item['Employee Name']);
+                    ws.cell(index + 6, 5).string(item['Hours']);
                 });
                 // Generate Excel file
-                const excelFileName = 'output343334.xlsx';
+                const excelFileName = `${fileName}.xlsx`;
                 wb.write(excelFileName, (err) => {
                     if (err) {
                         console.error('Error writing Excel file:', err);
@@ -325,7 +366,7 @@ class TimeActivityController {
                             }
                             else {
                                 // Clean up the Excel file after it's sent
-                                // fs.unlinkSync(excelFileName);
+                                fs_1.default.unlinkSync(excelFileName);
                             }
                         });
                     }

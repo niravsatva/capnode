@@ -24,7 +24,7 @@ class TimeActivityService {
     // Get all time activities
     getAllTimeActivitiesServices(timeActivityData) {
         return __awaiter(this, void 0, void 0, function* () {
-            const { companyId, search, sort, page, limit, type, classId, customerId, employeeId, startDate, endDate, } = timeActivityData;
+            const { companyId, search, sort, page, limit, type, classId, customerId, employeeId, startDate, endDate, isOverHours, } = timeActivityData;
             // Offset set
             const offset = (Number(page) - 1) * Number(limit);
             // Set filter conditions
@@ -128,29 +128,72 @@ class TimeActivityService {
                 sortCondition: sortCondition,
                 dateFilters: dateFilters,
             });
-            // const finalData = await Promise.all(
-            // 	await timeActivities?.map(async (singleActivity) => {
-            // 		const field = await prisma.field.findFirst({
-            // 			where: {
-            // 				companyId: singleActivity?.companyId as string,
-            // 				name: 'Maximum allocate hours per year',
-            // 			},
-            // 		});
-            // 		const data = {
-            // 			employeeId: singleActivity?.employeeId,
-            // 			companyId: singleActivity?.companyId,
-            // 			year: new Date(singleActivity.activityDate).getFullYear(),
-            // 			fieldId: field?.id,
-            // 		};
-            // 		const hours = await timeActivityRepository.getEmployeeHours(data);
-            // 		return hours;
-            // 	})
-            // );
-            // console.log('Final data: ', finalData);
+            const finalData = yield Promise.all(yield (timeActivities === null || timeActivities === void 0 ? void 0 : timeActivities.map((singleActivity) => __awaiter(this, void 0, void 0, function* () {
+                var _a, _b;
+                const field = yield prisma_1.prisma.field.findFirst({
+                    where: {
+                        companyId: singleActivity === null || singleActivity === void 0 ? void 0 : singleActivity.companyId,
+                        name: 'Maximum allocate hours per year',
+                    },
+                });
+                const data = {
+                    employeeId: singleActivity === null || singleActivity === void 0 ? void 0 : singleActivity.employeeId,
+                    companyId: singleActivity === null || singleActivity === void 0 ? void 0 : singleActivity.companyId,
+                    year: new Date(singleActivity.activityDate).getFullYear(),
+                    fieldId: field === null || field === void 0 ? void 0 : field.id,
+                };
+                const employeeTotalHours = yield timeActivityRepository_1.default.getEmployeeHours(data);
+                let actualHours = 0;
+                let actualMinutes = 0;
+                const employeeHours = yield timeActivityRepository_1.default.getTimeActivityByEmployee({
+                    companyId: singleActivity === null || singleActivity === void 0 ? void 0 : singleActivity.companyId,
+                    employeeId: singleActivity === null || singleActivity === void 0 ? void 0 : singleActivity.employeeId,
+                    year: new Date(singleActivity.activityDate).getFullYear(),
+                });
+                employeeHours === null || employeeHours === void 0 ? void 0 : employeeHours.map((singleEmpHours) => {
+                    actualHours += Number(singleEmpHours === null || singleEmpHours === void 0 ? void 0 : singleEmpHours.hours);
+                    actualMinutes += Number(singleEmpHours === null || singleEmpHours === void 0 ? void 0 : singleEmpHours.minute);
+                });
+                if (actualMinutes > 60) {
+                    const additionalHours = Math.floor(actualMinutes / 60);
+                    actualHours += additionalHours;
+                    actualMinutes %= 60;
+                }
+                const employeeFinalHours = {
+                    actualHours: actualHours,
+                    actualMinutes: actualMinutes,
+                    totalHours: Number((_a = employeeTotalHours === null || employeeTotalHours === void 0 ? void 0 : employeeTotalHours.value) === null || _a === void 0 ? void 0 : _a.split(':')[0]),
+                    totalMinutes: Number((_b = employeeTotalHours === null || employeeTotalHours === void 0 ? void 0 : employeeTotalHours.value) === null || _b === void 0 ? void 0 : _b.split(':')[1]),
+                };
+                return employeeFinalHours;
+            }))));
+            console.log('Final data: ', finalData);
+            let timeActivitiesWithHours = timeActivities === null || timeActivities === void 0 ? void 0 : timeActivities.map((singleActivity, index) => {
+                var _a, _b, _c, _d;
+                const totalHours = (_a = finalData[index]) === null || _a === void 0 ? void 0 : _a.totalHours;
+                const totalMinutes = (_b = finalData[index]) === null || _b === void 0 ? void 0 : _b.totalMinutes;
+                const actualHours = (_c = finalData[index]) === null || _c === void 0 ? void 0 : _c.actualHours;
+                const actualMinutes = (_d = finalData[index]) === null || _d === void 0 ? void 0 : _d.actualMinutes;
+                //  Calculate total time in minutes
+                const totalTimeInMinutes = totalHours * 60 + totalMinutes;
+                const actualTimeInMinutes = actualHours * 60 + actualMinutes;
+                //  Calculate the difference in minutes
+                let timeDifferenceInMinutes = totalTimeInMinutes - actualTimeInMinutes;
+                // Take the absolute value of the result for further calculations
+                timeDifferenceInMinutes = Math.abs(timeDifferenceInMinutes);
+                //  Calculate hours and minutes from the difference
+                const hoursDifference = Math.floor(Number(timeDifferenceInMinutes) / 60);
+                const minutesDifference = Number(timeDifferenceInMinutes) % 60;
+                const data = Object.assign(Object.assign({}, singleActivity), { isOver: actualTimeInMinutes > totalTimeInMinutes ? true : false, totalHours: totalHours, totalMinutes: totalMinutes, actualHours: actualHours, actualMinutes: actualMinutes, overHours: hoursDifference, overMinutes: minutesDifference });
+                return data;
+            });
+            if (isOverHours === true) {
+                timeActivitiesWithHours = timeActivitiesWithHours === null || timeActivitiesWithHours === void 0 ? void 0 : timeActivitiesWithHours.filter((singleActivity) => (singleActivity === null || singleActivity === void 0 ? void 0 : singleActivity.isOver) === true);
+            }
             const timeActivitiesCount = yield timeActivityRepository_1.default.getAllTimeActivitiesCount({
                 companyId: companyId,
             });
-            return { timeActivities, timeActivitiesCount };
+            return { timeActivitiesWithHours, timeActivitiesCount, timeActivities };
         });
     }
     syncTimeActivities(companyId) {
@@ -529,7 +572,7 @@ class TimeActivityService {
                 searchCondition: searchCondition,
                 dateFilters: dateFilters,
             });
-            const finalActivities = getAllActivities === null || getAllActivities === void 0 ? void 0 : getAllActivities.map((singleTimeActivity) => {
+            const timeActivities = getAllActivities === null || getAllActivities === void 0 ? void 0 : getAllActivities.map((singleTimeActivity) => {
                 var _a;
                 return {
                     'Activity Date': (0, moment_timezone_1.default)(singleTimeActivity.activityDate).format('MM/DD/YYYY'),
@@ -543,7 +586,7 @@ class TimeActivityService {
                     Hours: `${singleTimeActivity === null || singleTimeActivity === void 0 ? void 0 : singleTimeActivity.hours}:${singleTimeActivity === null || singleTimeActivity === void 0 ? void 0 : singleTimeActivity.minute}`,
                 };
             });
-            return finalActivities;
+            return { timeActivities, companyDetails };
         });
     }
 }

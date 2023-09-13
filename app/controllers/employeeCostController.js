@@ -17,6 +17,7 @@ const validationHelper_1 = require("../helpers/validationHelper");
 const customError_1 = require("../models/customError");
 const employeeCostServices_1 = __importDefault(require("../services/employeeCostServices"));
 const isAuthorizedUser_1 = require("../middlewares/isAuthorizedUser");
+const global_1 = require("../helpers/global");
 const dataExporter = require('json2csv').Parser;
 class EmployeeConstController {
     // For get the cost by month
@@ -123,16 +124,25 @@ class EmployeeConstController {
                     });
                     let finalObject = {};
                     sortedData.forEach((item) => {
-                        var _a, _b, _c, _d;
+                        var _a, _b, _c, _d, _e, _f, _g, _h, _j;
                         finalObject = Object.assign(Object.assign({}, finalObject), { [(_a = item === null || item === void 0 ? void 0 : item.field) === null || _a === void 0 ? void 0 : _a.name]: ((_b = item === null || item === void 0 ? void 0 : item.costValue[0]) === null || _b === void 0 ? void 0 : _b.value) === 'salaried_exempt'
                                 ? 'Salaried Exempt'
                                 : ((_c = item === null || item === void 0 ? void 0 : item.costValue[0]) === null || _c === void 0 ? void 0 : _c.value) === 'salaried_non_exempt'
                                     ? 'Salaried Non Exempt'
-                                    : (_d = item === null || item === void 0 ? void 0 : item.costValue[0]) === null || _d === void 0 ? void 0 : _d.value });
+                                    : ((_d = item === null || item === void 0 ? void 0 : item.costValue[0]) === null || _d === void 0 ? void 0 : _d.value) === null
+                                        ? 'NA'
+                                        : ((_e = item === null || item === void 0 ? void 0 : item.field) === null || _e === void 0 ? void 0 : _e.name) === 'Maximum allocate hours per year'
+                                            ? (_f = item === null || item === void 0 ? void 0 : item.costValue[0]) === null || _f === void 0 ? void 0 : _f.value
+                                            : ((_g = item === null || item === void 0 ? void 0 : item.field) === null || _g === void 0 ? void 0 : _g.name) === 'Maximum Vacation/PTO hours per year'
+                                                ? (_h = item === null || item === void 0 ? void 0 : item.costValue[0]) === null || _h === void 0 ? void 0 : _h.value
+                                                : `$ ${(0, global_1.formatNumberWithCommas)((_j = item === null || item === void 0 ? void 0 : item.costValue[0]) === null || _j === void 0 ? void 0 : _j.value)}` });
                     });
-                    return Object.assign(Object.assign({ 'Employee Name': singleEmployee === null || singleEmployee === void 0 ? void 0 : singleEmployee.fullName }, finalObject), { 'Total Labor Burden': Number(finalObject['Total Salary']) +
-                            Number(finalObject['Total Fringe']) +
-                            Number(finalObject['Total Payroll Taxes']) });
+                    return Object.assign(Object.assign({ 'Employee Name': singleEmployee === null || singleEmployee === void 0 ? void 0 : singleEmployee.fullName }, finalObject), { 'Total Labor Burden': (0, global_1.formatNumberWithCommas)(Number(finalObject['Total Salary'].split(',').join('').split('$')[1]) +
+                            Number(finalObject['Total Fringe'].split(',').join('').split('$')[1]) +
+                            Number(finalObject['Total Payroll Taxes']
+                                .split(',')
+                                .join('')
+                                .split('$')[1])) });
                 });
                 if (percentage) {
                     finalDataArr.forEach((singleEmployee) => {
@@ -143,6 +153,12 @@ class EmployeeConstController {
                 }
                 const fileHeader = ['Employee Name', 'Employee Type'];
                 const jsonData = new dataExporter({ fileHeader });
+                // const extraData = [
+                // 	{ 'Report Name': 'Employee Cost' },
+                // 	{ Period: 'Time Log Activity' },
+                // 	{ "QBO Company's Name": employeesMonthlyCost?.company?.tenantName },
+                // ];
+                // const exportingData = [...extraData, ...finalDataArr];
                 const csvData = jsonData.parse(finalDataArr);
                 res.setHeader('Content-Type', 'text/csv');
                 res.setHeader('Content-Disposition', 'attachment; filename=employee_cost_data.csv');

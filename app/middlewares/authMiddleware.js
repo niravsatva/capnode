@@ -130,7 +130,7 @@ const isAuthenticated = (req, res, next) => __awaiter(void 0, void 0, void 0, fu
             return next(error);
         }
         const isValid = yield (0, tokenHelper_1.checkTokens)(verifiedAccessToken === null || verifiedAccessToken === void 0 ? void 0 : verifiedAccessToken.id, accessToken, refreshToken);
-        // console.log('Is valid: ', isValid);
+        console.log('Is valid: ', isValid);
         if (!isValid) {
             const error = new customError_1.CustomError(401, 'Token expired');
             return next(error);

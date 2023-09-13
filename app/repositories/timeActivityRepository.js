@@ -403,9 +403,13 @@ class TimeActivityRepository {
                     where: {
                         companyId: companyId,
                         employeeId: employeeId,
-                        activityDate: year,
+                        activityDate: {
+                            gte: new Date(year, 0, 1),
+                            lt: new Date(year + 1, 0, 1),
+                        },
                     },
                 });
+                console.log('My employees: ', employee);
                 return employee;
             }
             catch (err) {

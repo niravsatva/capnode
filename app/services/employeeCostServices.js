@@ -93,7 +93,7 @@ class EmployeeCostService {
                 };
                 const employeesMonthlyCost = yield repositories_1.employeeCostRepository.getMonthlyCostExport(companyId, date, searchCondition, sortCondition, isPercentage);
                 const count = yield repositories_1.employeeCostRepository.count(companyId, searchCondition);
-                return { employees: employeesMonthlyCost, count };
+                return { employees: employeesMonthlyCost, count, company };
             }
             catch (error) {
                 throw error;

@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.employeeFormationDataHandler = void 0;
+exports.formatNumberWithCommas = exports.employeeFormationDataHandler = void 0;
 const employeeFormationDataHandler = (singleEmployeeData) => {
     const obj = {};
     obj['employeeName'] = singleEmployeeData.fullName;
@@ -14,3 +14,7 @@ const employeeFormationDataHandler = (singleEmployeeData) => {
     return obj;
 };
 exports.employeeFormationDataHandler = employeeFormationDataHandler;
+function formatNumberWithCommas(number) {
+    return number.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+}
+exports.formatNumberWithCommas = formatNumberWithCommas;

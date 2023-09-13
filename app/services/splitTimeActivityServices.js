@@ -26,6 +26,13 @@ class SplitTimeActivityServices {
             if ((parentTimeActivity === null || parentTimeActivity === void 0 ? void 0 : parentTimeActivity.employeeId) !== employeeId) {
                 throw new customError_1.CustomError(400, 'Employee id must be same');
             }
+            // const splitTimeActivity =
+            // 	await splitTimeActivityRepository.getSplitTimeActivityByParentId(
+            // 		parentActivityId
+            // 	);
+            // if (splitTimeActivity.length > 0) {
+            // 	throw new CustomError(400, 'Time activities are already splitted');
+            // }
             const parentHours = parentTimeActivity === null || parentTimeActivity === void 0 ? void 0 : parentTimeActivity.hours;
             const parentMinutes = parentTimeActivity === null || parentTimeActivity === void 0 ? void 0 : parentTimeActivity.minute;
             const parentFinalTime = Number(parentHours) * 60 + Number(parentMinutes);
@@ -43,10 +50,11 @@ class SplitTimeActivityServices {
             }
             const splitFinalTime = Number(totalHours) * 60 + Number(totalMinutes);
             if (splitFinalTime !== parentFinalTime) {
-                throw new customError_1.CustomError(400, 'Split time activities time can be different than parent activity time');
+                throw new customError_1.CustomError(400, 'Split time cannot be greater than the parent time.');
             }
-            const data = yield splitTimeActivityRepository_1.default.create(parentActivityId, employeeId, splitTimeActivityData);
-            return data;
+            yield splitTimeActivityRepository_1.default.create(parentActivityId, employeeId, splitTimeActivityData);
+            const finalData = yield splitTimeActivityRepository_1.default.getSplitTimeActivityByParentId(parentActivityId);
+            return finalData;
         });
     }
     deleteSplitTimeActivity(splitTimeActivityData) {

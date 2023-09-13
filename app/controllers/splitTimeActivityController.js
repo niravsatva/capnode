@@ -57,7 +57,7 @@ class SplitTimeActivityController {
                     throw new customError_1.CustomError(400, 'Time activity data array must not be empty');
                 }
                 const splitActivities = yield splitTimeActivityServices_1.default.createSplitTimeActivity(parentActivityId, employeeId, timeActivityData);
-                return (0, defaultResponseHelper_1.DefaultResponse)(res, 200, 'Split activity created successfully', splitActivities);
+                return (0, defaultResponseHelper_1.DefaultResponse)(res, 201, 'Split activity created successfully', splitActivities);
             }
             catch (err) {
                 next(err);
