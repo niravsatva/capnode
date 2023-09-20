@@ -15,7 +15,28 @@ class TimeActivityRepository {
     getAllTimeActivities(timeActivityData) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
+                const isOverHours = false;
                 const { companyId, offset, limit, searchCondition, filterConditions, sortCondition, dateFilters, } = timeActivityData;
+                if (isOverHours) {
+                    const timeActivities = yield prisma_1.prisma.hoursOver.findMany({
+                        where: {
+                            companyId: companyId,
+                            isOverHours: isOverHours,
+                        },
+                        include: {
+                            employee: {
+                                include: {
+                                    timeActivities: {
+                                        orderBy: {
+                                            activityDate: 'desc',
+                                        },
+                                    },
+                                },
+                            },
+                        },
+                    });
+                    return timeActivities;
+                }
                 const timeActivities = yield prisma_1.prisma.timeActivities.findMany(Object.assign({ where: Object.assign(Object.assign(Object.assign({ companyId: companyId }, searchCondition), filterConditions), dateFilters), include: {
                         employee: {
                             select: {
@@ -37,6 +58,99 @@ class TimeActivityRepository {
                         },
                     }, skip: offset, take: limit }, sortCondition));
                 return timeActivities;
+            }
+            catch (err) {
+                console.log(err);
+                throw err;
+            }
+        });
+    }
+    // Get time activity with over hours
+    getAllTimeActivitiesOverHours(timeActivityData) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                const { companyId, isOverHours, offset, limit, 
+                // searchCondition,
+                // filterConditions,
+                // sortCondition,
+                // dateFilters,
+                search, sort, type, } = timeActivityData;
+                let queryString = `
+							SELECT 
+								ta."id" as id, 
+								ta."timeActivityId" as timeActivityId,
+								ta."classId" as classId, 
+								ta."className" as className, 
+								ta."customerId" as customerId, 
+								ta."customerName" as customerName, 
+								ta."hours" as hours,
+								ta."minute" as minutes,
+								ta."companyId" as companyId,
+								ta."employeeId" as employeeId,
+								ta."activityDate" as activityDate,  
+								e."fullName" as employeeName,
+								json_agg(Distinct "ho") as overHours,
+								json_agg(Distinct "sa") as splitActivities
+								FROM "TimeActivities" ta
+								LEFT JOIN "Employee" e ON ta."employeeId" = e."id"
+								LEFT JOIN "SplitTimeActivities" sa ON sa."timeActivityId" = ta."id"
+								LEFT JOIN "HoursOver"  ho ON e."id" = ho."employeeId" AND ho."year" = EXTRACT('Year' FROM ta."activityDate") 
+
+								WHERE ta."companyId" = '${companyId}' AND ho."isOverHours"=true
+							`;
+                if (search) {
+                    queryString += ` AND (ta."className"='${search}' OR ta."customerName"='${search}' OR e."fullName"='${search}')`;
+                }
+                let sortColumnName = `ta."activityDate"`;
+                if (sort === 'className') {
+                    sortColumnName = `ta."className"`;
+                }
+                if (sort === 'customerName') {
+                    sortColumnName = `ta."customerName"`;
+                }
+                if (sort === 'employeeName') {
+                    sortColumnName = `e."fullName"`;
+                }
+                queryString += `
+								GROUP BY ta."id", e."fullName"
+								ORDER BY ${sortColumnName} ${type ? type : 'desc'}
+								OFFSET ${offset}
+								LIMIT ${limit}`;
+                if (isOverHours) {
+                    const timeActivities = yield prisma_1.prisma.$queryRawUnsafe(queryString);
+                    console.log('Time: ', timeActivities);
+                    const finalData = timeActivities.map((singleActivity) => {
+                        const data = {
+                            id: singleActivity === null || singleActivity === void 0 ? void 0 : singleActivity.id,
+                            timeActivityId: singleActivity === null || singleActivity === void 0 ? void 0 : singleActivity.timeactivityid,
+                            classId: singleActivity === null || singleActivity === void 0 ? void 0 : singleActivity.classid,
+                            className: singleActivity === null || singleActivity === void 0 ? void 0 : singleActivity.classname,
+                            customerId: singleActivity === null || singleActivity === void 0 ? void 0 : singleActivity.customerid,
+                            customerName: singleActivity === null || singleActivity === void 0 ? void 0 : singleActivity.customername,
+                            hours: singleActivity === null || singleActivity === void 0 ? void 0 : singleActivity.hours,
+                            minute: singleActivity === null || singleActivity === void 0 ? void 0 : singleActivity.minutes,
+                            companyId: singleActivity === null || singleActivity === void 0 ? void 0 : singleActivity.companyid,
+                            employeeId: singleActivity === null || singleActivity === void 0 ? void 0 : singleActivity.employeeid,
+                            activityDate: singleActivity === null || singleActivity === void 0 ? void 0 : singleActivity.activitydate,
+                            employeeName: singleActivity === null || singleActivity === void 0 ? void 0 : singleActivity.employeename,
+                            overhours: singleActivity === null || singleActivity === void 0 ? void 0 : singleActivity.overhours,
+                            employee: {
+                                id: singleActivity === null || singleActivity === void 0 ? void 0 : singleActivity.employeeid,
+                                fullName: singleActivity === null || singleActivity === void 0 ? void 0 : singleActivity.employeename,
+                            },
+                            SplitTimeActivities: (singleActivity === null || singleActivity === void 0 ? void 0 : singleActivity.splitactivities[0])
+                                ? singleActivity === null || singleActivity === void 0 ? void 0 : singleActivity.splitactivities
+                                : [],
+                            isOver: singleActivity === null || singleActivity === void 0 ? void 0 : singleActivity.overhours[0].isOverHours,
+                            overHours: singleActivity === null || singleActivity === void 0 ? void 0 : singleActivity.overhours[0].overHours,
+                            overMinutes: singleActivity === null || singleActivity === void 0 ? void 0 : singleActivity.overhours[0].overMinutes,
+                            actualHours: singleActivity === null || singleActivity === void 0 ? void 0 : singleActivity.hours,
+                            actualMinutes: singleActivity === null || singleActivity === void 0 ? void 0 : singleActivity.minutes,
+                        };
+                        return data;
+                    });
+                    return finalData;
+                }
             }
             catch (err) {
                 console.log(err);
@@ -368,7 +482,6 @@ class TimeActivityRepository {
     // Get employee hours
     getEmployeeHours(data) {
         return __awaiter(this, void 0, void 0, function* () {
-            console.log('Data:', data);
             const { companyId, employeeId, year, fieldId } = data;
             try {
                 const employeeCostFieldId = yield prisma_1.prisma.employeeCostField.findFirst({
@@ -378,7 +491,6 @@ class TimeActivityRepository {
                         employeeId: employeeId,
                     },
                 });
-                console.log('EMP : ', employeeCostFieldId, year);
                 const employees = yield prisma_1.prisma.employeeCostValue.findFirst({
                     where: {
                         employeeId: employeeId,
@@ -409,7 +521,31 @@ class TimeActivityRepository {
                         },
                     },
                 });
-                console.log('My employees: ', employee);
+                return employee;
+            }
+            catch (err) {
+                throw err;
+            }
+        });
+    }
+    // Get employee-time wise time activity
+    getTimeActivityByEmployeeDate(data) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                const { companyId, employeeId, startDate, endDate } = data;
+                const employee = yield prisma_1.prisma.timeActivities.findMany({
+                    where: {
+                        companyId: companyId,
+                        employeeId: employeeId,
+                        activityDate: {
+                            gte: startDate,
+                            lt: endDate,
+                        },
+                    },
+                    include: {
+                        employee: true,
+                    },
+                });
                 return employee;
             }
             catch (err) {

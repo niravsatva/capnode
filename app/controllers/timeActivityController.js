@@ -69,7 +69,11 @@ class TimeActivityController {
                     sort: String(sort),
                     startDate: String(formattedStartDate),
                     endDate: String(formattedEndDate),
-                    isOverHours: Boolean(isOverHours),
+                    isOverHours: isOverHours === 'false'
+                        ? false
+                        : isOverHours === 'true'
+                            ? true
+                            : '',
                 });
                 return (0, defaultResponseHelper_1.DefaultResponse)(res, 200, 'Time Activities fetched successfully', {
                     timeActivities: timeActivitiesWithHours,
@@ -158,6 +162,9 @@ class TimeActivityController {
                 const companyDetails = yield repositories_1.companyRepository.getDetails(companyId);
                 if (!companyDetails) {
                     throw new customError_1.CustomError(404, 'Company not found');
+                }
+                if (!classId || !customerId || !employeeId) {
+                    throw new customError_1.CustomError(400, 'ClassId, CustomerId and EmployeeId are required');
                 }
                 // Checking is the user is permitted
                 const isPermitted = yield (0, isAuthorizedUser_1.checkPermission)(req, companyId, {

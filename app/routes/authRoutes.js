@@ -25,4 +25,5 @@ router.post('/change-password/:token', validators_1.changePasswordValidationRule
 router.get('/fetch-profile', authMiddleware_1.isAuthenticated, controllers_1.authController.fetchProfile);
 // Update Profile
 router.put('/', authMiddleware_1.isAuthenticated, multer_1.updateProfileMiddleware.single('profileImg'), validators_1.updateProfileValidationRules, controllers_1.authController.updateProfile);
+router.post('/refresh-token', controllers_1.authController.refreshToken);
 exports.default = router;

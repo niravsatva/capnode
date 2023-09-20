@@ -72,7 +72,7 @@ class TimeSheetRepository {
     // Create new time sheet
     createTimeSheet(timeSheetData) {
         return __awaiter(this, void 0, void 0, function* () {
-            const { name, totalHours, totalMinute, notes, status, companyId, userId, SubmittedOn, } = timeSheetData;
+            const { name, totalHours, totalMinute, notes, status, companyId, userId, SubmittedOn, startDate, endDate, } = timeSheetData;
             const timeSheet = yield prisma_1.prisma.timeSheets.create({
                 data: {
                     name: name,
@@ -82,6 +82,8 @@ class TimeSheetRepository {
                     status: status,
                     company: { connect: { id: companyId } },
                     createdBy: { connect: { id: userId } },
+                    startDate: startDate,
+                    endDate: endDate,
                     SubmitedOn: SubmittedOn,
                 },
             });

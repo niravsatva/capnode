@@ -66,6 +66,7 @@ class EmployeeServices {
                         },
                     }
                     : {};
+                console.log(offset, filterConditions, sortCondition, searchCondition);
                 // Get all employees by company id
                 const employees = yield repositories_1.employeeRepository.getAllEmployeesByCompanyId(companyId);
                 return employees;

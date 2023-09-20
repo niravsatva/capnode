@@ -41,7 +41,7 @@ const refreshAccessToken = (accessToken, refreshToken) => __awaiter(void 0, void
             throw error;
         }
         yield (tokenRepository_1.default === null || tokenRepository_1.default === void 0 ? void 0 : tokenRepository_1.default.updateTokens(verified === null || verified === void 0 ? void 0 : verified.id, accessToken, refreshToken, newAccessToken, newRefreshToken));
-        return { newAccessToken, newRefreshToken };
+        return { newAccessToken, newRefreshToken, verified };
     }
     catch (err) {
         if (err.name == 'TokenExpiredError') {
@@ -106,7 +106,7 @@ exports.refreshAccessToken = refreshAccessToken;
 // 	}
 // };
 const isAuthenticated = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
-    var _a, _b, _c, _d, _e, _f, _g, _h;
+    var _a, _b, _c, _d;
     try {
         // Fetch Token from Header
         const accessToken = (_b = (_a = req === null || req === void 0 ? void 0 : req.headers) === null || _a === void 0 ? void 0 : _a.authorization) === null || _b === void 0 ? void 0 : _b.split(' ')[1];
@@ -118,7 +118,7 @@ const isAuthenticated = (req, res, next) => __awaiter(void 0, void 0, void 0, fu
             return next(error);
         }
         // Verify the access token
-        const verifiedAccessToken = (0, tokenHelper_1.verifyAccessToken)(accessToken);
+        const verifiedAccessToken = yield (0, tokenHelper_1.verifyAccessToken)(accessToken);
         req.user = {
             id: verifiedAccessToken === null || verifiedAccessToken === void 0 ? void 0 : verifiedAccessToken.id,
             email: verifiedAccessToken === null || verifiedAccessToken === void 0 ? void 0 : verifiedAccessToken.email,
@@ -138,20 +138,25 @@ const isAuthenticated = (req, res, next) => __awaiter(void 0, void 0, void 0, fu
         next();
     }
     catch (err) {
-        if (err.name == 'TokenExpiredError') {
-            const accessToken = (_f = (_e = req === null || req === void 0 ? void 0 : req.headers) === null || _e === void 0 ? void 0 : _e.authorization) === null || _f === void 0 ? void 0 : _f.split(' ')[1];
-            const refreshToken = (_h = (_g = req === null || req === void 0 ? void 0 : req.headers) === null || _g === void 0 ? void 0 : _g.refreshtoken) === null || _h === void 0 ? void 0 : _h.split(' ')[1];
-            (0, exports.refreshAccessToken)(accessToken, refreshToken)
-                .then(() => {
-                next();
-            })
-                .catch((err) => {
-                next(err);
-            });
-        }
-        else {
-            next(err);
-        }
+        next(err);
+        // if (err.name == 'TokenExpiredError') {
+        // 	next(err);
+        // const accessToken = req?.headers?.authorization?.split(' ')[1] as any;
+        // const refreshToken = req?.headers?.refreshtoken?.split(' ')[1] as any;
+        // refreshAccessToken(accessToken, refreshToken)
+        // 	.then((res) => {
+        // 		req.user = {
+        // 			id: res?.verified?.id,
+        // 			user: res?.verified?.user,
+        // 		};
+        // 		next();
+        // 	})
+        // 	.catch((err) => {
+        // 		next(err);
+        // 	});
+        // } else {
+        // 	next(err);
+        // }
     }
 });
 exports.isAuthenticated = isAuthenticated;

@@ -8,9 +8,13 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 const prisma_1 = require("../client/prisma");
 const customError_1 = require("../models/customError");
+const overHoursRepository_1 = __importDefault(require("./overHoursRepository"));
 class EmployeeCostRepository {
     // For get the monthly cost value per employee
     getMonthlyCost(companyId, date, offset, limit, searchCondition, sortCondition, isPercentage) {
@@ -95,6 +99,21 @@ class EmployeeCostRepository {
                         month: 'desc',
                     },
                 });
+                const uniqueEmployeeIds = new Set();
+                const filteredEmployees = employees === null || employees === void 0 ? void 0 : employees.filter((singleEmployee) => {
+                    if (!uniqueEmployeeIds.has(singleEmployee.id)) {
+                        uniqueEmployeeIds.add(singleEmployee.id);
+                        return true;
+                    }
+                    return false;
+                });
+                yield Promise.all(filteredEmployees.map((singleEmployee) => __awaiter(this, void 0, void 0, function* () {
+                    const getEmployeeHours = yield overHoursRepository_1.default.getOverHoursByYear(companyId, singleEmployee === null || singleEmployee === void 0 ? void 0 : singleEmployee.id, dateCopy.getFullYear());
+                    if (!getEmployeeHours) {
+                        const createEmployeeHours = yield overHoursRepository_1.default.createOverHoursByYear(companyId, singleEmployee === null || singleEmployee === void 0 ? void 0 : singleEmployee.id, dateCopy.getFullYear());
+                        console.log('Created EmployeeHours: ' + createEmployeeHours);
+                    }
+                })));
                 yield Promise.all(employees.map((singleEmployee) => __awaiter(this, void 0, void 0, function* () {
                     // Fetching all the fields of that employee
                     const employeeCostFields = yield prisma_1.prisma.employeeCostField.findMany({
@@ -463,6 +482,7 @@ class EmployeeCostRepository {
         var _a;
         return __awaiter(this, void 0, void 0, function* () {
             try {
+                console.log('Is calculator: ', isCalculatorValue);
                 const employeeCostValue = yield prisma_1.prisma.employeeCostValue.findFirst({
                     where: {
                         id: employeeCostValueID,

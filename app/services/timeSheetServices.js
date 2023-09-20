@@ -12,9 +12,14 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+/* eslint-disable no-mixed-spaces-and-tabs */
+const client_sqs_1 = require("@aws-sdk/client-sqs");
+const aws_1 = require("../config/aws");
+const customError_1 = require("../models/customError");
+const repositories_1 = require("../repositories");
 const timeActivityRepository_1 = __importDefault(require("../repositories/timeActivityRepository"));
 const timeSheetRepository_1 = __importDefault(require("../repositories/timeSheetRepository"));
-const customError_1 = require("../models/customError");
+const sqs = new client_sqs_1.SQSClient(aws_1.awsConfig);
 class TimeSheetServices {
     // Get all time sheets
     getAllTimeSheets(timeSheetData) {
@@ -31,14 +36,27 @@ class TimeSheetServices {
                     },
                 });
             }
-            const dateFilters = startDate && endDate
-                ? {
-                    activityDate: {
-                        gte: startDate,
-                        lte: endDate,
-                    },
+            let dateFilters = {};
+            if (startDate && endDate) {
+                if (startDate === endDate) {
+                    dateFilters = {
+                        SubmitedOn: {
+                            equals: startDate,
+                        },
+                    };
                 }
-                : {};
+                else {
+                    dateFilters = {
+                        SubmitedOn: {
+                            gte: startDate,
+                            lt: endDate,
+                        },
+                    };
+                }
+            }
+            else {
+                dateFilters = {};
+            }
             // Conditions for searching
             const searchCondition = search
                 ? {
@@ -156,6 +174,8 @@ class TimeSheetServices {
                     companyId: companyId,
                     userId: user.id,
                     SubmittedOn: new Date(),
+                    startDate: startDate,
+                    endDate: endDate,
                 };
                 const timeSheet = yield timeSheetRepository_1.default.createTimeSheet(finalTimeSheetData);
                 const timeSheetLogsData = (_a = Object.entries(totalHoursAndMinutes)) === null || _a === void 0 ? void 0 : _a.map((singleObject) => {
@@ -184,6 +204,84 @@ class TimeSheetServices {
                     throw new customError_1.CustomError(404, 'Time sheet not found');
                 }
                 return timeSheetDetails;
+            }
+            catch (err) {
+                throw err;
+            }
+        });
+    }
+    // Email time sheets
+    emailTimeSheet(timeSheetData) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                const { timeSheetId, employeeList, companyId } = timeSheetData;
+                const timeSheetDetails = yield timeSheetRepository_1.default.getTimeSheetDetails(timeSheetId);
+                if (!timeSheetDetails) {
+                    throw new customError_1.CustomError(404, 'Time sheet not found');
+                }
+                yield Promise.all(yield employeeList.map((singleEmployee) => __awaiter(this, void 0, void 0, function* () {
+                    const dateFilters = {
+                        activityDate: {
+                            gte: timeSheetDetails.startDate,
+                            lte: timeSheetDetails.endDate,
+                        },
+                    };
+                    const data = {
+                        employeeId: singleEmployee,
+                        dateFilters: dateFilters,
+                        companyId: companyId,
+                    };
+                    const allTimeLogs = yield timeActivityRepository_1.default.getTimeActivityByEmployeeDate(data);
+                    const employeeDetails = yield repositories_1.employeeRepository.getEmployeeDetails(singleEmployee);
+                    const pdfData = {
+                        allTimeLogs,
+                        startDate: timeSheetDetails.startDate,
+                        endDate: timeSheetDetails.endDate,
+                        employeeId: singleEmployee.employeeId,
+                        totalHours: timeSheetDetails.totalHours,
+                        totalMinutes: timeSheetDetails.totalMinute,
+                    };
+                    const queueData = new client_sqs_1.SendMessageCommand({
+                        QueueUrl: `${process.env.QUEUE_URL}`,
+                        MessageBody: JSON.stringify({
+                            pdfData: pdfData,
+                            singleEmployee: employeeDetails,
+                        }),
+                    });
+                    yield sqs.send(queueData);
+                    // const pdfData = await timeLogPdfGenerate(
+                    // 	allTimeLogs,
+                    // 	timeSheetDetails.startDate,
+                    // 	timeSheetDetails.endDate,
+                    // 	singleEmployee.employeeId,
+                    // 	'120'
+                    // );
+                    // if (employeeDetails?.email) {
+                    // 	const response = await axios.post(
+                    // 		'https://pdf.satvasolutions.com/api/ConvertHtmlToPdf',
+                    // 		{
+                    // 			FileName: 'mypdf.pdf',
+                    // 			HtmlData: [btoa(pdfData)],
+                    // 		}
+                    // 	);
+                    // 	console.log('RES: ', response.data);
+                    // 	const mailOptions = {
+                    // 		from: config.smtpEmail,
+                    // 		to: employeeDetails?.email,
+                    // 		subject: `Actual hours worked Timesheet `,
+                    // 		html: 'This is pdf',
+                    // 		attachments: [
+                    // 			{
+                    // 				filename: 'cat.pdf',
+                    // 				content: response.data,
+                    // 				encoding: 'base64',
+                    // 			},
+                    // 		],
+                    // 		// text: `Please use the following token to reset your password: ${forgotPasswordToken}`,
+                    // 	};
+                    // 	sendEmail(mailOptions);
+                    // }
+                })));
             }
             catch (err) {
                 throw err;

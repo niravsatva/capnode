@@ -59,7 +59,7 @@ class EmployeeController {
                     throw new customError_1.CustomError(400, 'Company is not connected');
                 }
                 // Get new employees
-                const updatedEmployees = yield employeeServices_1.default.syncEmployeesByLastSync(companyId);
+                yield employeeServices_1.default.syncEmployeesByLastSync(companyId);
                 return (0, defaultResponseHelper_1.DefaultResponse)(res, 200, 'Employees synced successfully');
             }
             catch (err) {

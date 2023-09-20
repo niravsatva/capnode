@@ -20,6 +20,7 @@ const quickbooksClient_1 = __importDefault(require("../quickbooksClient/quickboo
 const repositories_1 = require("../repositories");
 const timeActivityRepository_1 = __importDefault(require("../repositories/timeActivityRepository"));
 const quickbooksServices_1 = __importDefault(require("./quickbooksServices"));
+const overHoursRepository_1 = __importDefault(require("../repositories/overHoursRepository"));
 class TimeActivityService {
     // Get all time activities
     getAllTimeActivitiesServices(timeActivityData) {
@@ -119,81 +120,63 @@ class TimeActivityService {
             if (!companyDetails) {
                 throw new customError_1.CustomError(404, 'Company not found');
             }
-            const timeActivities = yield timeActivityRepository_1.default.getAllTimeActivities({
+            // Update total hours for each time activities
+            const allTimeActivities = yield timeActivityRepository_1.default.getAllTimeActivities({
                 companyId: companyId,
-                offset: offset,
-                limit: limit,
-                filterConditions: filterConditions,
-                searchCondition: searchCondition,
-                sortCondition: sortCondition,
-                dateFilters: dateFilters,
             });
-            const finalData = yield Promise.all(yield (timeActivities === null || timeActivities === void 0 ? void 0 : timeActivities.map((singleActivity) => __awaiter(this, void 0, void 0, function* () {
-                var _a, _b;
-                const field = yield prisma_1.prisma.field.findFirst({
-                    where: {
-                        companyId: singleActivity === null || singleActivity === void 0 ? void 0 : singleActivity.companyId,
-                        name: 'Maximum allocate hours per year',
-                    },
-                });
-                const data = {
-                    employeeId: singleActivity === null || singleActivity === void 0 ? void 0 : singleActivity.employeeId,
-                    companyId: singleActivity === null || singleActivity === void 0 ? void 0 : singleActivity.companyId,
-                    year: new Date(singleActivity.activityDate).getFullYear(),
-                    fieldId: field === null || field === void 0 ? void 0 : field.id,
+            const allTimeActivityHoursUpdate = yield this.calculateTimeActivitiesWithHours(allTimeActivities);
+            // Filter out unique employee ids
+            // const uniqueEmployeeIdActivities = new Set();
+            // const updatedAllTimeACtivitiesHours = allTimeActivityHoursUpdate?.filter(
+            // 	(singleActivity: any) => {
+            // 		if (!uniqueEmployeeIdActivities.has(singleActivity.employeeId)) {
+            // 			uniqueEmployeeIdActivities.add(singleActivity.employeeId);
+            // 			return true;
+            // 		}
+            // 		return false;
+            // 	}
+            // );
+            // Update over hour records
+            yield Promise.all(allTimeActivityHoursUpdate === null || allTimeActivityHoursUpdate === void 0 ? void 0 : allTimeActivityHoursUpdate.map((singleActivity) => __awaiter(this, void 0, void 0, function* () {
+                // if (singleActivity?.isOver) {
+                yield overHoursRepository_1.default.updateOverHoursByYear(singleActivity === null || singleActivity === void 0 ? void 0 : singleActivity.companyId, singleActivity === null || singleActivity === void 0 ? void 0 : singleActivity.employeeId, new Date(singleActivity === null || singleActivity === void 0 ? void 0 : singleActivity.activityDate).getFullYear(), singleActivity === null || singleActivity === void 0 ? void 0 : singleActivity.overHours, singleActivity === null || singleActivity === void 0 ? void 0 : singleActivity.overMinutes, singleActivity === null || singleActivity === void 0 ? void 0 : singleActivity.isOver);
+                // }
+            })));
+            let timeActivitiesWithHours;
+            if (isOverHours) {
+                const timeActivities = {
+                    companyId: companyId,
+                    isOverHours: isOverHours,
+                    offset: offset,
+                    limit: limit,
+                    filterConditions: filterConditions,
+                    searchCondition: searchCondition,
+                    sortCondition: sortCondition,
+                    dateFilters: dateFilters,
+                    search: search,
+                    sort: sort,
+                    type: type,
                 };
-                const employeeTotalHours = yield timeActivityRepository_1.default.getEmployeeHours(data);
-                let actualHours = 0;
-                let actualMinutes = 0;
-                const employeeHours = yield timeActivityRepository_1.default.getTimeActivityByEmployee({
-                    companyId: singleActivity === null || singleActivity === void 0 ? void 0 : singleActivity.companyId,
-                    employeeId: singleActivity === null || singleActivity === void 0 ? void 0 : singleActivity.employeeId,
-                    year: new Date(singleActivity.activityDate).getFullYear(),
+                timeActivitiesWithHours =
+                    yield timeActivityRepository_1.default.getAllTimeActivitiesOverHours(timeActivities);
+            }
+            else {
+                const timeActivities = yield timeActivityRepository_1.default.getAllTimeActivities({
+                    companyId: companyId,
+                    offset: offset,
+                    limit: limit,
+                    filterConditions: filterConditions,
+                    searchCondition: searchCondition,
+                    sortCondition: sortCondition,
+                    dateFilters: dateFilters,
                 });
-                employeeHours === null || employeeHours === void 0 ? void 0 : employeeHours.map((singleEmpHours) => {
-                    actualHours += Number(singleEmpHours === null || singleEmpHours === void 0 ? void 0 : singleEmpHours.hours);
-                    actualMinutes += Number(singleEmpHours === null || singleEmpHours === void 0 ? void 0 : singleEmpHours.minute);
-                });
-                if (actualMinutes > 60) {
-                    const additionalHours = Math.floor(actualMinutes / 60);
-                    actualHours += additionalHours;
-                    actualMinutes %= 60;
-                }
-                const employeeFinalHours = {
-                    actualHours: actualHours,
-                    actualMinutes: actualMinutes,
-                    totalHours: Number((_a = employeeTotalHours === null || employeeTotalHours === void 0 ? void 0 : employeeTotalHours.value) === null || _a === void 0 ? void 0 : _a.split(':')[0]),
-                    totalMinutes: Number((_b = employeeTotalHours === null || employeeTotalHours === void 0 ? void 0 : employeeTotalHours.value) === null || _b === void 0 ? void 0 : _b.split(':')[1]),
-                };
-                return employeeFinalHours;
-            }))));
-            console.log('Final data: ', finalData);
-            let timeActivitiesWithHours = timeActivities === null || timeActivities === void 0 ? void 0 : timeActivities.map((singleActivity, index) => {
-                var _a, _b, _c, _d;
-                const totalHours = (_a = finalData[index]) === null || _a === void 0 ? void 0 : _a.totalHours;
-                const totalMinutes = (_b = finalData[index]) === null || _b === void 0 ? void 0 : _b.totalMinutes;
-                const actualHours = (_c = finalData[index]) === null || _c === void 0 ? void 0 : _c.actualHours;
-                const actualMinutes = (_d = finalData[index]) === null || _d === void 0 ? void 0 : _d.actualMinutes;
-                //  Calculate total time in minutes
-                const totalTimeInMinutes = totalHours * 60 + totalMinutes;
-                const actualTimeInMinutes = actualHours * 60 + actualMinutes;
-                //  Calculate the difference in minutes
-                let timeDifferenceInMinutes = totalTimeInMinutes - actualTimeInMinutes;
-                // Take the absolute value of the result for further calculations
-                timeDifferenceInMinutes = Math.abs(timeDifferenceInMinutes);
-                //  Calculate hours and minutes from the difference
-                const hoursDifference = Math.floor(Number(timeDifferenceInMinutes) / 60);
-                const minutesDifference = Number(timeDifferenceInMinutes) % 60;
-                const data = Object.assign(Object.assign({}, singleActivity), { isOver: actualTimeInMinutes > totalTimeInMinutes ? true : false, totalHours: totalHours, totalMinutes: totalMinutes, actualHours: actualHours, actualMinutes: actualMinutes, overHours: hoursDifference, overMinutes: minutesDifference });
-                return data;
-            });
-            if (isOverHours === true) {
-                timeActivitiesWithHours = timeActivitiesWithHours === null || timeActivitiesWithHours === void 0 ? void 0 : timeActivitiesWithHours.filter((singleActivity) => (singleActivity === null || singleActivity === void 0 ? void 0 : singleActivity.isOver) === true);
+                timeActivitiesWithHours = yield this.calculateTimeActivitiesWithHours(timeActivities);
             }
             const timeActivitiesCount = yield timeActivityRepository_1.default.getAllTimeActivitiesCount({
                 companyId: companyId,
             });
-            return { timeActivitiesWithHours, timeActivitiesCount, timeActivities };
+            return { timeActivitiesWithHours, timeActivitiesCount };
+            // return { timeActivitiesWithHours, timeActivitiesCount, timeActivities };
         });
     }
     syncTimeActivities(companyId) {
@@ -238,13 +221,12 @@ class TimeActivityService {
                 }
                 else {
                     // Else - sync time activities for the first time
-                    const timeActivities = yield this.syncTimeActivityFirstTime({
+                    yield this.syncTimeActivityFirstTime({
                         accessToken: authResponse === null || authResponse === void 0 ? void 0 : authResponse.accessToken,
                         refreshToken: authResponse === null || authResponse === void 0 ? void 0 : authResponse.refreshToken,
                         tenantID: authResponse === null || authResponse === void 0 ? void 0 : authResponse.tenantID,
                         companyId: companyId,
                     });
-                    console.log('Time Activities: ', timeActivities);
                 }
             }
         });
@@ -587,6 +569,69 @@ class TimeActivityService {
                 };
             });
             return { timeActivities, companyDetails };
+        });
+    }
+    calculateTimeActivitiesWithHours(timeActivities) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const finalData = yield Promise.all(yield (timeActivities === null || timeActivities === void 0 ? void 0 : timeActivities.map((singleActivity) => __awaiter(this, void 0, void 0, function* () {
+                var _a, _b;
+                const field = yield prisma_1.prisma.field.findFirst({
+                    where: {
+                        companyId: singleActivity === null || singleActivity === void 0 ? void 0 : singleActivity.companyId,
+                        name: 'Maximum allocate hours per year',
+                    },
+                });
+                const data = {
+                    employeeId: singleActivity === null || singleActivity === void 0 ? void 0 : singleActivity.employeeId,
+                    companyId: singleActivity === null || singleActivity === void 0 ? void 0 : singleActivity.companyId,
+                    year: new Date(singleActivity.activityDate).getFullYear(),
+                    fieldId: field === null || field === void 0 ? void 0 : field.id,
+                };
+                const employeeTotalHours = yield timeActivityRepository_1.default.getEmployeeHours(data);
+                let actualHours = 0;
+                let actualMinutes = 0;
+                const employeeHours = yield timeActivityRepository_1.default.getTimeActivityByEmployee({
+                    companyId: singleActivity === null || singleActivity === void 0 ? void 0 : singleActivity.companyId,
+                    employeeId: singleActivity === null || singleActivity === void 0 ? void 0 : singleActivity.employeeId,
+                    year: new Date(singleActivity.activityDate).getFullYear(),
+                });
+                employeeHours === null || employeeHours === void 0 ? void 0 : employeeHours.map((singleEmpHours) => {
+                    actualHours += Number(singleEmpHours === null || singleEmpHours === void 0 ? void 0 : singleEmpHours.hours);
+                    actualMinutes += Number(singleEmpHours === null || singleEmpHours === void 0 ? void 0 : singleEmpHours.minute);
+                });
+                if (actualMinutes > 60) {
+                    const additionalHours = Math.floor(actualMinutes / 60);
+                    actualHours += additionalHours;
+                    actualMinutes %= 60;
+                }
+                const employeeFinalHours = {
+                    actualHours: actualHours,
+                    actualMinutes: actualMinutes,
+                    totalHours: Number((_a = employeeTotalHours === null || employeeTotalHours === void 0 ? void 0 : employeeTotalHours.value) === null || _a === void 0 ? void 0 : _a.split(':')[0]),
+                    totalMinutes: Number((_b = employeeTotalHours === null || employeeTotalHours === void 0 ? void 0 : employeeTotalHours.value) === null || _b === void 0 ? void 0 : _b.split(':')[1]),
+                };
+                return employeeFinalHours;
+            }))));
+            const timeActivitiesWithHours = timeActivities === null || timeActivities === void 0 ? void 0 : timeActivities.map((singleActivity, index) => {
+                var _a, _b, _c, _d;
+                const totalHours = (_a = finalData[index]) === null || _a === void 0 ? void 0 : _a.totalHours;
+                const totalMinutes = (_b = finalData[index]) === null || _b === void 0 ? void 0 : _b.totalMinutes;
+                const actualHours = (_c = finalData[index]) === null || _c === void 0 ? void 0 : _c.actualHours;
+                const actualMinutes = (_d = finalData[index]) === null || _d === void 0 ? void 0 : _d.actualMinutes;
+                //  Calculate total time in minutes
+                const totalTimeInMinutes = totalHours * 60 + totalMinutes;
+                const actualTimeInMinutes = actualHours * 60 + actualMinutes;
+                //  Calculate the difference in minutes
+                let timeDifferenceInMinutes = totalTimeInMinutes - actualTimeInMinutes;
+                // Take the absolute value of the result for further calculations
+                timeDifferenceInMinutes = Math.abs(timeDifferenceInMinutes);
+                //  Calculate hours and minutes from the difference
+                const hoursDifference = Math.floor(Number(timeDifferenceInMinutes) / 60);
+                const minutesDifference = Number(timeDifferenceInMinutes) % 60;
+                const data = Object.assign(Object.assign({}, singleActivity), { isOver: actualTimeInMinutes > totalTimeInMinutes ? true : false, totalHours: totalHours, totalMinutes: totalMinutes, actualHours: actualHours, actualMinutes: actualMinutes, overHours: hoursDifference, overMinutes: minutesDifference });
+                return data;
+            });
+            return timeActivitiesWithHours;
         });
     }
 }

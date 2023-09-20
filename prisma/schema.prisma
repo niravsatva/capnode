@@ -75,6 +75,7 @@ model Company {
   EmployeeCostField          EmployeeCostField[]
   MonthYearTable             MonthYearTable[]
   timeSheets                 TimeSheets[]
+  hoursOver                  HoursOver[]
 }
 
 model Role {
@@ -164,6 +165,7 @@ model Employee {
   employeeCostValue   EmployeeCostValue[]
   timeSheetLogs       TimeSheetLogs[]
   splitTimeActivities SplitTimeActivities[]
+  hoursOver           HoursOver[]
 }
 
 // Add 4 sections - 3 for fields and 1 for yearly data 
@@ -287,8 +289,8 @@ model TimeSheets {
   company       Company          @relation(fields: [companyId], references: [id])
   userId        String
   createdBy     User             @relation(fields: [userId], references: [id])
-  // startDate     DateTime?
-  // endDate       DateTime?
+  startDate     DateTime?
+  endDate       DateTime?
   SubmitedOn    DateTime
   createdAt     DateTime         @default(now())
   updatedAt     DateTime         @updatedAt
@@ -305,6 +307,21 @@ model TimeSheetLogs {
   timeSheets   TimeSheets @relation(fields: [timeSheetsId], references: [id])
   createdAt    DateTime   @default(now())
   updatedAt    DateTime   @updatedAt
+}
+
+// Employee hours Over
+model HoursOver {
+  id          String   @id @default(uuid())
+  employeeId  String
+  employee    Employee @relation(fields: [employeeId], references: [id])
+  isOverHours Boolean  @default(false)
+  overHours   Int      @default(0)
+  overMinutes Int      @default(0)
+  year        Int
+  companyId   String?
+  company     Company? @relation(fields: [companyId], references: [id])
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 }
 
 enum PayrollMethods {

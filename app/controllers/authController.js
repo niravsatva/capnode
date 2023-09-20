@@ -30,6 +30,7 @@ const repositories_1 = require("../repositories");
 const tokenRepository_1 = __importDefault(require("../repositories/tokenRepository"));
 const authServices_1 = __importDefault(require("../services/authServices"));
 const customError_1 = require("../models/customError");
+const tokenHelper_1 = require("../helpers/tokenHelper");
 class AuthController {
     // Register User
     register(req, res, next) {
@@ -229,6 +230,45 @@ class AuthController {
                 const machineId = req.body.machineId;
                 const deleted = yield tokenRepository_1.default.delete(req.user.id, accessToken, refreshToken, machineId);
                 return (0, defaultResponseHelper_1.DefaultResponse)(res, 200, 'User logged out successfully');
+            }
+            catch (err) {
+                next(err);
+            }
+        });
+    }
+    // Refresh Token
+    refreshToken(req, res, next) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                const { accessToken, refreshToken } = req.body;
+                if (!accessToken || !refreshToken) {
+                    throw new customError_1.CustomError(401, 'Unauthorized user');
+                }
+                const verifiedAccessToken = yield (0, tokenHelper_1.verifyAccessToken)(accessToken);
+                if (!verifiedAccessToken) {
+                    throw new customError_1.CustomError(401, 'Invalid access token');
+                }
+                const isValid = yield (0, tokenHelper_1.checkTokens)(verifiedAccessToken === null || verifiedAccessToken === void 0 ? void 0 : verifiedAccessToken.id, accessToken, refreshToken);
+                if (!isValid) {
+                    const error = new customError_1.CustomError(401, 'Token expired');
+                    return next(error);
+                }
+                // Generate new access token
+                const newAccessToken = (0, tokenHelper_1.generateAccessToken)({
+                    id: verifiedAccessToken === null || verifiedAccessToken === void 0 ? void 0 : verifiedAccessToken.id,
+                    email: verifiedAccessToken === null || verifiedAccessToken === void 0 ? void 0 : verifiedAccessToken.email,
+                });
+                // Generate new refresh token
+                const newRefreshToken = (0, tokenHelper_1.generateRefreshToken)({
+                    id: verifiedAccessToken === null || verifiedAccessToken === void 0 ? void 0 : verifiedAccessToken.id,
+                    email: verifiedAccessToken === null || verifiedAccessToken === void 0 ? void 0 : verifiedAccessToken.email,
+                });
+                yield (tokenRepository_1.default === null || tokenRepository_1.default === void 0 ? void 0 : tokenRepository_1.default.updateTokens(verifiedAccessToken === null || verifiedAccessToken === void 0 ? void 0 : verifiedAccessToken.id, accessToken, refreshToken, newAccessToken, newRefreshToken));
+                const data = {
+                    accessToken: newAccessToken,
+                    refreshToken: newRefreshToken,
+                };
+                return (0, defaultResponseHelper_1.DefaultResponse)(res, 200, 'Refreshed token', data);
             }
             catch (err) {
                 next(err);

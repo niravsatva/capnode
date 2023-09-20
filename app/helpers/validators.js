@@ -213,9 +213,34 @@ exports.createSplitTimeActivity = [
         .notEmpty()
         .withMessage('Parent activity id is required'),
     body('employeeId').notEmpty().withMessage('Employee id is required'),
-    body('timeActivityData')
-        .isArray()
-        .withMessage('Time activity data is required'),
+    body('timeActivityData.*.classId')
+        .not()
+        .isEmpty()
+        .withMessage('Time activity data is not valid'),
+    body('timeActivityData.*.customerId')
+        .not()
+        .isEmpty()
+        .withMessage('Time activity data is not valid'),
+    body('timeActivityData.*.className')
+        .not()
+        .isEmpty()
+        .withMessage('Time activity data is not valid'),
+    body('timeActivityData.*.customerName')
+        .not()
+        .isEmpty()
+        .withMessage('Time activity data is not valid'),
+    body('timeActivityData.*.hours')
+        .not()
+        .isEmpty()
+        .withMessage('Time activity data is not valid'),
+    body('timeActivityData.*.minute')
+        .not()
+        .isEmpty()
+        .withMessage('Time activity data is not valid'),
+    body('timeActivityData.*.activityDate')
+        .not()
+        .isEmpty()
+        .withMessage('Time activity data is not valid'),
 ];
 exports.deleteSplitTimeActivity = [
     body('splitTimeActivityId')
