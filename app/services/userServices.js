@@ -157,6 +157,9 @@ class UserServices {
     inviteUser(invitedBy, invitedByEmail, email, role, company, phone, firstName, lastName) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
+                const adminUser = yield repositories_1.userRepository.getById(invitedBy);
+                const finalName = adminUser.firstName + ' ' + adminUser.lastName;
+                console.log('final name: ' + finalName);
                 // Find user by Email
                 const user = yield repositories_1.userRepository.getByEmail(email);
                 // Check if role exists
@@ -191,32 +194,12 @@ class UserServices {
                     };
                     // Mail send to admin
                     const adminEmailContent = (0, emailTemplateHelper_1.getInvitationAdminMailTemplate)({
-                        invitedByEmail,
+                        finalName,
                         firstName: user.firstName,
                         lastName: user.lastName,
                         companyName: companyName === null || companyName === void 0 ? void 0 : companyName.tenantName,
                         url: config_1.default === null || config_1.default === void 0 ? void 0 : config_1.default.reactAppBaseUrl,
                     });
-                    // const adminEmailContent = `
-                    // <body>
-                    // 	<p>Hi <b>${invitedByEmail}</b>,</p>
-                    // 	<br/>
-                    // 	<p>
-                    // 		You just invited ${email} to ${company} on CostAllocation Pro. If you don't want this person on your account, you can delete them from your Manage Users page.
-                    //  	</p>
-                    // 	<br/>
-                    // 	<p>
-                    // 		<a href='${config?.reactAppBaseUrl}' style="color:blue;text-decoration:none;">Click here<a/>, to view the Manage Users page.
-                    // 	</p>
-                    // 	<br/>
-                    // 	<p>
-                    // 	Best regards,
-                    // 	<br/>
-                    // 	<br/>
-                    // 	CostAllocation Pro Team
-                    // 	</p>
-                    // </body>
-                    // `;
                     // Send mail to Admin
                     const adminMailOptions = {
                         from: config_1.default.smtpEmail,
@@ -288,8 +271,9 @@ class UserServices {
                     };
                     // Mail send to admin
                     const adminEmailContent = (0, emailTemplateHelper_1.getInvitationAdminMailTemplate)({
-                        invitedByEmail,
-                        email,
+                        finalName,
+                        firstName: createdUser === null || createdUser === void 0 ? void 0 : createdUser.firstName,
+                        lastName: createdUser === null || createdUser === void 0 ? void 0 : createdUser.lastName,
                         companyName: companyName === null || companyName === void 0 ? void 0 : companyName.tenantName,
                         url: config_1.default === null || config_1.default === void 0 ? void 0 : config_1.default.reactAppBaseUrl,
                     });

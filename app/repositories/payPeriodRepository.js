@@ -17,7 +17,7 @@ class PayPeriodRepository {
             const query = {
                 where: Object.assign({ companyId: companyId }, dateFilter),
                 skip: offset,
-                take: limit
+                take: limit,
             };
             if (!offset) {
                 delete query.skip;
@@ -53,8 +53,12 @@ class PayPeriodRepository {
     }
     isDateInAnyPayPeriod(payPeriodData) {
         return __awaiter(this, void 0, void 0, function* () {
-            const { startDate, endDate } = payPeriodData;
-            const allPayPeriods = yield prisma_1.prisma.payPeriod.findMany();
+            const { startDate, endDate, companyId } = payPeriodData;
+            const allPayPeriods = yield prisma_1.prisma.payPeriod.findMany({
+                where: {
+                    companyId: companyId,
+                },
+            });
             for (const payPeriod of allPayPeriods) {
                 if (payPeriod.startDate <= startDate && // Check if startDate is less than or equal to the checkDate
                     payPeriod.endDate >= startDate // Check if endDate is greater than or equal to the checkDate
