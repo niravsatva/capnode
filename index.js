@@ -15,6 +15,7 @@ const routes_1 = __importDefault(require("./app/routes"));
 // Database configuration
 require("./app/config/db");
 const config_1 = __importDefault(require("./config"));
+const migration_runner_service_1 = require("./app/services/migration-runner.service");
 const app = (0, express_1.default)();
 // app.use(cookieParser());
 // Connection pool to store session in the database
@@ -35,6 +36,7 @@ app.use((0, cors_1.default)({
 }));
 app.use(body_parser_1.default.json());
 app.use(body_parser_1.default.urlencoded({ extended: true }));
+(0, migration_runner_service_1.runMigration)();
 // Create a new session
 // app.use(
 // 	session({

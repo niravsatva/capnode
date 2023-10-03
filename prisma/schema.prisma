@@ -342,6 +342,14 @@ model HoursOver {
   updatedAt   DateTime @updatedAt
 }
 
+model Migrations {
+  id          String   @id @default(uuid())
+  name        String
+  isCompleted Boolean  @default(false)
+  isFailed     Boolean  @default(false)
+  runOn       DateTime @default(now())
+}
+
 enum PayrollMethods {
   Hours
   Percentage
