@@ -18,6 +18,7 @@ const authMiddleware_1 = require("../middlewares/authMiddleware");
 const configuration_1 = __importDefault(require("./configuration"));
 const employeeCostRoutes_1 = __importDefault(require("./employeeCostRoutes"));
 const timeSheetRoutes_1 = __importDefault(require("./timeSheetRoutes"));
+const payPeriodRoutes_1 = __importDefault(require("./payPeriodRoutes"));
 const router = express_1.default.Router();
 router.use('/auth', authRoutes_1.default);
 router.use('/users', authMiddleware_1.isAuthenticated, userRoutes_1.default);
@@ -31,6 +32,7 @@ router.use('/configuration', configuration_1.default);
 router.use('/employee-cost', employeeCostRoutes_1.default);
 router.use('/split-time-activity', splitTimeActivityRoutes_1.default);
 router.use('/time-sheet', timeSheetRoutes_1.default);
+router.use('/pay-periods', payPeriodRoutes_1.default);
 router.use('/test', (req, res) => {
     return res.json({ data: 'Hello world!' });
 });

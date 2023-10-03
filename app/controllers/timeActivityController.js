@@ -26,23 +26,15 @@ const Excel = require('excel4node');
 const dataExporter = require('json2csv').Parser;
 class TimeActivityController {
     getAllTimeActivities(req, res, next) {
-        var _a;
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 (0, validationHelper_1.checkValidation)(req);
-                const { page = 1, limit = 10, search = '', classId = '', customerId = '', employeeId = '', type = '', sort = '', startDate = '', endDate = '', isOverHours = false, } = req.query;
-                const companyId = (_a = req.body) === null || _a === void 0 ? void 0 : _a.companyId;
-                let formattedStartDate = '';
-                let formattedEndDate = '';
-                if (startDate && endDate) {
-                    // Format start date
-                    const newStart = new Date(startDate);
-                    newStart.setUTCHours(0, 0, 0, 0);
-                    formattedStartDate = newStart.toISOString();
-                    // Format end date
-                    const newEnd = new Date(endDate);
-                    newEnd.setUTCHours(0, 0, 0, 0);
-                    formattedEndDate = newEnd.toISOString();
+                const { page = 1, limit = 10, search = '', classId = '', customerId = '', employeeId = '', type = '', sort = '', isOverHours = false, payPeriodId = '', companyId = '', } = req.query;
+                // if (!payPeriodId) {
+                // 	throw new CustomError(400, 'Pay Period Id is required');
+                // }
+                if (!companyId) {
+                    throw new customError_1.CustomError(400, 'Company id is required');
                 }
                 // Check If company exists
                 const companyDetails = yield repositories_1.companyRepository.getDetails(companyId);
@@ -58,7 +50,7 @@ class TimeActivityController {
                     throw new customError_1.CustomError(403, 'You are not authorized');
                 }
                 const { timeActivitiesWithHours, timeActivitiesCount } = yield timeActivityServices_1.default.getAllTimeActivitiesServices({
-                    companyId: companyId,
+                    companyId: String(companyId),
                     page: Number(page),
                     limit: Number(limit),
                     search: String(search),
@@ -67,13 +59,12 @@ class TimeActivityController {
                     employeeId: String(employeeId),
                     type: String(type),
                     sort: String(sort),
-                    startDate: String(formattedStartDate),
-                    endDate: String(formattedEndDate),
                     isOverHours: isOverHours === 'false'
                         ? false
                         : isOverHours === 'true'
                             ? true
                             : '',
+                    payPeriodId: String(payPeriodId),
                 });
                 return (0, defaultResponseHelper_1.DefaultResponse)(res, 200, 'Time Activities fetched successfully', {
                     timeActivities: timeActivitiesWithHours,
@@ -130,7 +121,7 @@ class TimeActivityController {
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 (0, validationHelper_1.checkValidation)(req);
-                const { timeActivityId, companyId, hours, minute } = req.body;
+                const { timeActivityId, companyId, hours, minute, classId, className, customerId, customerName, } = req.body;
                 // Checking is the user is permitted
                 const isPermitted = yield (0, isAuthorizedUser_1.checkPermission)(req, companyId, {
                     permissionName: 'Time Logs',
@@ -145,6 +136,10 @@ class TimeActivityController {
                     companyId,
                     hours,
                     minute,
+                    classId,
+                    className,
+                    customerId,
+                    customerName,
                 });
                 return (0, defaultResponseHelper_1.DefaultResponse)(res, 200, 'Time activity updated successfully', updatedTimeActivity);
             }
@@ -217,24 +212,12 @@ class TimeActivityController {
             }
         });
     }
-    // Export Time Activity
+    // Export Time Activity CSV
     exportTimeActivity(req, res, next) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                const { companyId, search = '', classId = '', customerId = '', employeeId = '', startDate = '', endDate = '', } = req.query;
-                let formattedStartDate = '';
-                let formattedEndDate = '';
-                if (startDate && endDate) {
-                    // Format start date
-                    const newStart = new Date(startDate);
-                    newStart.setUTCHours(0, 0, 0, 0);
-                    formattedStartDate = newStart.toISOString();
-                    // Format end date
-                    const newEnd = new Date(endDate);
-                    newEnd.setUTCHours(0, 0, 0, 0);
-                    formattedEndDate = newEnd.toISOString();
-                }
-                const { timeActivities, companyDetails } = yield timeActivityServices_1.default.exportTimeActivity(companyId, search, classId, customerId, employeeId, formattedStartDate, formattedEndDate);
+                const { companyId, search = '', classId = '', customerId = '', employeeId = '', payPeriodId = '', } = req.query;
+                const { timeActivities, companyDetails, payPeriodData } = yield timeActivityServices_1.default.exportTimeActivity(companyId, search, classId, customerId, employeeId, payPeriodId);
                 const timeActivityData = JSON.parse(JSON.stringify(timeActivities));
                 const fileHeader = [
                     'Activity Date',
@@ -245,18 +228,17 @@ class TimeActivityController {
                 ];
                 const jsonData = new dataExporter({ fileHeader });
                 let dateRange;
-                if (startDate && endDate) {
-                    if (startDate === endDate) {
-                        dateRange = `${(0, moment_1.default)(formattedStartDate).format('MM/DD/YYYY')} `;
-                    }
-                    else {
-                        dateRange = `${(0, moment_1.default)(formattedStartDate).format('MM/DD/YYYY')} to ${(0, moment_1.default)(formattedEndDate).format('MM/DD/YYYY')}`;
-                    }
+                let startDate;
+                let endDate;
+                if (payPeriodData) {
+                    startDate = (0, moment_1.default)(payPeriodData.startDate).format('MM/DD/YYYY');
+                    endDate = (0, moment_1.default)(payPeriodData.endDate).format('MM/DD/YYYY');
+                    dateRange = `${startDate} - ${endDate}`;
                 }
                 else {
                     dateRange = 'All';
                 }
-                const extraData = `Report Name ,Time Activity\n` +
+                const extraData = `Report Name ,Time Logs\n` +
                     `Period ,${dateRange}\n` +
                     `QBO Company's Name ,${companyDetails === null || companyDetails === void 0 ? void 0 : companyDetails.tenantName}\n` +
                     `\n`;
@@ -293,7 +275,7 @@ class TimeActivityController {
     exportTimeActivityExcel(req, res, next) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                const { companyId, search = '', classId = '', customerId = '', employeeId = '', startDate = '', endDate = '', } = req.query;
+                const { companyId, search = '', classId = '', customerId = '', employeeId = '', startDate = '', endDate = '', payPeriodId = '', } = req.query;
                 let formattedStartDate = '';
                 let formattedEndDate = '';
                 if (startDate && endDate) {
@@ -306,7 +288,7 @@ class TimeActivityController {
                     newEnd.setUTCHours(0, 0, 0, 0);
                     formattedEndDate = newEnd.toISOString();
                 }
-                const { timeActivities, companyDetails } = yield timeActivityServices_1.default.exportTimeActivity(companyId, search, classId, customerId, employeeId, formattedStartDate, formattedEndDate);
+                const { timeActivities, companyDetails } = yield timeActivityServices_1.default.exportTimeActivity(companyId, search, classId, customerId, employeeId, payPeriodId);
                 // Create a new Excel workbook and worksheet
                 const wb = new Excel.Workbook();
                 const ws = wb.addWorksheet('Sheet 1');

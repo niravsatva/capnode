@@ -15,6 +15,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const prisma_1 = require("../client/prisma");
 const data_1 = require("../constants/data");
 const employeeCostRepository_1 = __importDefault(require("./employeeCostRepository"));
+const payPeriodRepository_1 = __importDefault(require("./payPeriodRepository"));
 class ConfigurationRepository {
     // Create default configuration settings for the first time company is created
     createDefaultConfiguration(companyId) {
@@ -24,7 +25,7 @@ class ConfigurationRepository {
                     data: {
                         settings: data_1.DefaultConfigurationSettings,
                         indirectExpenseRate: 10,
-                        payrollMethod: 'Hours',
+                        payrollMethod: 'Percentage',
                         company: { connect: { id: companyId } },
                     },
                 });
@@ -115,11 +116,15 @@ class ConfigurationRepository {
                     },
                 });
                 const percentAndHourArray = [true, false];
-                const monthsByCompanyId = yield employeeCostRepository_1.default.getMonthsByCompanyId(companyId);
-                yield Promise.all(percentAndHourArray.map((singleMethod) => __awaiter(this, void 0, void 0, function* () {
-                    yield Promise.all(monthsByCompanyId.map((singleMonthlyValue) => __awaiter(this, void 0, void 0, function* () {
+                console.log(companyId, percentAndHourArray);
+                const listOfPeriod = yield payPeriodRepository_1.default.getAll({
+                    companyId,
+                    dateFilter: {},
+                });
+                yield Promise.all(percentAndHourArray.map(() => __awaiter(this, void 0, void 0, function* () {
+                    yield Promise.all(listOfPeriod.map((singlePayPeriod) => __awaiter(this, void 0, void 0, function* () {
                         const configurationFields = yield this.getConfigurationField(companyId);
-                        const monthlyCost = yield employeeCostRepository_1.default.getMonthlyCost(companyId, new Date(`${singleMonthlyValue.month}/1/${singleMonthlyValue.year}`).toString(), 0, 1000, {}, {}, singleMethod);
+                        const monthlyCost = yield employeeCostRepository_1.default.getMonthlyCost(companyId, '', 0, 10000000, {}, {}, true, singlePayPeriod.id);
                         monthlyCost.map((singleEmployeeData) => {
                             configurationFields.map((singleConfigurationSection) => __awaiter(this, void 0, void 0, function* () {
                                 if (singleConfigurationSection.no !== 0) {

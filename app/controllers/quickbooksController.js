@@ -193,14 +193,14 @@ class QuickbooksController {
                                 .format(),
                         },
                     });
-                    yield configurationRepository_1.default.initialFieldSectionCreate(finalCompanyDetails === null || finalCompanyDetails === void 0 ? void 0 : finalCompanyDetails.id);
+                    const fields = yield configurationRepository_1.default.initialFieldSectionCreate(finalCompanyDetails === null || finalCompanyDetails === void 0 ? void 0 : finalCompanyDetails.id);
                     const employees = yield repositories_1.employeeRepository.getAllEmployeesByCompanyId(finalCompanyDetails === null || finalCompanyDetails === void 0 ? void 0 : finalCompanyDetails.id);
                     const sectionWithFields = yield configurationRepository_1.default.getConfigurationField(finalCompanyDetails === null || finalCompanyDetails === void 0 ? void 0 : finalCompanyDetails.id);
                     const sectionFields = sectionWithFields.reduce((accumulator, section) => {
                         accumulator.push(...section.fields);
                         return accumulator;
                     }, []);
-                    yield repositories_1.employeeCostRepository.createInitialValues(employees, sectionFields, finalCompanyDetails === null || finalCompanyDetails === void 0 ? void 0 : finalCompanyDetails.id);
+                    const values = yield repositories_1.employeeCostRepository.createInitialValues(employees, sectionFields, finalCompanyDetails === null || finalCompanyDetails === void 0 ? void 0 : finalCompanyDetails.id);
                     // await employeeServices.syncEmployeesByLastSync(companyId);
                 }
                 return (0, defaultResponseHelper_1.DefaultResponse)(res, 200, 'Company connected successfully', finalCompanyDetails);

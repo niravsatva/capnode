@@ -12,12 +12,14 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+const prisma_1 = require("../client/prisma");
 const defaultResponseHelper_1 = require("../helpers/defaultResponseHelper");
+const global_1 = require("../helpers/global");
 const validationHelper_1 = require("../helpers/validationHelper");
+const isAuthorizedUser_1 = require("../middlewares/isAuthorizedUser");
 const customError_1 = require("../models/customError");
 const employeeCostServices_1 = __importDefault(require("../services/employeeCostServices"));
-const isAuthorizedUser_1 = require("../middlewares/isAuthorizedUser");
-const global_1 = require("../helpers/global");
+const moment_1 = __importDefault(require("moment"));
 const dataExporter = require('json2csv').Parser;
 class EmployeeConstController {
     // For get the cost by month
@@ -25,12 +27,44 @@ class EmployeeConstController {
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 const { companyId, date, page = 1, limit = 10, search, type, sort, } = req.query;
+                let payPeriodId = req.query.payPeriodId;
+                if (!payPeriodId) {
+                    const payPeriodData = yield prisma_1.prisma.payPeriod.findFirst({
+                        where: {
+                            companyId: companyId,
+                            OR: [
+                                {
+                                    startDate: {
+                                        lte: new Date(new Date().setUTCHours(23, 59, 59, 999)),
+                                    },
+                                    endDate: {
+                                        gte: new Date(new Date().setUTCHours(0, 0, 0, 0)),
+                                    },
+                                },
+                                {
+                                    startDate: {
+                                        gte: new Date(new Date().setUTCHours(0, 0, 0, 0)),
+                                    },
+                                    endDate: {
+                                        lte: new Date(new Date().setUTCHours(23, 59, 59, 999)),
+                                    },
+                                },
+                            ],
+                        },
+                    });
+                    if (payPeriodData && payPeriodData.id) {
+                        payPeriodId = payPeriodData.id;
+                    }
+                }
+                // if (!payPeriodId) {
+                // 	throw new CustomError(400, 'No Pay Periods Found');
+                // }
                 if (!companyId) {
                     throw new customError_1.CustomError(400, 'Company id is required');
                 }
-                if (!date) {
-                    throw new customError_1.CustomError(400, 'Date is required');
-                }
+                // if (!payPeriodId) {
+                // 	throw new CustomError(400, 'Pay period id is required');
+                // }
                 // Checking is the user is permitted
                 const isPermitted = yield (0, isAuthorizedUser_1.checkPermission)(req, companyId, {
                     permissionName: 'Employee Cost',
@@ -39,7 +73,7 @@ class EmployeeConstController {
                 if (!isPermitted) {
                     throw new customError_1.CustomError(403, 'You are not authorized');
                 }
-                const employeesMonthlyCost = yield employeeCostServices_1.default.getMonthlyCost(companyId, date, Number(page), Number(limit), search, type, sort);
+                const employeesMonthlyCost = yield employeeCostServices_1.default.getMonthlyCostV2(companyId, date, Number(page), Number(limit), search, type, sort, payPeriodId);
                 return (0, defaultResponseHelper_1.DefaultResponse)(res, 200, 'Configurations fetched successfully', employeesMonthlyCost);
             }
             catch (error) {
@@ -51,15 +85,15 @@ class EmployeeConstController {
     createMonthlyCost(req, res, next) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                const { companyId, date } = req.body;
+                const { companyId, payPeriodId } = req.body;
                 (0, validationHelper_1.checkValidation)(req);
                 if (!companyId) {
                     throw new customError_1.CustomError(400, 'Company id is required');
                 }
-                if (!date) {
-                    throw new customError_1.CustomError(400, 'Date is required');
+                if (!payPeriodId) {
+                    throw new customError_1.CustomError(400, 'Pay period id is required');
                 }
-                yield employeeCostServices_1.default.createMonthlyCost(companyId, date);
+                yield employeeCostServices_1.default.createMonthlyCost(companyId, payPeriodId);
                 return (0, defaultResponseHelper_1.DefaultResponse)(res, 200, 'Configuration values created successfully');
             }
             catch (error) {
@@ -71,15 +105,9 @@ class EmployeeConstController {
     updateMonthlyCost(req, res, next) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                const { employeeCostValueID, value, selectedMonth, isCalculatorValue } = req.body;
+                const { employeeCostValueID, value, payPeriodId, isCalculatorValue } = req.body;
                 (0, validationHelper_1.checkValidation)(req);
-                if (!employeeCostValueID) {
-                    throw new customError_1.CustomError(400, 'Employee Cost value id is required');
-                }
-                if (!value) {
-                    throw new customError_1.CustomError(400, 'Value is required');
-                }
-                const updatedEmployeeCostValue = yield employeeCostServices_1.default.updateMonthlyCost(employeeCostValueID, value, selectedMonth, isCalculatorValue);
+                const updatedEmployeeCostValue = yield employeeCostServices_1.default.updateMonthlyCost(employeeCostValueID, value, payPeriodId, isCalculatorValue);
                 return (0, defaultResponseHelper_1.DefaultResponse)(res, 200, 'Configurations fetched successfully', updatedEmployeeCostValue);
             }
             catch (error) {
@@ -88,18 +116,15 @@ class EmployeeConstController {
         });
     }
     exportEmployeeCost(req, res, next) {
-        var _a;
+        var _a, _b;
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                const { companyId, date, search, type, sort, isPercentage } = req.query;
+                const { companyId, date, search, type, sort, isPercentage, payPeriodId } = req.query;
                 const percentage = isPercentage === 'false' ? false : true;
                 if (!companyId) {
                     throw new customError_1.CustomError(400, 'Company id is required');
                 }
-                if (!date) {
-                    throw new customError_1.CustomError(400, 'Date is required');
-                }
-                const employeesMonthlyCost = yield employeeCostServices_1.default.getMonthlyCostExport(companyId, date, search, type, sort, Boolean(percentage));
+                const employeesMonthlyCost = yield employeeCostServices_1.default.getMonthlyCostExport(companyId, date, search, type, sort, Boolean(percentage), payPeriodId);
                 const finalDataArr = (_a = employeesMonthlyCost === null || employeesMonthlyCost === void 0 ? void 0 : employeesMonthlyCost.employees) === null || _a === void 0 ? void 0 : _a.map((singleEmployee) => {
                     var _a;
                     const sortedData = (_a = singleEmployee === null || singleEmployee === void 0 ? void 0 : singleEmployee.employeeCostField) === null || _a === void 0 ? void 0 : _a.sort((a, b) => {
@@ -153,16 +178,26 @@ class EmployeeConstController {
                 }
                 const fileHeader = ['Employee Name', 'Employee Type'];
                 const jsonData = new dataExporter({ fileHeader });
-                // const extraData = [
-                // 	{ 'Report Name': 'Employee Cost' },
-                // 	{ Period: 'Time Log Activity' },
-                // 	{ "QBO Company's Name": employeesMonthlyCost?.company?.tenantName },
-                // ];
+                let dateRange;
+                let startDate;
+                let endDate;
+                if (employeesMonthlyCost.payPeriodData) {
+                    startDate = (0, moment_1.default)(employeesMonthlyCost.payPeriodData.startDate).format('MM/DD/YYYY');
+                    endDate = (0, moment_1.default)(employeesMonthlyCost.payPeriodData.endDate).format('MM/DD/YYYY');
+                    dateRange = `${startDate} - ${endDate}`;
+                }
+                else {
+                    dateRange = 'All';
+                }
+                const extraData = `Report Name ,Employee Cost\n` +
+                    `Period ,${dateRange}\n` +
+                    `QBO Company's Name ,${(_b = employeesMonthlyCost === null || employeesMonthlyCost === void 0 ? void 0 : employeesMonthlyCost.company) === null || _b === void 0 ? void 0 : _b.tenantName}\n` +
+                    `\n`;
                 // const exportingData = [...extraData, ...finalDataArr];
                 const csvData = jsonData.parse(finalDataArr);
                 res.setHeader('Content-Type', 'text/csv');
                 res.setHeader('Content-Disposition', 'attachment; filename=employee_cost_data.csv');
-                return res.status(200).end(csvData);
+                return res.status(200).end(extraData + csvData);
             }
             catch (error) {
                 next(error);

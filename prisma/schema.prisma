@@ -73,9 +73,10 @@ model Company {
   ConfigurationSection       ConfigurationSection[]
   Field                      Field[]
   EmployeeCostField          EmployeeCostField[]
-  MonthYearTable             MonthYearTable[]
+  // MonthYearTable             MonthYearTable[]
   timeSheets                 TimeSheets[]
   hoursOver                  HoursOver[]
+  payPeriod                  PayPeriod[]
 }
 
 model Role {
@@ -217,8 +218,10 @@ model EmployeeCostValue {
   employeeType      EmployeeType?
   employeeFieldId   String
   employeeCostField EmployeeCostField @relation(fields: [employeeFieldId], references: [id], onDelete: Cascade)
-  month             Int //06
-  year              Int //2022
+  // month             Int //06
+  // year              Int //2022
+  payPeriodId       String?
+  payPeriod         PayPeriod?        @relation(fields: [payPeriodId], references: [id])
   value             String?           @default("0.00") // Employee 1 - March Fringe Expense = 10 
   isPercentage      Boolean // If percentage method is selected from configuration
   isCalculatorValue Boolean?          @default(false)
@@ -229,16 +232,29 @@ model EmployeeCostValue {
 
 // Month Year table to get month and year of created employee cost
 
-model MonthYearTable {
-  id        String   @id @default(uuid())
-  month     Int //06
-  year      Int //2022
-  companyId String
-  company   Company  @relation(fields: [companyId], references: [id])
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+// model MonthYearTable {
+//   id        String   @id @default(uuid())
+//   month     Int //06
+//   year      Int //2022
+//   companyId String
+//   company   Company  @relation(fields: [companyId], references: [id])
+//   createdAt DateTime @default(now())
+//   updatedAt DateTime @updatedAt
 
-  @@unique([month, year, companyId])
+//   @@unique([month, year, companyId])
+// }
+
+model PayPeriod {
+  id                String              @id @default(uuid())
+  startDate         DateTime
+  endDate           DateTime
+  status            Int                 @default(1)
+  companyId         String
+  company           Company             @relation(fields: [companyId], references: [id])
+  employeeCostValue EmployeeCostValue[]
+  createdAt         DateTime            @default(now())
+  updatedAt         DateTime            @updatedAt
+  timeActivities    TimeActivities[]
 }
 
 model TimeActivities {
@@ -255,6 +271,8 @@ model TimeActivities {
   employeeId          String?
   employee            Employee?             @relation(fields: [employeeId], references: [id])
   activityDate        DateTime
+  payPeriodId         String?
+  payPeriod           PayPeriod?            @relation(fields: [payPeriodId], references: [id])
   createdAt           DateTime              @default(now())
   updatedAt           DateTime              @updatedAt
   SplitTimeActivities SplitTimeActivities[]

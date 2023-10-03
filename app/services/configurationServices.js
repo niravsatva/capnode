@@ -15,6 +15,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const customError_1 = require("../models/customError");
 const repositories_1 = require("../repositories");
 const configurationRepository_1 = __importDefault(require("../repositories/configurationRepository"));
+const payPeriodServices_1 = __importDefault(require("./payPeriodServices"));
 // import employeeServices from './employeeServices';
 class ConfigurationService {
     // For get sections with fields
@@ -42,8 +43,14 @@ class ConfigurationService {
                 // Get all employees by companyId
                 const employeeList = yield repositories_1.employeeRepository.getAllEmployeesByCompanyId(companyId);
                 // Employee Cost Field
-                const listOfMonths = yield repositories_1.employeeCostRepository.getMonthsByCompanyId(companyId);
-                yield repositories_1.employeeCostRepository.createNewEmployeeCost(employeeList, createdField === null || createdField === void 0 ? void 0 : createdField.id, companyId, listOfMonths);
+                // const listOfMonths = await employeeCostRepository.getMonthsByCompanyId(
+                // 	companyId
+                // );
+                // Get list of all pay periods
+                const listOfPayPeriods = yield payPeriodServices_1.default.getAllPayPeriods({
+                    companyId: companyId,
+                });
+                yield repositories_1.employeeCostRepository.createNewEmployeeCost(employeeList, createdField === null || createdField === void 0 ? void 0 : createdField.id, companyId, listOfPayPeriods);
                 return createdField;
             }
             catch (error) {

@@ -13,19 +13,61 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-const prisma_1 = require("../client/prisma");
 const moment_timezone_1 = __importDefault(require("moment-timezone"));
+const prisma_1 = require("../client/prisma");
 const customError_1 = require("../models/customError");
 const quickbooksClient_1 = __importDefault(require("../quickbooksClient/quickbooksClient"));
 const repositories_1 = require("../repositories");
 const timeActivityRepository_1 = __importDefault(require("../repositories/timeActivityRepository"));
 const quickbooksServices_1 = __importDefault(require("./quickbooksServices"));
-const overHoursRepository_1 = __importDefault(require("../repositories/overHoursRepository"));
+const payPeriodRepository_1 = __importDefault(require("../repositories/payPeriodRepository"));
 class TimeActivityService {
     // Get all time activities
     getAllTimeActivitiesServices(timeActivityData) {
         return __awaiter(this, void 0, void 0, function* () {
-            const { companyId, search, sort, page, limit, type, classId, customerId, employeeId, startDate, endDate, isOverHours, } = timeActivityData;
+            const { companyId, search, sort, page, limit, type, classId, customerId, employeeId, isOverHours, payPeriodId, } = timeActivityData;
+            let dateFilters = {};
+            if (payPeriodId) {
+                // Get pay period details
+                const payPeriodData = yield payPeriodRepository_1.default.getDetails(payPeriodId);
+                if (!payPeriodData) {
+                    throw new customError_1.CustomError(404, 'Pay period not found');
+                }
+                const payPeriodStartDate = payPeriodData === null || payPeriodData === void 0 ? void 0 : payPeriodData.startDate;
+                const payPeriodEndDate = payPeriodData === null || payPeriodData === void 0 ? void 0 : payPeriodData.endDate;
+                let startDate = '';
+                let endDate = '';
+                if (payPeriodStartDate && payPeriodEndDate) {
+                    // Format start date
+                    const newStart = new Date(payPeriodStartDate);
+                    newStart.setUTCHours(0, 0, 0, 0);
+                    startDate = newStart.toISOString();
+                    // Format end date
+                    const newEnd = new Date(payPeriodEndDate);
+                    newEnd.setUTCHours(0, 0, 0, 0);
+                    endDate = newEnd.toISOString();
+                }
+                if (startDate && endDate) {
+                    if (startDate === endDate) {
+                        dateFilters = {
+                            activityDate: {
+                                equals: startDate,
+                            },
+                        };
+                    }
+                    else {
+                        dateFilters = {
+                            activityDate: {
+                                gte: startDate,
+                                lte: endDate,
+                            },
+                        };
+                    }
+                }
+                else {
+                    dateFilters = {};
+                }
+            }
             // Offset set
             const offset = (Number(page) - 1) * Number(limit);
             // Set filter conditions
@@ -48,27 +90,6 @@ class TimeActivityService {
                     AND: filteredData,
                 }
                 : {};
-            let dateFilters = {};
-            if (startDate && endDate) {
-                if (startDate === endDate) {
-                    dateFilters = {
-                        activityDate: {
-                            equals: startDate,
-                        },
-                    };
-                }
-                else {
-                    dateFilters = {
-                        activityDate: {
-                            gte: startDate,
-                            lte: endDate,
-                        },
-                    };
-                }
-            }
-            else {
-                dateFilters = {};
-            }
             // const dateFilters =
             // 	startDate && endDate
             // 		? {
@@ -120,28 +141,30 @@ class TimeActivityService {
             if (!companyDetails) {
                 throw new customError_1.CustomError(404, 'Company not found');
             }
+            // CODE FOR HANDLING OVER HOURS AND UNDER HOURS
             // Update total hours for each time activities
-            const allTimeActivities = yield timeActivityRepository_1.default.getAllTimeActivities({
-                companyId: companyId,
-            });
-            const allTimeActivityHoursUpdate = yield this.calculateTimeActivitiesWithHours(allTimeActivities);
-            // Filter out unique employee ids
-            // const uniqueEmployeeIdActivities = new Set();
-            // const updatedAllTimeACtivitiesHours = allTimeActivityHoursUpdate?.filter(
-            // 	(singleActivity: any) => {
-            // 		if (!uniqueEmployeeIdActivities.has(singleActivity.employeeId)) {
-            // 			uniqueEmployeeIdActivities.add(singleActivity.employeeId);
-            // 			return true;
-            // 		}
-            // 		return false;
+            // const allTimeActivities = await timeActivityRepository.getAllTimeActivities(
+            // 	{
+            // 		companyId: companyId,
             // 	}
             // );
-            // Update over hour records
-            yield Promise.all(allTimeActivityHoursUpdate === null || allTimeActivityHoursUpdate === void 0 ? void 0 : allTimeActivityHoursUpdate.map((singleActivity) => __awaiter(this, void 0, void 0, function* () {
-                // if (singleActivity?.isOver) {
-                yield overHoursRepository_1.default.updateOverHoursByYear(singleActivity === null || singleActivity === void 0 ? void 0 : singleActivity.companyId, singleActivity === null || singleActivity === void 0 ? void 0 : singleActivity.employeeId, new Date(singleActivity === null || singleActivity === void 0 ? void 0 : singleActivity.activityDate).getFullYear(), singleActivity === null || singleActivity === void 0 ? void 0 : singleActivity.overHours, singleActivity === null || singleActivity === void 0 ? void 0 : singleActivity.overMinutes, singleActivity === null || singleActivity === void 0 ? void 0 : singleActivity.isOver);
-                // }
-            })));
+            // const allTimeActivityHoursUpdate =
+            // 	await this.calculateTimeActivitiesWithHours(allTimeActivities);
+            // // Update over hour records
+            // await Promise.all(
+            // 	allTimeActivityHoursUpdate?.map(async (singleActivity: any) => {
+            // 		// if (singleActivity?.isOver) {
+            // 		await overHoursRepository.updateOverHoursByYear(
+            // 			singleActivity?.companyId,
+            // 			singleActivity?.employeeId,
+            // 			new Date(singleActivity?.activityDate).getFullYear(),
+            // 			singleActivity?.overHours,
+            // 			singleActivity?.overMinutes,
+            // 			singleActivity?.isOver
+            // 		);
+            // 		// }
+            // 	})
+            // );
             let timeActivitiesWithHours;
             if (isOverHours) {
                 const timeActivities = {
@@ -441,7 +464,7 @@ class TimeActivityService {
     // Update hours for time activity in DB
     updateTimeActivity(timeActivityData) {
         return __awaiter(this, void 0, void 0, function* () {
-            const { companyId, timeActivityId, hours, minute } = timeActivityData;
+            const { companyId, timeActivityId, hours, minute, classId, className, customerId, customerName, } = timeActivityData;
             // Check if company exists or not
             const companyDetails = yield repositories_1.companyRepository.getDetails(companyId);
             if (!companyDetails) {
@@ -453,6 +476,10 @@ class TimeActivityService {
                 companyId: companyId,
                 hours: hours,
                 minute: minute,
+                classId: classId,
+                className: className,
+                customerId: customerId,
+                customerName: customerName,
             });
             return updated;
         });
@@ -495,8 +522,51 @@ class TimeActivityService {
         });
     }
     // Export Time Activity
-    exportTimeActivity(companyId, search, classId, customerId, employeeId, startDate, endDate) {
+    exportTimeActivity(companyId, search, classId, customerId, employeeId, payPeriodId) {
         return __awaiter(this, void 0, void 0, function* () {
+            let dateFilters = {};
+            let payPeriodData;
+            if (payPeriodId) {
+                // Get pay period details
+                payPeriodData = yield payPeriodRepository_1.default.getDetails(payPeriodId);
+                if (!payPeriodData) {
+                    throw new customError_1.CustomError(404, 'Pay period not found');
+                }
+                const payPeriodStartDate = payPeriodData === null || payPeriodData === void 0 ? void 0 : payPeriodData.startDate;
+                const payPeriodEndDate = payPeriodData === null || payPeriodData === void 0 ? void 0 : payPeriodData.endDate;
+                let startDate = '';
+                let endDate = '';
+                if (payPeriodStartDate && payPeriodEndDate) {
+                    // Format start date
+                    const newStart = new Date(payPeriodStartDate);
+                    newStart.setUTCHours(0, 0, 0, 0);
+                    startDate = newStart.toISOString();
+                    // Format end date
+                    const newEnd = new Date(payPeriodEndDate);
+                    newEnd.setUTCHours(0, 0, 0, 0);
+                    endDate = newEnd.toISOString();
+                }
+                if (startDate && endDate) {
+                    if (startDate === endDate) {
+                        dateFilters = {
+                            activityDate: {
+                                equals: startDate,
+                            },
+                        };
+                    }
+                    else {
+                        dateFilters = {
+                            activityDate: {
+                                gte: startDate,
+                                lte: endDate,
+                            },
+                        };
+                    }
+                }
+                else {
+                    dateFilters = {};
+                }
+            }
             // Check If company exists
             const companyDetails = yield repositories_1.companyRepository.getDetails(companyId);
             if (!companyDetails) {
@@ -520,14 +590,6 @@ class TimeActivityService {
             const filterConditions = (filteredData === null || filteredData === void 0 ? void 0 : filteredData.length) > 0
                 ? {
                     AND: filteredData,
-                }
-                : {};
-            const dateFilters = startDate && endDate
-                ? {
-                    activityDate: {
-                        gte: startDate,
-                        lte: endDate,
-                    },
                 }
                 : {};
             // Conditions for searching
@@ -568,7 +630,7 @@ class TimeActivityService {
                     Hours: `${singleTimeActivity === null || singleTimeActivity === void 0 ? void 0 : singleTimeActivity.hours}:${singleTimeActivity === null || singleTimeActivity === void 0 ? void 0 : singleTimeActivity.minute}`,
                 };
             });
-            return { timeActivities, companyDetails };
+            return { timeActivities, companyDetails, payPeriodData };
         });
     }
     calculateTimeActivitiesWithHours(timeActivities) {

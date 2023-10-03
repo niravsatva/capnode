@@ -14,6 +14,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const prisma_1 = require("../client/prisma");
 const employeeCostRepository_1 = __importDefault(require("./employeeCostRepository"));
+const payPeriodRepository_1 = __importDefault(require("./payPeriodRepository"));
 class EmployeeRepository {
     getAllEmployeesByCompanyId(companyId) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -77,15 +78,32 @@ class EmployeeRepository {
                                 },
                             });
                         })));
-                        const monthList = yield prisma_1.prisma.monthYearTable.findMany({
-                            where: {
-                                companyId: companyId,
-                            },
+                        // Fetch all pay periods
+                        const payPeriods = yield payPeriodRepository_1.default.getAll({
+                            companyId: companyId,
                         });
                         // Create initial values
-                        monthList === null || monthList === void 0 ? void 0 : monthList.map((singleRecord) => __awaiter(this, void 0, void 0, function* () {
-                            yield employeeCostRepository_1.default.createMonthlyCost([updatedEmployees], companyId, new Date(`${singleRecord === null || singleRecord === void 0 ? void 0 : singleRecord.month}/1/${singleRecord === null || singleRecord === void 0 ? void 0 : singleRecord.year}`).toString());
-                        }));
+                        if (payPeriods.length > 0) {
+                            payPeriods.map((singlePayPeriod) => __awaiter(this, void 0, void 0, function* () {
+                                yield employeeCostRepository_1.default.createMonthlyCost([updatedEmployees], companyId, singlePayPeriod.id);
+                            }));
+                        }
+                        // OLD REQUIREMENT CODE NEED TO UPDATE WITH NEW
+                        // const monthList = await prisma.monthYearTable.findMany({
+                        // 	where: {
+                        // 		companyId: companyId,
+                        // 	},
+                        // });
+                        // // Create initial values
+                        // monthList?.map(async (singleRecord: any) => {
+                        // 	await employeeCostRepository.createMonthlyCost(
+                        // 		[updatedEmployees],
+                        // 		companyId,
+                        // 		new Date(
+                        // 			`${singleRecord?.month}/1/${singleRecord?.year}`
+                        // 		).toString()
+                        // 	);
+                        // });
                     }
                 }
                 return updatedEmployees;

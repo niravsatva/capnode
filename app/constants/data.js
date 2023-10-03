@@ -17,6 +17,7 @@ exports.DefaultPermissions = [
     { permissionName: 'Time Summary', sortId: 13 },
     { permissionName: 'Payroll Summary', sortId: 14 },
     { permissionName: 'Customer Overview', sortId: 15 },
+    { permissionName: 'Pay Period', sortId: 16 },
 ];
 exports.DefaultAdminPermissions = [
     {
@@ -148,6 +149,15 @@ exports.DefaultAdminPermissions = [
     {
         permissionName: 'Customer Overview',
         sortId: 15,
+        all: true,
+        view: true,
+        edit: true,
+        delete: true,
+        add: true,
+    },
+    {
+        permissionName: 'Pay Period',
+        sortId: 16,
         all: true,
         view: true,
         edit: true,

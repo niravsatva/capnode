@@ -230,6 +230,9 @@ class TimeActivityRepository {
                             companyId: companyId,
                         },
                     });
+                    if (!employee) {
+                        throw new customError_1.CustomError(400, 'You need to sync employees before time activities');
+                    }
                     const data = {
                         classId: timeActivityData === null || timeActivityData === void 0 ? void 0 : timeActivityData.classId,
                         className: timeActivityData === null || timeActivityData === void 0 ? void 0 : timeActivityData.className,
@@ -265,6 +268,9 @@ class TimeActivityRepository {
                             companyId: companyId,
                         },
                     });
+                    if (!employee) {
+                        throw new customError_1.CustomError(400, 'You need to sync employees before time activities');
+                    }
                     const data = {
                         timeActivityId: timeActivityData === null || timeActivityData === void 0 ? void 0 : timeActivityData.timeActivityId,
                         classId: timeActivityData === null || timeActivityData === void 0 ? void 0 : timeActivityData.classId,
@@ -299,7 +305,7 @@ class TimeActivityRepository {
     updateTimeActivity(timeActivityData) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                const { timeActivityId, companyId, hours, minute } = timeActivityData;
+                const { timeActivityId, companyId, hours, minute, classId, className, customerId, customerName, } = timeActivityData;
                 const findActivity = yield prisma_1.prisma.timeActivities.findFirst({
                     where: {
                         id: timeActivityId,
@@ -309,14 +315,25 @@ class TimeActivityRepository {
                 if (!findActivity) {
                     throw new customError_1.CustomError(404, 'Time Activity not found');
                 }
+                const data = {
+                    hours: hours,
+                    minute: minute,
+                    classId: classId,
+                    className: className,
+                    customerId: customerId,
+                    customerName: customerName,
+                };
+                if (!classId) {
+                    delete data['classId'];
+                }
+                if (!className) {
+                    delete data['className'];
+                }
                 const updatedTimeActivity = yield prisma_1.prisma.timeActivities.update({
                     where: {
                         id: timeActivityId,
                     },
-                    data: {
-                        hours: hours,
-                        minute: minute,
-                    },
+                    data: data,
                 });
                 return updatedTimeActivity;
             }
@@ -483,6 +500,7 @@ class TimeActivityRepository {
     getEmployeeHours(data) {
         return __awaiter(this, void 0, void 0, function* () {
             const { companyId, employeeId, year, fieldId } = data;
+            console.log('YEAR: ', year);
             try {
                 const employeeCostFieldId = yield prisma_1.prisma.employeeCostField.findFirst({
                     where: {
@@ -494,7 +512,7 @@ class TimeActivityRepository {
                 const employees = yield prisma_1.prisma.employeeCostValue.findFirst({
                     where: {
                         employeeId: employeeId,
-                        year: year,
+                        // year: year,
                         employeeFieldId: employeeCostFieldId === null || employeeCostFieldId === void 0 ? void 0 : employeeCostFieldId.id,
                         isPercentage: false,
                     },

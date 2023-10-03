@@ -126,13 +126,12 @@ class UserController {
                 // const emails = await adminEmails.map((item) => item?.user?.email);
                 const companyDetails = yield repositories_1.companyRepository.getDetails(company);
                 const userDetails = yield userRepository_1.default.getById(user);
-                let userName;
-                if ((userDetails === null || userDetails === void 0 ? void 0 : userDetails.firstName) && (userDetails === null || userDetails === void 0 ? void 0 : userDetails.lastName)) {
-                    userName = (userDetails === null || userDetails === void 0 ? void 0 : userDetails.firstName) + ' ' + (userDetails === null || userDetails === void 0 ? void 0 : userDetails.lastName);
-                }
-                else {
-                    userName = userDetails === null || userDetails === void 0 ? void 0 : userDetails.email;
-                }
+                // let userName: string;
+                // if (userDetails?.firstName && userDetails?.lastName) {
+                // 	userName = userDetails?.firstName + ' ' + userDetails?.lastName;
+                // } else {
+                // 	userName = userDetails?.email;
+                // }
                 const userEmailContent = (0, emailTemplateHelper_1.getUserEmailOnDeleteTemplate)({
                     firstName: userDetails === null || userDetails === void 0 ? void 0 : userDetails.firstName,
                     lastName: userDetails === null || userDetails === void 0 ? void 0 : userDetails.lastName,

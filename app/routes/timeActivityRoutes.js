@@ -12,7 +12,7 @@ const router = express_1.default.Router();
 // Sync time activities
 router.post('/sync', authMiddleware_1.isAuthenticated, validators_1.timeActivityValidation, controllers_1.timeActivityController.syncTimeActivities);
 // Get all time activities from db
-router.post('/', authMiddleware_1.isAuthenticated, validators_1.timeActivityValidation, controllers_1.timeActivityController === null || controllers_1.timeActivityController === void 0 ? void 0 : controllers_1.timeActivityController.getAllTimeActivities);
+router.get('/', authMiddleware_1.isAuthenticated, controllers_1.timeActivityController === null || controllers_1.timeActivityController === void 0 ? void 0 : controllers_1.timeActivityController.getAllTimeActivities);
 // Update time activity
 router.put('/', authMiddleware_1.isAuthenticated, validators_1.updateTimeActivityValidation, controllers_1.timeActivityController === null || controllers_1.timeActivityController === void 0 ? void 0 : controllers_1.timeActivityController.updateTimeActivity);
 // Create time activity
