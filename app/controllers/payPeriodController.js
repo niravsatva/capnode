@@ -16,6 +16,7 @@ const payPeriodServices_1 = __importDefault(require("../services/payPeriodServic
 const defaultResponseHelper_1 = require("../helpers/defaultResponseHelper");
 const customError_1 = require("../models/customError");
 const validationHelper_1 = require("../helpers/validationHelper");
+const isAuthorizedUser_1 = require("../middlewares/isAuthorizedUser");
 class PayPeriodController {
     getAllPayPeriods(req, res, next) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -30,6 +31,13 @@ class PayPeriodController {
                     page: Number(page),
                     limit: Number(limit),
                 };
+                const isPermitted = yield (0, isAuthorizedUser_1.checkPermission)(req, companyId, {
+                    permissionName: 'Pay Period',
+                    permission: ['view'],
+                });
+                if (!isPermitted) {
+                    throw new customError_1.CustomError(403, 'You are not authorized');
+                }
                 const payPeriods = yield payPeriodServices_1.default.getAllPayPeriods(data);
                 const count = yield payPeriodServices_1.default.count(data);
                 return (0, defaultResponseHelper_1.DefaultResponse)(res, 200, 'Get all pay periods', payPeriods, count);
@@ -50,6 +58,13 @@ class PayPeriodController {
                     endDate: new Date(endDate),
                 };
                 console.log('DATA: ', data);
+                const isPermitted = yield (0, isAuthorizedUser_1.checkPermission)(req, companyId, {
+                    permissionName: 'Pay Period',
+                    permission: ['add'],
+                });
+                if (!isPermitted) {
+                    throw new customError_1.CustomError(403, 'You are not authorized');
+                }
                 const payPeriodData = yield payPeriodServices_1.default.createNewPayPeriod(data);
                 return (0, defaultResponseHelper_1.DefaultResponse)(res, 201, 'Pay period created successfully', payPeriodData);
             }
@@ -64,6 +79,13 @@ class PayPeriodController {
                 const { id } = req.params;
                 const { companyId, startDate, endDate } = req.body;
                 (0, validationHelper_1.checkValidation)(req);
+                const isPermitted = yield (0, isAuthorizedUser_1.checkPermission)(req, companyId, {
+                    permissionName: 'Pay Period',
+                    permission: ['edit'],
+                });
+                if (!isPermitted) {
+                    throw new customError_1.CustomError(403, 'You are not authorized');
+                }
                 const newStartDate = new Date(startDate);
                 const newEndDate = new Date(endDate);
                 if (newEndDate < newStartDate) {

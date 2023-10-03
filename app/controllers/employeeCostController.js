@@ -26,7 +26,7 @@ class EmployeeConstController {
     getMonthlyCost(req, res, next) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                const { companyId, date, page = 1, limit = 10, search, type, sort, } = req.query;
+                const { companyId, date, page = 1, limit = 10, search, type, sort, isPdf } = req.query;
                 let payPeriodId = req.query.payPeriodId;
                 if (!payPeriodId) {
                     const payPeriodData = yield prisma_1.prisma.payPeriod.findFirst({
@@ -73,7 +73,13 @@ class EmployeeConstController {
                 if (!isPermitted) {
                     throw new customError_1.CustomError(403, 'You are not authorized');
                 }
-                const employeesMonthlyCost = yield employeeCostServices_1.default.getMonthlyCostV2(companyId, date, Number(page), Number(limit), search, type, sort, payPeriodId);
+                let employeesMonthlyCost;
+                if (isPdf === 'true') {
+                    employeesMonthlyCost = yield employeeCostServices_1.default.getMonthlyCost(companyId, date, Number(page), Number(limit), search, type, sort, payPeriodId);
+                }
+                else {
+                    employeesMonthlyCost = yield employeeCostServices_1.default.getMonthlyCostV2(companyId, date, Number(page), Number(limit), search, type, sort, payPeriodId);
+                }
                 return (0, defaultResponseHelper_1.DefaultResponse)(res, 200, 'Configurations fetched successfully', employeesMonthlyCost);
             }
             catch (error) {

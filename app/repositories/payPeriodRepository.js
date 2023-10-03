@@ -60,18 +60,23 @@ class PayPeriodRepository {
                 },
             });
             for (const payPeriod of allPayPeriods) {
-                if (payPeriod.startDate <= startDate && // Check if startDate is less than or equal to the checkDate
-                    payPeriod.endDate >= startDate // Check if endDate is greater than or equal to the checkDate
-                ) {
+                console.log('object');
+                if (startDate < new Date(payPeriod.endDate).setUTCHours(23, 59, 59, 59) &&
+                    endDate > new Date(payPeriod.startDate).setUTCHours(0, 0, 0, 0)) {
                     return { isInPayPeriod: true, payPeriod: payPeriod }; // The date is in a pay period
                 }
-            }
-            for (const payPeriod of allPayPeriods) {
-                if (payPeriod.startDate <= endDate && // Check if startDate is less than or equal to the checkDate
-                    payPeriod.endDate >= endDate // Check if endDate is greater than or equal to the checkDate
-                ) {
-                    return { isInPayPeriod: true, payPeriod: payPeriod }; // The date is in a pay period
-                }
+                // if (
+                // 	new Date(payPeriod.startDate).setUTCHours(0, 0, 0, 0) <= startDate && // Check if startDate is less than or equal to the checkDate
+                // 	new Date(payPeriod.endDate).setUTCHours(23, 59, 59, 59) >= startDate // Check if endDate is greater than or equal to the checkDate
+                // ) {
+                // 	return { isInPayPeriod: true, payPeriod: payPeriod }; // The date is in a pay period
+                // }
+                // if (
+                // 	new Date(payPeriod.startDate).setUTCHours(0, 0, 0, 0) <= endDate && // Check if startDate is less than or equal to the checkDate
+                // 	new Date(payPeriod.endDate).setUTCHours(23, 59, 59, 59) >= endDate // Check if endDate is greater than or equal to the checkDate
+                // ) {
+                // 	return { isInPayPeriod: true, payPeriod: payPeriod }; // The date is in a pay period
+                // }
             }
             return { isInPayPeriod: false }; // The date is not in any pay period
         });

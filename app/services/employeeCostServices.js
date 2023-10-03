@@ -124,9 +124,12 @@ class EmployeeCostService {
                         if (singleEmployeeData && (singleEmployeeData === null || singleEmployeeData === void 0 ? void 0 : singleEmployeeData.employeeCostField)) {
                             singleEmployeeData.employeeCostField.forEach((singleFieldObj) => {
                                 if (singleFieldObj && singleFieldObj.field) {
-                                    obj[singleFieldObj.field.id] = singleFieldObj.costValue[0].value;
-                                    obj[`value_${singleFieldObj.field.id}`] = singleFieldObj.costValue[0].id;
-                                    obj[`section_${singleFieldObj.field.id}`] = singleFieldObj.field.configurationSectionId;
+                                    obj[singleFieldObj.field.id] =
+                                        singleFieldObj.costValue[0].value;
+                                    obj[`value_${singleFieldObj.field.id}`] =
+                                        singleFieldObj.costValue[0].id;
+                                    obj[`section_${singleFieldObj.field.id}`] =
+                                        singleFieldObj.field.configurationSectionId;
                                 }
                             });
                         }
