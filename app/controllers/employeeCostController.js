@@ -26,7 +26,7 @@ class EmployeeConstController {
     getMonthlyCost(req, res, next) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                const { companyId, date, page = 1, limit = 10, search, type, sort, isPdf } = req.query;
+                const { companyId, date, page = 1, limit = 10, search, type, sort, isPdf, } = req.query;
                 let payPeriodId = req.query.payPeriodId;
                 if (!payPeriodId) {
                     const payPeriodData = yield prisma_1.prisma.payPeriod.findFirst({
@@ -168,12 +168,12 @@ class EmployeeConstController {
                                                 ? (_h = item === null || item === void 0 ? void 0 : item.costValue[0]) === null || _h === void 0 ? void 0 : _h.value
                                                 : `$ ${(0, global_1.formatNumberWithCommas)((_j = item === null || item === void 0 ? void 0 : item.costValue[0]) === null || _j === void 0 ? void 0 : _j.value)}` });
                     });
-                    return Object.assign(Object.assign({ 'Employee Name': singleEmployee === null || singleEmployee === void 0 ? void 0 : singleEmployee.fullName }, finalObject), { 'Total Labor Burden': (0, global_1.formatNumberWithCommas)(Number(finalObject['Total Salary'].split(',').join('').split('$')[1]) +
+                    return Object.assign(Object.assign({ 'Employee Name': singleEmployee === null || singleEmployee === void 0 ? void 0 : singleEmployee.fullName }, finalObject), { 'Total Labor Burden': `$ ${(0, global_1.formatNumberWithCommas)(Number(finalObject['Total Salary'].split(',').join('').split('$')[1]) +
                             Number(finalObject['Total Fringe'].split(',').join('').split('$')[1]) +
                             Number(finalObject['Total Payroll Taxes']
                                 .split(',')
                                 .join('')
-                                .split('$')[1])) });
+                                .split('$')[1]))}` });
                 });
                 if (percentage) {
                     finalDataArr.forEach((singleEmployee) => {
