@@ -79,5 +79,20 @@ class SplitTimeActivityController {
             }
         });
     }
+    deleteAllSplitTimeActivity(req, res, next) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                const { timeActivityId } = req.body;
+                (0, validationHelper_1.checkValidation)(req);
+                const deletedActivity = yield splitTimeActivityServices_1.default.deleteAllSplitTimeActivity({
+                    timeActivityId: timeActivityId,
+                });
+                return (0, defaultResponseHelper_1.DefaultResponse)(res, 200, 'Split activity deleted successfully', deletedActivity);
+            }
+            catch (err) {
+                next(err);
+            }
+        });
+    }
 }
 exports.default = new SplitTimeActivityController();

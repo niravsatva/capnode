@@ -13,6 +13,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 /* eslint-disable no-mixed-spaces-and-tabs */
+const prisma_1 = require("../client/prisma");
 const customError_1 = require("../models/customError");
 const repositories_1 = require("../repositories");
 const payPeriodRepository_1 = __importDefault(require("../repositories/payPeriodRepository"));
@@ -143,6 +144,57 @@ class EmployeeCostService {
             catch (error) {
                 throw error;
             }
+        });
+    }
+    getMonthlyCostTotal(companyId, payPeriodId) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const company = yield repositories_1.companyRepository.getDetails(companyId);
+            if (!company) {
+                const error = new customError_1.CustomError(404, 'Company not found');
+                throw error;
+            }
+            const payPeriod = yield payPeriodRepository_1.default.getDetails(payPeriodId);
+            if (!payPeriod) {
+                const error = new customError_1.CustomError(404, 'Pay period not found');
+                throw error;
+            }
+            const employeesMonthlyCost = yield repositories_1.employeeCostRepository.getMonthlyCostTotal(companyId, payPeriodId);
+            const obj = {
+                employeeName: 'Total',
+                status: true
+            };
+            const companyFields = yield prisma_1.prisma.field.findMany({
+                where: {
+                    companyId,
+                    jsonId: 't1'
+                }
+            });
+            const totalFields = [];
+            companyFields.forEach((e) => {
+                if (!totalFields.includes(e.id)) {
+                    totalFields.push(e.id);
+                }
+            });
+            employeesMonthlyCost.forEach((singleEmployeeData) => {
+                singleEmployeeData.employeeCostField.forEach((singleFieldObj) => {
+                    if (singleEmployeeData && (singleEmployeeData === null || singleEmployeeData === void 0 ? void 0 : singleEmployeeData.employeeCostField)) {
+                        if (obj[singleFieldObj.field.id]) {
+                            obj[singleFieldObj.field.id] += Number(singleFieldObj.costValue[0].value);
+                        }
+                        else {
+                            obj[singleFieldObj.field.id] = Number(singleFieldObj.costValue[0].value);
+                        }
+                    }
+                });
+            });
+            let total = 0;
+            Object.keys(obj).forEach((key) => {
+                if (totalFields.includes(key)) {
+                    total += obj[key];
+                }
+            });
+            obj['totalLaborBurden'] = total;
+            return obj;
         });
     }
     getMonthlyCostExport(companyId, date, search, type, sort, isPercentage, payPeriodId) {

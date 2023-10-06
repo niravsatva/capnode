@@ -210,5 +210,27 @@ class EmployeeConstController {
             }
         });
     }
+    employeeCostTotal(req, res, next) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                const { companyId, payPeriodId } = req.query;
+                if (!companyId) {
+                    throw new customError_1.CustomError(400, 'Company id is required');
+                }
+                if (!payPeriodId) {
+                    throw new customError_1.CustomError(400, 'Pay period id is required');
+                }
+                const data = yield employeeCostServices_1.default.getMonthlyCostTotal(companyId, payPeriodId);
+                // const data = await employeeCostServices.getMonthlyCostTotal(
+                // 	'acad9ecb-797a-4d43-b354-1a4ebb4bf1c1',
+                // 	'3309e3e3-bc0e-45c0-8804-4c15afea65d3'
+                // );
+                return (0, defaultResponseHelper_1.DefaultResponse)(res, 200, 'Configurations fetched successfully', data);
+            }
+            catch (err) {
+                next(err);
+            }
+        });
+    }
 }
 exports.default = new EmployeeConstController();

@@ -14,4 +14,6 @@ router.get('/', authMiddleware_1.isAuthenticated, controllers_1.splitTimeActivit
 router.post('/', authMiddleware_1.isAuthenticated, validators_1.createSplitTimeActivity, controllers_1.splitTimeActivityController.createSplitTimeActivities);
 // Delete split time activity
 router.delete('/', authMiddleware_1.isAuthenticated, validators_1.deleteSplitTimeActivity, controllers_1.splitTimeActivityController.deleteSplitTimeActivity);
+// Delete all split time activity
+router.delete('/all', authMiddleware_1.isAuthenticated, validators_1.deleteAllSplitTimeActivity, controllers_1.splitTimeActivityController.deleteAllSplitTimeActivity);
 exports.default = router;

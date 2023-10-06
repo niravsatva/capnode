@@ -191,8 +191,8 @@ class TimeActivityController {
     deleteTimeActivity(req, res, next) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                (0, validationHelper_1.checkValidation)(req);
                 const { timeActivityId, companyId } = req.body;
+                (0, validationHelper_1.checkValidation)(req);
                 // Checking is the user is permitted
                 const isPermitted = yield (0, isAuthorizedUser_1.checkPermission)(req, companyId, {
                     permissionName: 'Time Logs',

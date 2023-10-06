@@ -66,5 +66,14 @@ class SplitTimeActivityServices {
             return deletedSplitActivity;
         });
     }
+    deleteAllSplitTimeActivity(splitTimeActivityData) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const { timeActivityId } = splitTimeActivityData;
+            const deletedSplitActivity = yield splitTimeActivityRepository_1.default.deleteSplitActivity({
+                timeActivityId: timeActivityId,
+            });
+            return deletedSplitActivity;
+        });
+    }
 }
 exports.default = new SplitTimeActivityServices();

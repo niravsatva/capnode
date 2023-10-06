@@ -96,5 +96,20 @@ class PayPeriodRepository {
             return payPeriod;
         });
     }
+    getDatesByPayPeriod(payPeriodId) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const data = yield prisma_1.prisma.payPeriod.findUnique({
+                where: {
+                    id: payPeriodId,
+                },
+            });
+            const startDate = data === null || data === void 0 ? void 0 : data.startDate;
+            const endDate = data === null || data === void 0 ? void 0 : data.endDate;
+            return {
+                startDate,
+                endDate,
+            };
+        });
+    }
 }
 exports.default = new PayPeriodRepository();

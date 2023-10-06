@@ -41,6 +41,32 @@ class EmployeeCostRepository {
             }
         });
     }
+    getMonthlyCostTotal(companyId, payPeriodId) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const employeesCostByMonth = yield prisma_1.prisma.employee.findMany({
+                where: {
+                    companyId: companyId,
+                },
+                include: {
+                    employeeCostField: {
+                        include: {
+                            field: true,
+                            costValue: {
+                                where: {
+                                    payPeriodId: payPeriodId,
+                                    isPercentage: true,
+                                },
+                            },
+                        },
+                    },
+                },
+                orderBy: {
+                    fullName: 'asc',
+                },
+            });
+            return employeesCostByMonth;
+        });
+    }
     getEmployees(companyId, offset, limit, searchCondition, sortCondition) {
         return __awaiter(this, void 0, void 0, function* () {
             try {

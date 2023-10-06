@@ -461,6 +461,11 @@ class TimeActivityRepository {
             if (!findActivity) {
                 throw new customError_1.CustomError(404, 'Time Activity not found');
             }
+            yield prisma_1.prisma.splitTimeActivities.deleteMany({
+                where: {
+                    timeActivityId: timeActivityId,
+                },
+            });
             const deleted = yield prisma_1.prisma.timeActivities.deleteMany({
                 where: {
                     id: timeActivityId,

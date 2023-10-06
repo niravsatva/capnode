@@ -63,5 +63,15 @@ class SplitTimeActivityRepository {
             return deletedSplitActivity;
         });
     }
+    deleteSplitActivity(splitTimeActivityData) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const { timeActivityId } = splitTimeActivityData;
+            yield prisma_1.prisma.splitTimeActivities.deleteMany({
+                where: {
+                    timeActivityId: timeActivityId,
+                },
+            });
+        });
+    }
 }
 exports.default = new SplitTimeActivityRepository();
