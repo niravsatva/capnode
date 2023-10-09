@@ -22,7 +22,10 @@ class payPeriodServices {
         return __awaiter(this, void 0, void 0, function* () {
             const companyId = payPeriodData.companyId;
             const { page, limit, year } = payPeriodData;
-            const offset = (Number(page) - 1) * Number(limit);
+            let offset;
+            if (page && limit) {
+                offset = (Number(page) - 1) * Number(limit);
+            }
             // Check If company exists
             const companyDetails = yield repositories_1.companyRepository.getDetails(companyId);
             if (!companyDetails) {
@@ -104,7 +107,7 @@ class payPeriodServices {
             if (!companyDetails) {
                 throw new customError_1.CustomError(404, 'Company not found');
             }
-            const { isInPayPeriod, payPeriod } = yield payPeriodRepository_1.default.isDateInAnyPayPeriod(payPeriodData);
+            const { isInPayPeriod, payPeriod } = yield payPeriodRepository_1.default.isDateInEditPayPeriod(payPeriodData);
             if (isInPayPeriod && payPeriod.id != payPeriodData.id) {
                 throw new customError_1.CustomError(400, 'Dates are already in pay period');
             }

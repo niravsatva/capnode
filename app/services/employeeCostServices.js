@@ -161,13 +161,13 @@ class EmployeeCostService {
             const employeesMonthlyCost = yield repositories_1.employeeCostRepository.getMonthlyCostTotal(companyId, payPeriodId);
             const obj = {
                 employeeName: 'Total',
-                status: true
+                status: true,
             };
             const companyFields = yield prisma_1.prisma.field.findMany({
                 where: {
                     companyId,
-                    jsonId: 't1'
-                }
+                    jsonId: 't1',
+                },
             });
             const totalFields = [];
             companyFields.forEach((e) => {

@@ -65,6 +65,17 @@ class EmployeeConstController {
                 // if (!payPeriodId) {
                 // 	throw new CustomError(400, 'Pay period id is required');
                 // }
+                if (payPeriodId) {
+                    const validatePayPeriod = yield prisma_1.prisma.payPeriod.findFirst({
+                        where: {
+                            companyId: companyId,
+                            id: payPeriodId
+                        }
+                    });
+                    if (!validatePayPeriod) {
+                        throw new customError_1.CustomError(400, 'Invalid PayPeriod');
+                    }
+                }
                 // Checking is the user is permitted
                 const isPermitted = yield (0, isAuthorizedUser_1.checkPermission)(req, companyId, {
                     permissionName: 'Employee Cost',
@@ -168,12 +179,15 @@ class EmployeeConstController {
                                                 ? (_h = item === null || item === void 0 ? void 0 : item.costValue[0]) === null || _h === void 0 ? void 0 : _h.value
                                                 : `$ ${(0, global_1.formatNumberWithCommas)((_j = item === null || item === void 0 ? void 0 : item.costValue[0]) === null || _j === void 0 ? void 0 : _j.value)}` });
                     });
-                    return Object.assign(Object.assign({ 'Employee Name': singleEmployee === null || singleEmployee === void 0 ? void 0 : singleEmployee.fullName }, finalObject), { 'Total Labor Burden': `$ ${(0, global_1.formatNumberWithCommas)(Number(finalObject['Total Salary'].split(',').join('').split('$')[1]) +
-                            Number(finalObject['Total Fringe'].split(',').join('').split('$')[1]) +
+                    return Object.assign(Object.assign({ 'Employee Name': singleEmployee === null || singleEmployee === void 0 ? void 0 : singleEmployee.fullName }, finalObject), { 'Total Labor Burden': `$ ${(0, global_1.formatNumberWithCommas)(Number(Number(finalObject['Total Salary'].split(',').join('').split('$')[1]) +
+                            Number(finalObject['Total Fringe']
+                                .split(',')
+                                .join('')
+                                .split('$')[1]) +
                             Number(finalObject['Total Payroll Taxes']
                                 .split(',')
                                 .join('')
-                                .split('$')[1]))}` });
+                                .split('$')[1])).toFixed(2))}` });
                 });
                 if (percentage) {
                     finalDataArr.forEach((singleEmployee) => {
@@ -182,6 +196,22 @@ class EmployeeConstController {
                         delete singleEmployee['Maximum Vacation/PTO hours per year'];
                     });
                 }
+                const totalObject = {};
+                if (finalDataArr.length > 0) {
+                    finalDataArr.forEach((singleData) => {
+                        Object.entries(singleData).map((singleField) => {
+                            if (singleField[0] in totalObject) {
+                                console.log('TOTAL: ', totalObject);
+                                totalObject[singleField[0]] += Number(singleField[1].split(' ')[1]);
+                            }
+                            else {
+                                totalObject[singleField[0]] = Number(singleField[1].split(' ')[1]);
+                            }
+                        });
+                        Object.values(singleData);
+                    });
+                }
+                totalObject['Employee Name'] = 'Total';
                 const fileHeader = ['Employee Name', 'Employee Type'];
                 const jsonData = new dataExporter({ fileHeader });
                 let dateRange;
@@ -201,9 +231,23 @@ class EmployeeConstController {
                     `\n`;
                 // const exportingData = [...extraData, ...finalDataArr];
                 const csvData = jsonData.parse(finalDataArr);
+                console.log(JSON.stringify(totalObject));
+                // const totalData = jsonData.parse([totalObject]);
+                const finalData = csvData +
+                    '\n' +
+                    JSON.stringify(Object.values(totalObject).map((singleObj, index) => {
+                        if (index === 0) {
+                            return singleObj;
+                        }
+                        else {
+                            return `$ ${singleObj.toFixed(2)}`;
+                        }
+                    }))
+                        .replace('[', '')
+                        .replace(']', '');
                 res.setHeader('Content-Type', 'text/csv');
                 res.setHeader('Content-Disposition', 'attachment; filename=employee_cost_data.csv');
-                return res.status(200).end(extraData + csvData);
+                return res.status(200).end(extraData + finalData);
             }
             catch (error) {
                 next(error);
@@ -219,6 +263,17 @@ class EmployeeConstController {
                 }
                 if (!payPeriodId) {
                     throw new customError_1.CustomError(400, 'Pay period id is required');
+                }
+                if (payPeriodId) {
+                    const validatePayPeriod = yield prisma_1.prisma.payPeriod.findFirst({
+                        where: {
+                            companyId: companyId,
+                            id: payPeriodId
+                        }
+                    });
+                    if (!validatePayPeriod) {
+                        throw new customError_1.CustomError(400, 'Invalid PayPeriod');
+                    }
                 }
                 const data = yield employeeCostServices_1.default.getMonthlyCostTotal(companyId, payPeriodId);
                 // const data = await employeeCostServices.getMonthlyCostTotal(

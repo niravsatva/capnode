@@ -9,5 +9,5 @@ employeeCostRouter.get('/', authMiddleware_1.isAuthenticated, controllers_1.empl
 employeeCostRouter.post('/', validators_1.employeeCostCreateValidation, authMiddleware_1.isAuthenticated, controllers_1.employeeCostController.createMonthlyCost);
 employeeCostRouter.put('/', validators_1.employeeCostUpdateValidation, authMiddleware_1.isAuthenticated, controllers_1.employeeCostController.updateMonthlyCost);
 employeeCostRouter.get('/export', controllers_1.employeeCostController.exportEmployeeCost);
-employeeCostRouter.get('/total', controllers_1.employeeCostController.employeeCostTotal);
+employeeCostRouter.get('/total', authMiddleware_1.isAuthenticated, controllers_1.employeeCostController.employeeCostTotal);
 exports.default = employeeCostRouter;

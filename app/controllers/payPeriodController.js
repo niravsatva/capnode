@@ -21,22 +21,24 @@ class PayPeriodController {
     getAllPayPeriods(req, res, next) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                const { companyId, year, page = 1, limit = 10 } = req.query;
+                const { companyId, year, page, limit } = req.query;
                 if (!companyId) {
                     throw new customError_1.CustomError(400, 'Company id is required');
                 }
                 const data = {
                     companyId,
                     year: Number(year),
-                    page: Number(page),
-                    limit: Number(limit),
+                    page: page ? Number(page) : page,
+                    limit: limit ? Number(limit) : limit,
                 };
-                const isPermitted = yield (0, isAuthorizedUser_1.checkPermission)(req, companyId, {
-                    permissionName: 'Pay Period',
-                    permission: ['view'],
-                });
-                if (!isPermitted) {
-                    throw new customError_1.CustomError(403, 'You are not authorized');
+                if (limit && page) {
+                    const isPermitted = yield (0, isAuthorizedUser_1.checkPermission)(req, companyId, {
+                        permissionName: 'Pay Period',
+                        permission: ['view'],
+                    });
+                    if (!isPermitted) {
+                        throw new customError_1.CustomError(403, 'You are not authorized');
+                    }
                 }
                 const payPeriods = yield payPeriodServices_1.default.getAllPayPeriods(data);
                 const count = yield payPeriodServices_1.default.count(data);
@@ -76,6 +78,7 @@ class PayPeriodController {
     editPayPeriod(req, res, next) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
+                console.log('IIINNN');
                 const { id } = req.params;
                 const { companyId, startDate, endDate } = req.body;
                 (0, validationHelper_1.checkValidation)(req);

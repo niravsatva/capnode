@@ -18,6 +18,9 @@ class PayPeriodRepository {
                 where: Object.assign({ companyId: companyId }, dateFilter),
                 skip: offset,
                 take: limit,
+                orderBy: {
+                    startDate: 'desc',
+                },
             };
             if (!offset) {
                 delete query.skip;
@@ -79,6 +82,27 @@ class PayPeriodRepository {
                 // }
             }
             return { isInPayPeriod: false }; // The date is not in any pay period
+        });
+    }
+    isDateInEditPayPeriod(payPeriodData) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const { startDate, endDate, companyId, id } = payPeriodData;
+            const allPayPeriods = yield prisma_1.prisma.payPeriod.findMany({
+                where: {
+                    companyId: companyId,
+                    NOT: {
+                        id: id,
+                    },
+                },
+            });
+            for (const payPeriod of allPayPeriods) {
+                console.log('object');
+                if (startDate < new Date(payPeriod.endDate).setUTCHours(23, 59, 59, 59) &&
+                    endDate > new Date(payPeriod.startDate).setUTCHours(0, 0, 0, 0)) {
+                    return { isInPayPeriod: true, payPeriod: payPeriod }; // The date is in a pay period
+                }
+            }
+            return { isInPayPeriod: false };
         });
     }
     update(payPeriodData) {
