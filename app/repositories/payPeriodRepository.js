@@ -19,7 +19,7 @@ class PayPeriodRepository {
                 skip: offset,
                 take: limit,
                 orderBy: {
-                    startDate: 'desc',
+                    startDate: 'asc',
                 },
             };
             if (!offset) {
