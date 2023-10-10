@@ -25,7 +25,25 @@ class TimeActivityService {
     // Get all time activities
     getAllTimeActivitiesServices(timeActivityData) {
         return __awaiter(this, void 0, void 0, function* () {
-            const { companyId, search, sort, page, limit, type, classId, customerId, employeeId, isOverHours, payPeriodId, } = timeActivityData;
+            const { companyId, search, sort, page, limit, type, classId, customerId, employeeId, isOverHours, payPeriodId, year, } = timeActivityData;
+            // let yearFilter = {};
+            // if (year) {
+            // 	yearFilter = {
+            // 		AND: [
+            // 			{
+            // 				activityDate: {
+            // 					gte: new Date(`${Number(year)}-01-01T00:00:00Z`), // Start of the year
+            // 				},
+            // 			},
+            // 			{
+            // 				activityDate: {
+            // 					lt: new Date(`${Number(year) + 1}-01-01T00:00:00Z`), // Start of the next year
+            // 				},
+            // 			},
+            // 		],
+            // 	};
+            // }
+            // console.log('YEAR: ', yearFilter);
             let dateFilters = {};
             if (payPeriodId) {
                 // Get pay period details
@@ -85,6 +103,17 @@ class TimeActivityService {
                     },
                 });
             }
+            if (year) {
+                filteredData.push({
+                    activityDate: {
+                        gte: new Date(`${Number(year)}-01-01T00:00:00Z`), // Start of the year
+                    },
+                }, {
+                    activityDate: {
+                        lt: new Date(`${Number(year) + 1}-01-01T00:00:00Z`), // Start of the next year
+                    },
+                });
+            }
             const filterConditions = (filteredData === null || filteredData === void 0 ? void 0 : filteredData.length) > 0
                 ? {
                     AND: filteredData,
@@ -120,21 +149,25 @@ class TimeActivityService {
             // Conditions for sort
             const sortCondition = sort
                 ? {
-                    orderBy: {
-                        [sort]: type !== null && type !== void 0 ? type : 'asc',
-                    },
+                    orderBy: [{
+                            [sort]: type !== null && type !== void 0 ? type : 'asc',
+                        }, {
+                            id: 'asc'
+                        }],
                 }
                 : {
-                    orderBy: {
-                        activityDate: 'desc',
-                    },
+                    orderBy: [{
+                            activityDate: 'desc'
+                        }, {
+                            id: 'asc'
+                        }],
                 };
             if (sort === 'employee') {
-                sortCondition['orderBy'] = {
-                    employee: {
-                        fullName: type,
-                    },
-                };
+                sortCondition['orderBy'] = [{
+                        employee: {
+                            fullName: type,
+                        },
+                    }, { id: 'asc' }];
             }
             // Check if company exists or not
             const companyDetails = yield repositories_1.companyRepository.getDetails(companyId);

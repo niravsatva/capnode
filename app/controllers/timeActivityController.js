@@ -29,7 +29,7 @@ class TimeActivityController {
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 (0, validationHelper_1.checkValidation)(req);
-                const { page = 1, limit = 10, search = '', classId = '', customerId = '', employeeId = '', type = '', sort = '', isOverHours = false, payPeriodId = '', companyId = '', } = req.query;
+                const { page = 1, limit = 10, search = '', classId = '', customerId = '', employeeId = '', type = '', sort = '', isOverHours = false, payPeriodId = '', companyId = '', year = '', } = req.query;
                 // if (!payPeriodId) {
                 // 	throw new CustomError(400, 'Pay Period Id is required');
                 // }
@@ -65,6 +65,7 @@ class TimeActivityController {
                             ? true
                             : '',
                     payPeriodId: String(payPeriodId),
+                    year: String(year),
                 });
                 return (0, defaultResponseHelper_1.DefaultResponse)(res, 200, 'Time Activities fetched successfully', {
                     timeActivities: timeActivitiesWithHours,
