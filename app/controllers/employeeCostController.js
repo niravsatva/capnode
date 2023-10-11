@@ -28,30 +28,39 @@ class EmployeeConstController {
             try {
                 const { companyId, date, page = 1, limit = 10, search, type, sort, isPdf, } = req.query;
                 let payPeriodId = req.query.payPeriodId;
+                const _date = new Date();
                 if (!payPeriodId) {
                     const payPeriodData = yield prisma_1.prisma.payPeriod.findFirst({
                         where: {
                             companyId: companyId,
-                            OR: [
-                                {
-                                    startDate: {
-                                        lte: new Date(new Date().setUTCHours(23, 59, 59, 999)),
-                                    },
-                                    endDate: {
-                                        gte: new Date(new Date().setUTCHours(0, 0, 0, 0)),
-                                    },
-                                },
-                                {
-                                    startDate: {
-                                        gte: new Date(new Date().setUTCHours(0, 0, 0, 0)),
-                                    },
-                                    endDate: {
-                                        lte: new Date(new Date().setUTCHours(23, 59, 59, 999)),
-                                    },
-                                },
-                            ],
+                            endDate: {
+                                gte: new Date(_date === null || _date === void 0 ? void 0 : _date.getFullYear(), _date === null || _date === void 0 ? void 0 : _date.getMonth(), 1),
+                                lte: new Date(_date.getFullYear(), _date.getMonth() + 1, 0)
+                            },
+                            // OR: [
+                            // 	// {
+                            // 	// 	startDate: {
+                            // 	// 		lte: new Date(new Date().setUTCHours(23, 59, 59, 999)),
+                            // 	// 	},
+                            // 	// 	endDate: {
+                            // 	// 		gte: new Date(new Date().setUTCHours(0, 0, 0, 0)),
+                            // 	// 	},
+                            // 	// },
+                            // 	// {
+                            // 	// 	startDate: {
+                            // 	// 		gte: new Date(new Date().setUTCHours(0, 0, 0, 0)),
+                            // 	// 	},
+                            // 	// 	endDate: {
+                            // 	// 		lte: new Date(new Date().setUTCHours(23, 59, 59, 999)),
+                            // 	// 	},
+                            // 	// },
+                            // ],
                         },
+                        orderBy: {
+                            endDate: 'desc'
+                        }
                     });
+                    console.log(payPeriodData);
                     if (payPeriodData && payPeriodData.id) {
                         payPeriodId = payPeriodData.id;
                     }
