@@ -11,6 +11,11 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 const prisma_1 = require("../client/prisma");
 const data_1 = require("../constants/data");
+// type SortCondition = {
+// 	orderBy: {
+// 		[key: string]: 'asc' | 'desc';
+// 	};
+// };
 class RoleRepositories {
     constructor() {
         this.checkIsUsersInRole = (roleId, companyId) => __awaiter(this, void 0, void 0, function* () {

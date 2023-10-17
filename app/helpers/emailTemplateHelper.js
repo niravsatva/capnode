@@ -148,7 +148,7 @@ const getInvitationAdminMailTemplate = (data) => {
 									<p>Hi <b>${finalName}</b>,</p>
 									<p>		You just invited ${firstName || ''} ${lastName || ''} to ${companyName} on CostAllocation Pro.</p><p> If you don't want this person on your account, you can delete them from your Manage Users page.</p>  
 										<br/>
-									<p style="margin:30px 0px"><button class="reset-button" style="border:none;border-radius:20px;padding:8px 20px;background-color:#000;"><a href='${url}' style="color:white;text-decoration:none;">Click Here<a/></button>, to view the Manage Users page.</p>
+									<p style="margin:30px 0px"><button class="reset-button" style="border:none;border-radius:20px;padding:8px 20px;background-color:#000;"><a href='${url}' style="color:white;text-decoration:none;">Click Here<a/></button> to view the Manage Users page.</p>
 									<br/>
 									<p>	Best Regards,</p>
 									<p> CostAllocation Pro Team</p>

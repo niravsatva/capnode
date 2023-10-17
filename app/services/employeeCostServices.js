@@ -153,7 +153,7 @@ class EmployeeCostService {
                 const error = new customError_1.CustomError(404, 'Company not found');
                 throw error;
             }
-            const payPeriod = yield payPeriodRepository_1.default.getDetails(payPeriodId);
+            const payPeriod = yield payPeriodRepository_1.default.getDetails(payPeriodId, companyId);
             if (!payPeriod) {
                 const error = new customError_1.CustomError(404, 'Pay period not found');
                 throw error;
@@ -208,7 +208,7 @@ class EmployeeCostService {
                 let payPeriodData;
                 if (payPeriodId) {
                     // Get pay period details
-                    payPeriodData = yield payPeriodRepository_1.default.getDetails(payPeriodId);
+                    payPeriodData = yield payPeriodRepository_1.default.getDetails(payPeriodId, companyId);
                     if (!payPeriodData) {
                         throw new customError_1.CustomError(404, 'Pay period not found');
                     }
@@ -251,7 +251,7 @@ class EmployeeCostService {
                     throw error;
                 }
                 // Check if pay period exists
-                const payPeriod = yield payPeriodRepository_1.default.getDetails(payPeriodId);
+                const payPeriod = yield payPeriodRepository_1.default.getDetails(payPeriodId, companyId);
                 if (!payPeriod) {
                     throw new customError_1.CustomError(404, 'Pay period not found');
                 }

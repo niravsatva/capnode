@@ -191,5 +191,24 @@ class CompanyRepository {
             }
         });
     }
+    getAllUsers(companyId) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const users = yield prisma_1.prisma.user.findMany({
+                where: {
+                    companies: {
+                        some: {
+                            companyId: companyId,
+                        },
+                    },
+                },
+                select: {
+                    id: true,
+                    firstName: true,
+                    lastName: true,
+                },
+            });
+            return users;
+        });
+    }
 }
 exports.default = new CompanyRepository();

@@ -14,48 +14,46 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 /* eslint-disable no-mixed-spaces-and-tabs */
 const client_sqs_1 = require("@aws-sdk/client-sqs");
+const axios_1 = __importDefault(require("axios"));
+const moment_1 = __importDefault(require("moment"));
+const prisma_1 = require("../client/prisma");
 const aws_1 = require("../config/aws");
+const global_1 = require("../helpers/global");
 const customError_1 = require("../models/customError");
 const repositories_1 = require("../repositories");
-const timeActivityRepository_1 = __importDefault(require("../repositories/timeActivityRepository"));
+const payPeriodRepository_1 = __importDefault(require("../repositories/payPeriodRepository"));
 const timeSheetRepository_1 = __importDefault(require("../repositories/timeSheetRepository"));
+const timeSheetPdf_1 = require("../templates/timeSheetPdf");
+const timeActivityServices_1 = __importDefault(require("./timeActivityServices"));
 const sqs = new client_sqs_1.SQSClient(aws_1.awsConfig);
 class TimeSheetServices {
     // Get all time sheets
     getAllTimeSheets(timeSheetData) {
         return __awaiter(this, void 0, void 0, function* () {
-            const { companyId, page, limit, search, createdBy, type, sort, startDate, endDate, } = timeSheetData;
+            const { companyId, payPeriodId, page, limit, search, createdBy, type, sort, } = timeSheetData;
+            if (!companyId) {
+                throw new customError_1.CustomError(400, 'Company id is required');
+            }
+            const companyDetails = yield repositories_1.companyRepository.getDetails(companyId);
+            if (!companyDetails) {
+                throw new customError_1.CustomError(400, 'Company not found');
+            }
             // Offset set
             const offset = (Number(page) - 1) * Number(limit);
             // Filter Conditions
-            const filterConditions = [];
+            let filterConditions = {};
             if (createdBy) {
-                filterConditions.push({
+                filterConditions = {
                     createdBy: {
                         id: createdBy,
                     },
-                });
+                };
             }
-            let dateFilters = {};
-            if (startDate && endDate) {
-                if (startDate === endDate) {
-                    dateFilters = {
-                        SubmitedOn: {
-                            equals: startDate,
-                        },
-                    };
-                }
-                else {
-                    dateFilters = {
-                        SubmitedOn: {
-                            gte: startDate,
-                            lt: endDate,
-                        },
-                    };
-                }
-            }
-            else {
-                dateFilters = {};
+            let payPeriodFilter = {};
+            if (payPeriodId) {
+                payPeriodFilter = {
+                    payPeriodId: payPeriodId,
+                };
             }
             // Conditions for searching
             const searchCondition = search
@@ -67,18 +65,25 @@ class TimeSheetServices {
                     ],
                 }
                 : {};
-            // Conditions for sort
-            const sortCondition = sort
-                ? {
-                    orderBy: {
-                        [sort]: type !== null && type !== void 0 ? type : 'asc',
+            const orderByArray = [];
+            if (sort === 'createdByName') {
+                orderByArray.push({
+                    createdBy: {
+                        firstName: type ? type : 'desc',
                     },
-                }
-                : {
-                    orderBy: {
-                        SubmitedOn: 'desc',
-                    },
-                };
+                });
+            }
+            if (sort === 'status') {
+                orderByArray.push({
+                    status: type ? type : 'desc',
+                });
+            }
+            orderByArray.push({
+                id: 'desc',
+            });
+            const sortCondition = {
+                orderBy: orderByArray,
+            };
             const data = {
                 companyId,
                 offset: offset,
@@ -86,128 +91,61 @@ class TimeSheetServices {
                 filterConditions: filterConditions,
                 searchCondition: searchCondition,
                 sortCondition: sortCondition,
-                dateFilters: dateFilters,
+                payPeriodFilter: payPeriodFilter,
             };
-            const timeSheets = yield timeSheetRepository_1.default.getAllTimeSheets(data);
-            return timeSheets;
+            const { timeSheets, count } = yield timeSheetRepository_1.default.getAllTimeSheets(data);
+            timeSheets.forEach((singleTimeSheet) => {
+                var _a, _b;
+                let approvedHours = 0;
+                singleTimeSheet.timeActivities.forEach((singleTimeActivity) => {
+                    approvedHours += singleTimeActivity.hours
+                        ? Number(singleTimeActivity.hours) * 60 +
+                            Number(singleTimeActivity.minute)
+                        : Number(singleTimeActivity.minute);
+                });
+                const formattedHours = (0, global_1.minutesToHoursAndMinutes)(approvedHours);
+                singleTimeSheet['approvedHours'] = formattedHours;
+                singleTimeSheet['createdByName'] =
+                    ((_a = singleTimeSheet === null || singleTimeSheet === void 0 ? void 0 : singleTimeSheet.createdBy) === null || _a === void 0 ? void 0 : _a.firstName) +
+                        ' ' +
+                        ((_b = singleTimeSheet === null || singleTimeSheet === void 0 ? void 0 : singleTimeSheet.createdBy) === null || _b === void 0 ? void 0 : _b.lastName);
+                delete singleTimeSheet.timeActivities;
+            });
+            return { timeSheets, count };
         });
     }
     createTimeSheet(timeSheetData) {
         return __awaiter(this, void 0, void 0, function* () {
-            try {
-                const timeSheet = yield timeSheetRepository_1.default.createTimeSheet(timeSheetData);
-                return timeSheet;
+            const { companyId, payPeriodId } = timeSheetData;
+            const companyDetails = yield repositories_1.companyRepository.getDetails(companyId);
+            if (!companyDetails) {
+                throw new customError_1.CustomError(400, 'Company not found');
             }
-            catch (err) {
-                throw err;
+            const payPeriodDetails = yield payPeriodRepository_1.default.getDetails(payPeriodId, companyId);
+            if (!payPeriodDetails) {
+                throw new customError_1.CustomError(400, 'Pay period not found');
             }
-        });
-    }
-    // Create a new time sheet
-    createTimeSheetByDate(timeSheetData) {
-        var _a;
-        return __awaiter(this, void 0, void 0, function* () {
-            try {
-                const { companyId, name, startDate, endDate, notes, status, user } = timeSheetData;
-                console.log('CCC: ', companyId, name, notes, status, user);
-                let dateFilters = {};
-                if (startDate && endDate) {
-                    if (startDate === endDate) {
-                        dateFilters = {
-                            activityDate: {
-                                equals: startDate,
-                            },
-                        };
-                    }
-                    else {
-                        dateFilters = {
-                            activityDate: {
-                                gte: startDate,
-                                lte: endDate,
-                            },
-                        };
-                    }
-                }
-                else {
-                    dateFilters = {};
-                }
-                const timeLogs = yield timeActivityRepository_1.default.getAllTimeActivities({
-                    companyId: companyId,
-                    dateFilters: dateFilters,
-                });
-                const totalHoursAndMinutes = {};
-                let finalHours = 0;
-                let finalMinutes = 0;
-                timeLogs === null || timeLogs === void 0 ? void 0 : timeLogs.forEach((singleActivity) => {
-                    const employeeId = singleActivity.employeeId;
-                    const hours = Number(singleActivity.hours);
-                    const minute = Number(singleActivity.minute);
-                    if (!totalHoursAndMinutes[employeeId]) {
-                        totalHoursAndMinutes[employeeId] = {
-                            totalHours: 0,
-                            totalMinutes: 0,
-                        };
-                    }
-                    totalHoursAndMinutes[employeeId].totalHours += hours;
-                    totalHoursAndMinutes[employeeId].totalMinutes += minute;
-                    // Adjust totalMinutes if it exceeds 59
-                    if (totalHoursAndMinutes[employeeId].totalMinutes >= 60) {
-                        const additionalHours = Math.floor(totalHoursAndMinutes[employeeId].totalMinutes / 60);
-                        totalHoursAndMinutes[employeeId].totalHours += additionalHours;
-                        totalHoursAndMinutes[employeeId].totalMinutes %= 60;
-                    }
-                    finalHours += hours;
-                    finalMinutes += minute;
-                    if (finalMinutes > 60) {
-                        const additionalHours = Math.floor(finalMinutes / 60);
-                        finalHours += additionalHours;
-                        finalMinutes %= 60;
+            const timeActivities = yield timeActivityServices_1.default.getAllTimeActivitiesServices({
+                companyId: companyId,
+                payPeriodId: payPeriodId,
+            });
+            // timeSheetData['timeActivities'] =
+            // 	timeActivities.timeActivitiesWithHours.map(
+            // 		(singleActivity: any) => singleActivity.id
+            // 	);
+            timeSheetData['timeActivities'] =
+                timeActivities.timeActivitiesWithHours.filter((singleActivity) => {
+                    if (singleActivity.classId && singleActivity.customerId) {
+                        return singleActivity.id;
                     }
                 });
-                // Create new timesheet
-                const finalTimeSheetData = {
-                    name: name,
-                    totalHours: finalHours.toString(),
-                    totalMinute: finalMinutes.toString(),
-                    notes: notes,
-                    status: status,
-                    companyId: companyId,
-                    userId: user.id,
-                    SubmittedOn: new Date(),
-                    startDate: startDate,
-                    endDate: endDate,
-                };
-                const timeSheet = yield timeSheetRepository_1.default.createTimeSheet(finalTimeSheetData);
-                const timeSheetLogsData = (_a = Object.entries(totalHoursAndMinutes)) === null || _a === void 0 ? void 0 : _a.map((singleObject) => {
-                    return {
-                        employeeId: singleObject[0],
-                        hours: singleObject[1]['totalHours'].toString(),
-                        minute: singleObject[1]['totalMinutes'].toString(),
-                        timeSheetsId: timeSheet === null || timeSheet === void 0 ? void 0 : timeSheet.id,
-                    };
-                });
-                const timeSheetLogs = yield (timeSheetRepository_1.default === null || timeSheetRepository_1.default === void 0 ? void 0 : timeSheetRepository_1.default.createTimeSheetLogs(timeSheetLogsData));
-                console.log('Time logs: ', timeSheet, timeSheetLogs);
-                return timeSheet;
-            }
-            catch (err) {
-                throw err;
-            }
-        });
-    }
-    // Get all time sheet employee logs
-    getTimeSheetLogs(timeSheetId) {
-        return __awaiter(this, void 0, void 0, function* () {
-            try {
-                const timeSheetDetails = yield timeSheetRepository_1.default.getTimeSheetDetails(timeSheetId);
-                if (!timeSheetDetails) {
-                    throw new customError_1.CustomError(404, 'Time sheet not found');
-                }
-                return timeSheetDetails;
-            }
-            catch (err) {
-                throw err;
-            }
+            // if (!name) {
+            // 	const startDate = moment(payPeriodDetails.startDate).format('MM-DD-YYYY');
+            // 	const endDate = moment(payPeriodDetails.endDate).format('MM-DD-YYYY');
+            // 	timeSheetData['name'] = `Timesheet (${startDate} - ${endDate})`;
+            // }
+            const timeSheet = yield timeSheetRepository_1.default.createTimeSheet(timeSheetData);
+            return timeSheet;
         });
     }
     // Email time sheets
@@ -215,77 +153,205 @@ class TimeSheetServices {
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 const { timeSheetId, employeeList, companyId } = timeSheetData;
+                const companyDetails = yield repositories_1.companyRepository.getDetails(companyId);
+                if (!companyDetails) {
+                    throw new customError_1.CustomError(400, 'Company not found');
+                }
                 const timeSheetDetails = yield timeSheetRepository_1.default.getTimeSheetDetails(timeSheetId);
                 if (!timeSheetDetails) {
-                    throw new customError_1.CustomError(404, 'Time sheet not found');
+                    throw new customError_1.CustomError(400, 'Time sheet not found');
                 }
                 yield Promise.all(yield employeeList.map((singleEmployee) => __awaiter(this, void 0, void 0, function* () {
-                    const dateFilters = {
-                        activityDate: {
-                            gte: timeSheetDetails.startDate,
-                            lte: timeSheetDetails.endDate,
-                        },
-                    };
                     const data = {
                         employeeId: singleEmployee,
-                        dateFilters: dateFilters,
                         companyId: companyId,
+                        payPeriodId: timeSheetDetails.payPeriodId,
                     };
-                    const allTimeLogs = yield timeActivityRepository_1.default.getTimeActivityByEmployeeDate(data);
-                    const employeeDetails = yield repositories_1.employeeRepository.getEmployeeDetails(singleEmployee);
+                    const { timeActivitiesWithHours: allTimeLogs } = yield timeActivityServices_1.default.getAllTimeActivitiesServices(data);
+                    const customerIds = [];
+                    const { startDate, endDate } = yield payPeriodRepository_1.default.getDatesByPayPeriod(timeSheetDetails.payPeriodId);
+                    let approvedHours = 0;
+                    allTimeLogs.forEach((singleTimeActivity) => {
+                        if (!customerIds.includes(singleTimeActivity.customerId)) {
+                            customerIds.push(singleTimeActivity.customerId);
+                        }
+                        approvedHours += (0, global_1.getTotalMinutes)(singleTimeActivity.hours, singleTimeActivity.minute);
+                    });
+                    const formattedHours = (0, global_1.minutesToHoursAndMinutes)(approvedHours);
+                    const uniqueCustomers = [];
+                    customerIds.forEach((singleCustomer) => {
+                        let customerMinutes = 0;
+                        const customerObject = {};
+                        let customerName = '';
+                        allTimeLogs.forEach((singleTimeActivity) => {
+                            if (singleTimeActivity.customerId === singleCustomer) {
+                                customerMinutes += (0, global_1.getTotalMinutes)(singleTimeActivity.hours, singleTimeActivity.minute);
+                                customerName = singleTimeActivity.customerName;
+                            }
+                        });
+                        customerObject['customerName'] = customerName;
+                        customerObject['hours'] = (0, global_1.minutesToHoursAndMinutes)(customerMinutes);
+                        uniqueCustomers.push(customerObject);
+                    });
                     const pdfData = {
                         allTimeLogs,
-                        startDate: timeSheetDetails.startDate,
-                        endDate: timeSheetDetails.endDate,
-                        employeeId: singleEmployee.employeeId,
-                        totalHours: timeSheetDetails.totalHours,
-                        totalMinutes: timeSheetDetails.totalMinute,
+                        startDate: startDate,
+                        endDate: endDate,
+                        employeeId: singleEmployee,
+                        totalHours: formattedHours.split(':')[0],
+                        totalMinutes: formattedHours.split(':')[1],
                     };
+                    const employeeDetails = yield repositories_1.employeeRepository.getEmployeeDetails(singleEmployee);
                     const queueData = new client_sqs_1.SendMessageCommand({
                         QueueUrl: `${process.env.QUEUE_URL}`,
                         MessageBody: JSON.stringify({
                             pdfData: pdfData,
                             singleEmployee: employeeDetails,
+                            customers: uniqueCustomers,
                         }),
                     });
                     yield sqs.send(queueData);
-                    // const pdfData = await timeLogPdfGenerate(
-                    // 	allTimeLogs,
-                    // 	timeSheetDetails.startDate,
-                    // 	timeSheetDetails.endDate,
-                    // 	singleEmployee.employeeId,
-                    // 	'120'
-                    // );
-                    // if (employeeDetails?.email) {
-                    // 	const response = await axios.post(
-                    // 		'https://pdf.satvasolutions.com/api/ConvertHtmlToPdf',
-                    // 		{
-                    // 			FileName: 'mypdf.pdf',
-                    // 			HtmlData: [btoa(pdfData)],
-                    // 		}
-                    // 	);
-                    // 	console.log('RES: ', response.data);
-                    // 	const mailOptions = {
-                    // 		from: config.smtpEmail,
-                    // 		to: employeeDetails?.email,
-                    // 		subject: `Actual hours worked Timesheet `,
-                    // 		html: 'This is pdf',
-                    // 		attachments: [
-                    // 			{
-                    // 				filename: 'cat.pdf',
-                    // 				content: response.data,
-                    // 				encoding: 'base64',
-                    // 			},
-                    // 		],
-                    // 		// text: `Please use the following token to reset your password: ${forgotPasswordToken}`,
-                    // 	};
-                    // 	sendEmail(mailOptions);
-                    // }
                 })));
             }
             catch (err) {
                 throw err;
             }
+        });
+    }
+    getTimeSheetByPayPeriod(payPeriodId, companyId) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const timeSheetData = yield prisma_1.prisma.timeSheets.findUnique({
+                where: {
+                    payPeriodId,
+                },
+            });
+            if (timeSheetData && timeSheetData.companyId != companyId) {
+                throw new customError_1.CustomError(400, 'Can not access timesheet');
+            }
+            return timeSheetData;
+        });
+    }
+    getTimeSheetWiseEmployees(timeSheetId, companyId) {
+        return __awaiter(this, void 0, void 0, function* () {
+            if (!timeSheetId) {
+                throw new customError_1.CustomError(400, 'Time Sheet id is required');
+            }
+            if (!companyId) {
+                throw new customError_1.CustomError(400, 'Company id is required');
+            }
+            const companyDetails = yield repositories_1.companyRepository.getDetails(companyId);
+            if (!companyDetails) {
+                throw new customError_1.CustomError(400, 'Company not found');
+            }
+            const timeSheetDetails = yield timeSheetRepository_1.default.getTimeSheetDetails(timeSheetId);
+            if (!timeSheetDetails) {
+                throw new customError_1.CustomError(400, 'Time sheet not found');
+            }
+            const timeSheet = yield timeSheetRepository_1.default.getEmployees(timeSheetId, companyId);
+            const employeeIds = [];
+            const newEmployees = [];
+            timeSheet === null || timeSheet === void 0 ? void 0 : timeSheet.timeActivities.forEach((singleActivity) => {
+                if (!employeeIds.includes(singleActivity.employee.id)) {
+                    employeeIds.push(singleActivity.employee.id);
+                }
+            });
+            employeeIds.forEach((singleId) => {
+                let minutes = 0;
+                const objectEmp = {};
+                const newArr = timeSheet === null || timeSheet === void 0 ? void 0 : timeSheet.timeActivities.filter((singleActivity) => singleActivity.employee.id == singleId);
+                newArr === null || newArr === void 0 ? void 0 : newArr.forEach((singleItem) => {
+                    minutes =
+                        (singleItem.hours
+                            ? Number(singleItem.hours) * 60 + Number(singleItem.minute)
+                            : Number(singleItem.minute)) + Number(minutes);
+                    objectEmp['employeeId'] = singleItem.employee.id;
+                    objectEmp['employeeName'] = singleItem.employee.fullName;
+                    objectEmp['email'] = singleItem.employee.email;
+                });
+                // Convert minutes to hours
+                const finalHours = (0, global_1.minutesToHoursAndMinutes)(minutes);
+                objectEmp['approvedHours'] = finalHours;
+                newEmployees.push(objectEmp);
+            });
+            // timeSheet &&
+            // 	timeSheet.timeActivities.map((singleActivity: any) => {
+            // 		let minutes = 0;
+            // 		if (singleActivity.hours) {
+            // 			minutes =
+            // 				Number(singleActivity.hours) * 60 + Number(singleActivity.minute);
+            // 		} else {
+            // 			minutes = Number(singleActivity.minute);
+            // 		}
+            // 		if (object[singleActivity.employee.id]) {
+            // 			object[singleActivity.employee.id] += Number(minutes);
+            // 		} else {
+            // 			object[singleActivity.employee.id] = minutes;
+            // 		}
+            // 	});
+            return newEmployees;
+        });
+    }
+    exportTimeSheetPdf(timeSheetData) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const { timeSheetId, employeeId, companyId } = timeSheetData;
+            const companyDetails = yield repositories_1.companyRepository.getDetails(companyId);
+            if (!companyDetails) {
+                throw new customError_1.CustomError(400, 'Company not found');
+            }
+            const timeSheetDetails = yield timeSheetRepository_1.default.getTimeSheetDetails(timeSheetId);
+            if (!timeSheetDetails) {
+                throw new customError_1.CustomError(400, 'Time sheet not found');
+            }
+            const employeeDetails = yield repositories_1.employeeRepository.getEmployeeDetails(employeeId);
+            if (!employeeDetails) {
+                throw new customError_1.CustomError(400, 'Employee not found');
+            }
+            const data = {
+                employeeId: employeeId,
+                companyId: companyId,
+                payPeriodId: timeSheetDetails.payPeriodId,
+            };
+            // Get time logs for employee
+            const { timeActivitiesWithHours: allTimeLogs } = yield timeActivityServices_1.default.getAllTimeActivitiesServices(data);
+            const customerIds = [];
+            const { startDate, endDate } = yield payPeriodRepository_1.default.getDatesByPayPeriod(timeSheetDetails.payPeriodId);
+            let approvedHours = 0;
+            allTimeLogs.forEach((singleTimeActivity) => {
+                if (!customerIds.includes(singleTimeActivity.customerId)) {
+                    customerIds.push(singleTimeActivity.customerId);
+                }
+                approvedHours += (0, global_1.getTotalMinutes)(singleTimeActivity.hours, singleTimeActivity.minute);
+            });
+            const formattedHours = (0, global_1.minutesToHoursAndMinutes)(approvedHours);
+            const uniqueCustomers = [];
+            customerIds.forEach((singleCustomer) => {
+                let customerMinutes = 0;
+                const customerObject = {};
+                let customerName = '';
+                allTimeLogs.forEach((singleTimeActivity) => {
+                    if (singleTimeActivity.customerId === singleCustomer) {
+                        customerMinutes += (0, global_1.getTotalMinutes)(singleTimeActivity.hours, singleTimeActivity.minute);
+                        customerName = singleTimeActivity.customerName;
+                    }
+                });
+                customerObject['customerName'] = customerName;
+                customerObject['hours'] = (0, global_1.minutesToHoursAndMinutes)(customerMinutes);
+                uniqueCustomers.push(customerObject);
+            });
+            const pdfData = {
+                allTimeLogs,
+                startDate: startDate,
+                endDate: endDate,
+                employeeId: employeeId,
+                totalHours: formattedHours.split(':')[0],
+                totalMinutes: formattedHours.split(':')[1],
+            };
+            const pdfHTML = (0, timeSheetPdf_1.generatePdf)(pdfData, employeeDetails, uniqueCustomers);
+            const response = yield axios_1.default.post('https://pdf.satvasolutions.com/api/ConvertHtmlToPdf', {
+                FileName: `${employeeDetails === null || employeeDetails === void 0 ? void 0 : employeeDetails.fullName}_${(0, moment_1.default)(pdfData.startDate).format('MM/DD/YYYY')} - ${(0, moment_1.default)(pdfData.endDate).format('MM/DD/YYYY')}.pdf`,
+                HtmlData: [btoa(pdfHTML)],
+            });
+            return response;
         });
     }
 }

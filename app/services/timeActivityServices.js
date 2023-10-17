@@ -47,40 +47,29 @@ class TimeActivityService {
             let dateFilters = {};
             if (payPeriodId) {
                 // Get pay period details
-                const payPeriodData = yield payPeriodRepository_1.default.getDetails(payPeriodId);
+                const payPeriodData = yield payPeriodRepository_1.default.getDetails(payPeriodId, companyId);
                 if (!payPeriodData) {
                     throw new customError_1.CustomError(404, 'Pay period not found');
                 }
                 const payPeriodStartDate = payPeriodData === null || payPeriodData === void 0 ? void 0 : payPeriodData.startDate;
                 const payPeriodEndDate = payPeriodData === null || payPeriodData === void 0 ? void 0 : payPeriodData.endDate;
-                let startDate = '';
-                let endDate = '';
+                let startDate;
+                let endDate;
                 if (payPeriodStartDate && payPeriodEndDate) {
                     // Format start date
-                    const newStart = new Date(payPeriodStartDate);
-                    newStart.setUTCHours(0, 0, 0, 0);
-                    startDate = newStart.toISOString();
+                    startDate = payPeriodStartDate.setUTCHours(0, 0, 0, 0);
+                    // startDate = newStart.toISOString();
                     // Format end date
-                    const newEnd = new Date(payPeriodEndDate);
-                    newEnd.setUTCHours(0, 0, 0, 0);
-                    endDate = newEnd.toISOString();
+                    endDate = payPeriodEndDate.setUTCHours(23, 59, 59, 999);
+                    // endDate = newEnd.toISOString();
                 }
                 if (startDate && endDate) {
-                    if (startDate === endDate) {
-                        dateFilters = {
-                            activityDate: {
-                                equals: startDate,
-                            },
-                        };
-                    }
-                    else {
-                        dateFilters = {
-                            activityDate: {
-                                gte: startDate,
-                                lte: endDate,
-                            },
-                        };
-                    }
+                    dateFilters = {
+                        activityDate: {
+                            gte: new Date(startDate),
+                            lte: new Date(endDate),
+                        },
+                    };
                 }
                 else {
                     dateFilters = {};
@@ -149,25 +138,34 @@ class TimeActivityService {
             // Conditions for sort
             const sortCondition = sort
                 ? {
-                    orderBy: [{
+                    orderBy: [
+                        {
                             [sort]: type !== null && type !== void 0 ? type : 'asc',
-                        }, {
-                            id: 'asc'
-                        }],
+                        },
+                        {
+                            id: 'asc',
+                        },
+                    ],
                 }
                 : {
-                    orderBy: [{
-                            activityDate: 'desc'
-                        }, {
-                            id: 'asc'
-                        }],
+                    orderBy: [
+                        {
+                            activityDate: 'desc',
+                        },
+                        {
+                            id: 'asc',
+                        },
+                    ],
                 };
             if (sort === 'employee') {
-                sortCondition['orderBy'] = [{
+                sortCondition['orderBy'] = [
+                    {
                         employee: {
                             fullName: type,
                         },
-                    }, { id: 'asc' }];
+                    },
+                    { id: 'asc' },
+                ];
             }
             // Check if company exists or not
             const companyDetails = yield repositories_1.companyRepository.getDetails(companyId);
@@ -561,7 +559,7 @@ class TimeActivityService {
             let payPeriodData;
             if (payPeriodId) {
                 // Get pay period details
-                payPeriodData = yield payPeriodRepository_1.default.getDetails(payPeriodId);
+                payPeriodData = yield payPeriodRepository_1.default.getDetails(payPeriodId, companyId);
                 if (!payPeriodData) {
                     throw new customError_1.CustomError(404, 'Pay period not found');
                 }
@@ -649,19 +647,39 @@ class TimeActivityService {
                 searchCondition: searchCondition,
                 dateFilters: dateFilters,
             });
-            const timeActivities = getAllActivities === null || getAllActivities === void 0 ? void 0 : getAllActivities.map((singleTimeActivity) => {
+            const timeActivities = [];
+            getAllActivities === null || getAllActivities === void 0 ? void 0 : getAllActivities.forEach((singleTimeActivity) => {
                 var _a;
-                return {
-                    'Activity Date': (0, moment_timezone_1.default)(singleTimeActivity.activityDate).format('MM/DD/YYYY'),
-                    'Employee Name': (_a = singleTimeActivity === null || singleTimeActivity === void 0 ? void 0 : singleTimeActivity.employee) === null || _a === void 0 ? void 0 : _a.fullName,
-                    Customer: (singleTimeActivity === null || singleTimeActivity === void 0 ? void 0 : singleTimeActivity.customerName)
-                        ? singleTimeActivity === null || singleTimeActivity === void 0 ? void 0 : singleTimeActivity.customerName
-                        : 'NA',
-                    Class: (singleTimeActivity === null || singleTimeActivity === void 0 ? void 0 : singleTimeActivity.className)
-                        ? singleTimeActivity === null || singleTimeActivity === void 0 ? void 0 : singleTimeActivity.className
-                        : 'NA',
-                    Hours: `${singleTimeActivity === null || singleTimeActivity === void 0 ? void 0 : singleTimeActivity.hours}:${singleTimeActivity === null || singleTimeActivity === void 0 ? void 0 : singleTimeActivity.minute}`,
-                };
+                if (singleTimeActivity.SplitTimeActivities &&
+                    singleTimeActivity.SplitTimeActivities.length > 0) {
+                    singleTimeActivity.SplitTimeActivities.forEach((singleSplit) => {
+                        var _a;
+                        const object = {
+                            'Activity Date': (0, moment_timezone_1.default)(singleSplit.activityDate).format('MM/DD/YYYY'),
+                            'Employee Name': (_a = singleSplit === null || singleSplit === void 0 ? void 0 : singleSplit.employee) === null || _a === void 0 ? void 0 : _a.fullName,
+                            Customer: (singleSplit === null || singleSplit === void 0 ? void 0 : singleSplit.customerName)
+                                ? singleSplit === null || singleSplit === void 0 ? void 0 : singleSplit.customerName
+                                : 'NA',
+                            Class: (singleSplit === null || singleSplit === void 0 ? void 0 : singleSplit.className) ? singleSplit === null || singleSplit === void 0 ? void 0 : singleSplit.className : 'NA',
+                            Hours: `${singleSplit === null || singleSplit === void 0 ? void 0 : singleSplit.hours}:${singleSplit === null || singleSplit === void 0 ? void 0 : singleSplit.minute}`,
+                        };
+                        timeActivities.push(object);
+                    });
+                }
+                else {
+                    const object = {
+                        'Activity Date': (0, moment_timezone_1.default)(singleTimeActivity.activityDate).format('MM/DD/YYYY'),
+                        'Employee Name': (_a = singleTimeActivity === null || singleTimeActivity === void 0 ? void 0 : singleTimeActivity.employee) === null || _a === void 0 ? void 0 : _a.fullName,
+                        Customer: (singleTimeActivity === null || singleTimeActivity === void 0 ? void 0 : singleTimeActivity.customerName)
+                            ? singleTimeActivity === null || singleTimeActivity === void 0 ? void 0 : singleTimeActivity.customerName
+                            : 'NA',
+                        Class: (singleTimeActivity === null || singleTimeActivity === void 0 ? void 0 : singleTimeActivity.className)
+                            ? singleTimeActivity === null || singleTimeActivity === void 0 ? void 0 : singleTimeActivity.className
+                            : 'NA',
+                        Hours: `${singleTimeActivity === null || singleTimeActivity === void 0 ? void 0 : singleTimeActivity.hours}:${singleTimeActivity === null || singleTimeActivity === void 0 ? void 0 : singleTimeActivity.minute}`,
+                    };
+                    timeActivities.push(object);
+                }
             });
             return { timeActivities, companyDetails, payPeriodData };
         });

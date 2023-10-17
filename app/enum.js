@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.PayPeriodStatus = exports.ResponseStatus = void 0;
+exports.TimeSheetsStatus = exports.PayPeriodStatus = exports.ResponseStatus = void 0;
 var ResponseStatus;
 (function (ResponseStatus) {
     ResponseStatus[ResponseStatus["Success"] = 200] = "Success";
@@ -15,3 +15,8 @@ var PayPeriodStatus;
     PayPeriodStatus[PayPeriodStatus["CURRENT"] = 1] = "CURRENT";
     PayPeriodStatus[PayPeriodStatus["POSTED"] = 2] = "POSTED";
 })(PayPeriodStatus || (exports.PayPeriodStatus = PayPeriodStatus = {}));
+var TimeSheetsStatus;
+(function (TimeSheetsStatus) {
+    TimeSheetsStatus["PUBLISHED"] = "Published";
+    TimeSheetsStatus["DRAFT"] = "Draft";
+})(TimeSheetsStatus || (exports.TimeSheetsStatus = TimeSheetsStatus = {}));

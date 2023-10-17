@@ -14,17 +14,9 @@ class TimeSheetRepository {
     // Get all time sheets
     getAllTimeSheets(timeSheetData) {
         return __awaiter(this, void 0, void 0, function* () {
-            const { companyId, offset, limit, searchCondition, filterConditions, sortCondition, dateFilters, } = timeSheetData;
-            const timeSheets = yield prisma_1.prisma.timeSheets.findMany(Object.assign(Object.assign({ where: Object.assign(Object.assign(Object.assign({ companyId: companyId }, searchCondition), dateFilters), filterConditions), skip: offset, take: limit }, sortCondition), { include: {
-                    TimeSheetLogs: {
-                        select: {
-                            id: true,
-                            hours: true,
-                            minute: true,
-                            employeeId: true,
-                            timeSheetsId: true,
-                        },
-                    },
+            const { companyId, offset, limit, searchCondition, filterConditions, sortCondition, payPeriodFilter, } = timeSheetData;
+            const timeSheets = yield prisma_1.prisma.timeSheets.findMany(Object.assign(Object.assign({ where: Object.assign(Object.assign(Object.assign({ companyId: companyId }, payPeriodFilter), searchCondition), filterConditions), skip: offset, take: limit }, sortCondition), { include: {
+                    timeActivities: true,
                     createdBy: {
                         select: {
                             id: true,
@@ -34,7 +26,8 @@ class TimeSheetRepository {
                         },
                     },
                 } }));
-            return timeSheets;
+            const count = yield prisma_1.prisma.timeSheets.count();
+            return { timeSheets, count };
         });
     }
     // Get time sheet details
@@ -53,17 +46,7 @@ class TimeSheetRepository {
                             lastName: true,
                         },
                     },
-                    TimeSheetLogs: {
-                        include: {
-                            employee: {
-                                select: {
-                                    id: true,
-                                    email: true,
-                                    fullName: true,
-                                },
-                            },
-                        },
-                    },
+                    timeActivities: true,
                 },
             });
             return timeSheetDetails;
@@ -72,19 +55,48 @@ class TimeSheetRepository {
     // Create new time sheet
     createTimeSheet(timeSheetData) {
         return __awaiter(this, void 0, void 0, function* () {
-            const { name, totalHours, totalMinute, notes, status, companyId, userId, SubmittedOn, startDate, endDate, } = timeSheetData;
+            const { name, notes, status = 'Draft', companyId, userId, payPeriodId, timeActivities, findExistingTimeSheet, } = timeSheetData;
+            // const findExistingTimeSheet = await prisma.timeSheets.findUnique({
+            // 	where: {
+            // 		payPeriodId,
+            // 	},
+            // });
+            if (findExistingTimeSheet) {
+                const timeSheet = yield prisma_1.prisma.timeSheets.update({
+                    where: {
+                        id: findExistingTimeSheet.id,
+                    },
+                    data: {
+                        name: name,
+                        notes: notes,
+                        status: status,
+                        company: { connect: { id: companyId } },
+                        createdBy: { connect: { id: userId } },
+                        payPeriod: { connect: { id: payPeriodId } },
+                        timeActivities: {
+                            connect: timeActivities.map((timeActivityId) => ({
+                                id: timeActivityId.id,
+                            })),
+                        },
+                        submittedOn: new Date(),
+                    },
+                });
+                return timeSheet;
+            }
             const timeSheet = yield prisma_1.prisma.timeSheets.create({
                 data: {
                     name: name,
-                    totalHours: totalHours,
-                    totalMinute: totalMinute,
                     notes: notes,
                     status: status,
                     company: { connect: { id: companyId } },
                     createdBy: { connect: { id: userId } },
-                    startDate: startDate,
-                    endDate: endDate,
-                    SubmitedOn: SubmittedOn,
+                    payPeriod: { connect: { id: payPeriodId } },
+                    timeActivities: {
+                        connect: timeActivities.map((timeActivityId) => ({
+                            id: timeActivityId.id,
+                        })),
+                    },
+                    submittedOn: new Date(),
                 },
             });
             return timeSheet;
@@ -104,6 +116,25 @@ class TimeSheetRepository {
                 });
             }))));
             return timeSheetLogs;
+        });
+    }
+    // Get Employees
+    getEmployees(timeSheetId, companyId) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const timeSheet = yield prisma_1.prisma.timeSheets.findFirst({
+                where: {
+                    id: timeSheetId,
+                    companyId: companyId,
+                },
+                include: {
+                    timeActivities: {
+                        include: {
+                            employee: true,
+                        },
+                    },
+                },
+            });
+            return timeSheet;
         });
     }
 }

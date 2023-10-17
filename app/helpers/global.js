@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getSearchConditionSQL = exports.formatNumberWithCommas = exports.employeeFormationDataHandler = void 0;
+exports.getTotalMinutes = exports.minutesToHoursAndMinutes = exports.getSearchConditionSQL = exports.formatNumberWithCommas = exports.employeeFormationDataHandler = void 0;
 /* eslint-disable no-prototype-builtins */
 const employeeFormationDataHandler = (singleEmployeeData) => {
     const obj = {};
@@ -36,3 +36,33 @@ function getSearchConditionSQL(searchCondition) {
     return conditions.join(' AND ');
 }
 exports.getSearchConditionSQL = getSearchConditionSQL;
+function minutesToHoursAndMinutes(minutes) {
+    if (isNaN(minutes)) {
+        return 'Invalid input';
+    }
+    const hours = Math.floor(minutes / 60)
+        .toString()
+        .padStart(2, '0');
+    const remainingMinutes = (minutes % 60).toString().padStart(2, '0');
+    if (hours == '00') {
+        return `00:${remainingMinutes}`;
+    }
+    else if (remainingMinutes == '00') {
+        return `${hours}:00`;
+    }
+    else {
+        return `${hours}:${remainingMinutes}`;
+    }
+}
+exports.minutesToHoursAndMinutes = minutesToHoursAndMinutes;
+function getTotalMinutes(hours, minutes) {
+    let totalMinutes = 0;
+    if (hours) {
+        totalMinutes = Number(hours) * 60 + Number(minutes);
+    }
+    else {
+        totalMinutes = Number(minutes);
+    }
+    return totalMinutes;
+}
+exports.getTotalMinutes = getTotalMinutes;

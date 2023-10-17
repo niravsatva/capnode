@@ -10,6 +10,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const prisma_1 = require("../client/prisma");
+const customError_1 = require("../models/customError");
 class PayPeriodRepository {
     getAll(payPeriodData) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -32,13 +33,16 @@ class PayPeriodRepository {
             return payPeriods;
         });
     }
-    getDetails(payPeriodId) {
+    getDetails(payPeriodId, companyId) {
         return __awaiter(this, void 0, void 0, function* () {
             const payPeriodDetails = yield prisma_1.prisma.payPeriod.findUnique({
                 where: {
-                    id: payPeriodId,
+                    id: payPeriodId
                 },
             });
+            if (payPeriodDetails && payPeriodDetails.companyId != companyId) {
+                throw new customError_1.CustomError(400, 'Invalid PayPeriod');
+            }
             return payPeriodDetails;
         });
     }

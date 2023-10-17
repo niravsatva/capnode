@@ -14,6 +14,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const companyRepository_1 = __importDefault(require("../repositories/companyRepository"));
 const defaultResponseHelper_1 = require("../helpers/defaultResponseHelper");
+const companyServices_1 = __importDefault(require("../services/companyServices"));
 class CompanyController {
     getUserWiseCompanies(req, res, next) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -62,6 +63,18 @@ class CompanyController {
             const user = (_a = req.user) === null || _a === void 0 ? void 0 : _a.id;
             yield (companyRepository_1.default === null || companyRepository_1.default === void 0 ? void 0 : companyRepository_1.default.connectCompany(user, company === null || company === void 0 ? void 0 : company.id));
             return (0, defaultResponseHelper_1.DefaultResponse)(res, 201, 'Company created successfully', company);
+        });
+    }
+    getUsers(req, res, next) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                const companyId = req.query.companyId;
+                const users = yield companyServices_1.default.getCompanyUsers(companyId);
+                return (0, defaultResponseHelper_1.DefaultResponse)(res, 200, 'Users fetched successfully', users);
+            }
+            catch (err) {
+                next(err);
+            }
         });
     }
 }

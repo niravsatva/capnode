@@ -17,6 +17,32 @@ class TimeActivityRepository {
             try {
                 const isOverHours = false;
                 const { companyId, offset, limit, searchCondition, filterConditions, sortCondition, dateFilters, } = timeActivityData;
+                const query = Object.assign({ where: Object.assign(Object.assign(Object.assign({ companyId: companyId }, searchCondition), filterConditions), dateFilters), include: {
+                        employee: {
+                            select: {
+                                id: true,
+                                fullName: true,
+                            },
+                        },
+                        SplitTimeActivities: {
+                            select: {
+                                id: true,
+                                classId: true,
+                                className: true,
+                                customerId: true,
+                                customerName: true,
+                                hours: true,
+                                minute: true,
+                                activityDate: true,
+                            },
+                        },
+                    }, skip: offset, take: limit }, sortCondition);
+                if (!offset) {
+                    delete query['skip'];
+                }
+                if (!limit) {
+                    delete query['take'];
+                }
                 if (isOverHours) {
                     const timeActivities = yield prisma_1.prisma.hoursOver.findMany({
                         where: {
@@ -37,26 +63,7 @@ class TimeActivityRepository {
                     });
                     return timeActivities;
                 }
-                const timeActivities = yield prisma_1.prisma.timeActivities.findMany(Object.assign({ where: Object.assign(Object.assign(Object.assign({ companyId: companyId }, searchCondition), filterConditions), dateFilters), include: {
-                        employee: {
-                            select: {
-                                id: true,
-                                fullName: true,
-                            },
-                        },
-                        SplitTimeActivities: {
-                            select: {
-                                id: true,
-                                classId: true,
-                                className: true,
-                                customerId: true,
-                                customerName: true,
-                                hours: true,
-                                minute: true,
-                                activityDate: true,
-                            },
-                        },
-                    }, skip: offset, take: limit }, sortCondition));
+                const timeActivities = yield prisma_1.prisma.timeActivities.findMany(query);
                 return timeActivities;
             }
             catch (err) {
@@ -407,7 +414,7 @@ class TimeActivityRepository {
                     });
                 }
                 const data = {
-                    timeActivityId: timeActivityData === null || timeActivityData === void 0 ? void 0 : timeActivityData.timeActivityId,
+                    // timeActivityId: timeActivityData?.timeActivityId,
                     hours: timeActivityData === null || timeActivityData === void 0 ? void 0 : timeActivityData.hours,
                     minute: timeActivityData === null || timeActivityData === void 0 ? void 0 : timeActivityData.minute,
                     activityDate: new Date(timeActivityData === null || timeActivityData === void 0 ? void 0 : timeActivityData.activityDate),
@@ -487,6 +494,11 @@ class TimeActivityRepository {
                             select: {
                                 id: true,
                                 fullName: true,
+                            },
+                        },
+                        SplitTimeActivities: {
+                            include: {
+                                employee: true,
                             },
                         },
                     },

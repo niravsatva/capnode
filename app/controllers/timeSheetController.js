@@ -15,45 +15,34 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const defaultResponseHelper_1 = require("../helpers/defaultResponseHelper");
 const validationHelper_1 = require("../helpers/validationHelper");
 const customError_1 = require("../models/customError");
-const repositories_1 = require("../repositories");
 const timeSheetServices_1 = __importDefault(require("../services/timeSheetServices"));
+const timeSheetRepository_1 = __importDefault(require("../repositories/timeSheetRepository"));
+const isAuthorizedUser_1 = require("../middlewares/isAuthorizedUser");
+const prisma_1 = require("../client/prisma");
 class TimeSheetController {
+    // Get all time sheets
     getAllTimeSheets(req, res, next) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                const { companyId, page = 1, limit = 10, search = '', createdBy = '', type = '', sort = '', startDate = '', endDate = '', } = req.query;
-                if (!companyId) {
-                    throw new customError_1.CustomError(404, 'Company id is required');
-                }
-                const companyDetails = yield repositories_1.companyRepository.getDetails(companyId);
-                if (!companyDetails) {
-                    throw new customError_1.CustomError(404, 'Company not found');
-                }
-                let formattedStartDate = '';
-                let formattedEndDate = '';
-                if (startDate && endDate) {
-                    // Format start date
-                    const newStart = new Date(startDate);
-                    newStart.setUTCHours(0, 0, 0, 0);
-                    formattedStartDate = newStart.toISOString();
-                    // Format end date
-                    const newEnd = new Date(endDate);
-                    const nextDate = new Date(newEnd);
-                    nextDate.setDate(newEnd.getDate() + 1);
-                    nextDate.setUTCHours(0, 0, 0, 0);
-                    formattedEndDate = nextDate.toISOString();
-                }
+                const { companyId, page = 1, limit = 10, search = '', createdBy = '', type = '', sort = '', payPeriodId = '', } = req.query;
                 const data = {
                     companyId: companyId,
-                    page: page,
-                    limit: limit,
+                    payPeriodId: payPeriodId,
+                    page: Number(page),
+                    limit: Number(limit),
                     search: String(search),
                     createdBy: String(createdBy),
                     type: String(type),
                     sort: String(sort),
-                    startDate: String(formattedStartDate),
-                    endDate: String(formattedEndDate),
                 };
+                // Checking is the user is permitted
+                const isPermitted = yield (0, isAuthorizedUser_1.checkPermission)(req, companyId, {
+                    permissionName: 'Time Sheets',
+                    permission: ['view'],
+                });
+                if (!isPermitted) {
+                    throw new customError_1.CustomError(403, 'You are not authorized');
+                }
                 const timeSheets = yield timeSheetServices_1.default.getAllTimeSheets(data);
                 return (0, defaultResponseHelper_1.DefaultResponse)(res, 200, 'Time Sheets fetched successfully', timeSheets);
             }
@@ -62,63 +51,69 @@ class TimeSheetController {
             }
         });
     }
-    createTimeSheetByDate(req, res, next) {
+    // Get time sheet deails
+    getTimeSheetDetails(req, res, next) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                const { companyId, name, startDate = '', endDate = '', notes, status, } = req.body;
-                (0, validationHelper_1.checkValidation)(req);
-                const companyDetails = yield repositories_1.companyRepository.getDetails(companyId);
-                if (!companyDetails) {
-                    throw new customError_1.CustomError(404, 'Company not found.');
+                const { id } = req.params;
+                const timeSheetDetails = yield timeSheetRepository_1.default.getTimeSheetDetails(id);
+                if (!timeSheetDetails) {
+                    throw new customError_1.CustomError(400, 'Time sheet not found');
                 }
-                let formattedStartDate = '';
-                let formattedEndDate = '';
-                if (startDate && endDate) {
-                    // Format start date
-                    const newStart = new Date(startDate);
-                    newStart.setUTCHours(0, 0, 0, 0);
-                    console.log('New start date: ' + newStart);
-                    formattedStartDate = newStart.toISOString();
-                    // Format end date
-                    const newEnd = new Date(endDate);
-                    newEnd.setUTCHours(0, 0, 0, 0);
-                    formattedEndDate = newEnd.toISOString();
-                }
-                const user = req.user;
-                const data = {
-                    companyId: companyId,
-                    name: name,
-                    startDate: formattedStartDate,
-                    endDate: formattedEndDate,
-                    notes: notes,
-                    status: status,
-                    user: user,
-                };
-                const timeSheet = yield timeSheetServices_1.default.createTimeSheetByDate(data);
-                return (0, defaultResponseHelper_1.DefaultResponse)(res, 200, 'Time sheet created successfully', timeSheet);
+                // Checking is the user is permitted
+                // const isPermitted = await checkPermission(req, companyId as string, {
+                // 	permissionName: 'Time Sheets',
+                // 	permission: ['view'],
+                // });
+                // if (!isPermitted) {
+                // 	throw new CustomError(403, 'You are not authorized');
+                // }
+                return (0, defaultResponseHelper_1.DefaultResponse)(res, 200, 'Time Sheet fetched successfully', timeSheetDetails);
             }
             catch (err) {
                 next(err);
             }
         });
     }
+    // Create a new time sheet
     createTimeSheet(req, res, next) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                const { companyId, name, totalHours, totalMinutes, notes, status } = req.body;
-                const companyDetails = yield repositories_1.companyRepository.getDetails(companyId);
-                if (!companyDetails) {
-                    throw new customError_1.CustomError(404, 'Company not found');
+                (0, validationHelper_1.checkValidation)(req);
+                const { name, notes, status, companyId, payPeriodId } = req.body;
+                const findExistingTimeSheet = yield prisma_1.prisma.timeSheets.findUnique({
+                    where: {
+                        payPeriodId,
+                    },
+                });
+                if (findExistingTimeSheet) {
+                    // Checking is the user is permitted
+                    const isPermitted = yield (0, isAuthorizedUser_1.checkPermission)(req, companyId, {
+                        permissionName: 'Time Sheets',
+                        permission: ['edit'],
+                    });
+                    if (!isPermitted) {
+                        throw new customError_1.CustomError(403, 'You are not authorized');
+                    }
                 }
-                const user = req.user;
+                else {
+                    // Checking is the user is permitted
+                    const isPermitted = yield (0, isAuthorizedUser_1.checkPermission)(req, companyId, {
+                        permissionName: 'Time Sheets',
+                        permission: ['add'],
+                    });
+                    if (!isPermitted) {
+                        throw new customError_1.CustomError(403, 'You are not authorized');
+                    }
+                }
                 const data = {
-                    companyId: companyId,
                     name: name,
-                    totalHours: totalHours,
-                    totalMinutes: totalMinutes,
                     notes: notes,
                     status: status,
-                    user: user,
+                    companyId: companyId,
+                    payPeriodId: payPeriodId,
+                    userId: req.user.id,
+                    findExistingTimeSheet: findExistingTimeSheet,
                 };
                 const createdTimeSheet = yield timeSheetServices_1.default.createTimeSheet(data);
                 return (0, defaultResponseHelper_1.DefaultResponse)(res, 201, 'Time sheet created successfully', createdTimeSheet);
@@ -128,49 +123,13 @@ class TimeSheetController {
             }
         });
     }
-    getAllTimeSheetLogs(req, res, next) {
-        return __awaiter(this, void 0, void 0, function* () {
-            try {
-                const { companyId, timeSheetId } = req.query;
-                if (!companyId) {
-                    throw new customError_1.CustomError(404, 'Company id is required');
-                }
-                if (!timeSheetId) {
-                    throw new customError_1.CustomError(404, 'Time sheet id is required');
-                }
-                const companyDetails = yield repositories_1.companyRepository.getDetails(companyId);
-                if (!companyDetails) {
-                    throw new customError_1.CustomError(404, 'Company not found');
-                }
-                const timeSheetLogs = yield timeSheetServices_1.default.getTimeSheetLogs(timeSheetId);
-                return (0, defaultResponseHelper_1.DefaultResponse)(res, 200, 'Time sheet employee logs successfully', timeSheetLogs);
-            }
-            catch (err) {
-                next(err);
-            }
-        });
-    }
+    // Email time sheet to employee
     emailTimeSheet(req, res, next) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 const { companyId, timeSheetId } = req.body;
                 const employeeList = req.body.employeeList;
-                if (!companyId) {
-                    throw new customError_1.CustomError(404, 'Company id is required');
-                }
-                if (!employeeList) {
-                    throw new customError_1.CustomError(404, 'Employee List array is required');
-                }
-                if (!timeSheetId) {
-                    throw new customError_1.CustomError(404, 'Time sheet id is required');
-                }
-                if (employeeList.length == 0) {
-                    throw new customError_1.CustomError(404, 'Employee List array is required');
-                }
-                const companyDetails = yield repositories_1.companyRepository.getDetails(companyId);
-                if (!companyDetails) {
-                    throw new customError_1.CustomError(404, 'Company not found');
-                }
+                (0, validationHelper_1.checkValidation)(req);
                 const timeSheetData = {
                     timeSheetId: timeSheetId,
                     employeeList: employeeList,
@@ -178,6 +137,52 @@ class TimeSheetController {
                 };
                 yield timeSheetServices_1.default.emailTimeSheet(timeSheetData);
                 return (0, defaultResponseHelper_1.DefaultResponse)(res, 200, 'Email sent successfully');
+            }
+            catch (err) {
+                next(err);
+            }
+        });
+    }
+    // Get time sheet by pay period
+    getTimeSheetByPayPeriod(req, res, next) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                const data = yield timeSheetServices_1.default.getTimeSheetByPayPeriod(req.query.payPeriodId, req.query.companyId);
+                return (0, defaultResponseHelper_1.DefaultResponse)(res, 200, 'Timesheet found', data);
+            }
+            catch (error) {
+                next(error);
+            }
+        });
+    }
+    // Get all employees by timesheet
+    getTimeSheetWiseEmployees(req, res, next) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                const { timeSheetId, companyId } = req.query;
+                const employees = yield timeSheetServices_1.default.getTimeSheetWiseEmployees(timeSheetId, companyId);
+                return (0, defaultResponseHelper_1.DefaultResponse)(res, 200, 'Employees fetched successfully', employees);
+            }
+            catch (err) {
+                next(err);
+            }
+        });
+    }
+    // Export Time sheet pdf
+    exportTimeSheetPdf(req, res, next) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                const { companyId, timeSheetId, employeeId } = req.body;
+                (0, validationHelper_1.checkValidation)(req);
+                const timeSheetData = {
+                    timeSheetId: timeSheetId,
+                    companyId: companyId,
+                    employeeId: employeeId,
+                };
+                const response = yield timeSheetServices_1.default.exportTimeSheetPdf(timeSheetData);
+                return res.status(200).json({
+                    data: response.data,
+                });
             }
             catch (err) {
                 next(err);

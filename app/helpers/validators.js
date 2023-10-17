@@ -1,7 +1,7 @@
 "use strict";
+// import { TimeSheetsStatus } from '../enum';
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.payPeriodValidator = exports.createTimeSheetValidator = exports.deleteAllSplitTimeActivity = exports.deleteSplitTimeActivity = exports.createSplitTimeActivity = exports.employeeCostUpdateValidation = exports.employeeCostCreateValidation = exports.deleteConfigurationFieldValidation = exports.updateConfigurationFieldValidation = exports.addConfigurationFieldValidation = exports.deleteTimeActivityValidation = exports.createTimeActivityValidation = exports.updateTimeActivityValidation = exports.timeActivityValidation = exports.employeeValidation = exports.companyConfigurationValidation = exports.companyGetConfigurationValidation = exports.quickbooksTimeActivityValidation = exports.quickbooksAccountsValidation = exports.quickbooksCustomersValidation = exports.quickbooksClassValidation = exports.quickbooksEmployeeValidation = exports.updateUserByAdminValidation = exports.permissionRoleValidationRules = exports.deleteRoleValidationRules = exports.updateRoleValidationRules = exports.createRoleValidationRules = exports.companyIdValidationRules = exports.updateProfileValidationRules = exports.deleteUserFromCompanyRules = exports.inviteUserValidationRules = exports.changePasswordValidationRules = exports.forgotPasswordValidationRules = exports.loginValidationRules = exports.companyIdValidation = void 0;
-const client_1 = require("@prisma/client");
+exports.timeSheetExportValidators = exports.timeSheetEmailValidators = exports.payPeriodValidator = exports.createTimeSheetValidator = exports.deleteAllSplitTimeActivity = exports.deleteSplitTimeActivity = exports.createSplitTimeActivity = exports.employeeCostUpdateValidation = exports.employeeCostCreateValidation = exports.deleteConfigurationFieldValidation = exports.updateConfigurationFieldValidation = exports.addConfigurationFieldValidation = exports.deleteTimeActivityValidation = exports.createTimeActivityValidation = exports.updateTimeActivityValidation = exports.timeActivityValidation = exports.employeeValidation = exports.companyConfigurationValidation = exports.companyGetConfigurationValidation = exports.quickbooksTimeActivityValidation = exports.quickbooksAccountsValidation = exports.quickbooksCustomersValidation = exports.quickbooksClassValidation = exports.quickbooksEmployeeValidation = exports.updateUserByAdminValidation = exports.permissionRoleValidationRules = exports.deleteRoleValidationRules = exports.updateRoleValidationRules = exports.createRoleValidationRules = exports.companyIdValidationRules = exports.updateProfileValidationRules = exports.deleteUserFromCompanyRules = exports.inviteUserValidationRules = exports.changePasswordValidationRules = exports.forgotPasswordValidationRules = exports.loginValidationRules = exports.companyIdValidation = void 0;
 /* eslint-disable @typescript-eslint/no-var-requires */
 const { body } = require('express-validator');
 // CompanyId Validation
@@ -252,17 +252,30 @@ exports.deleteAllSplitTimeActivity = [
 ];
 exports.createTimeSheetValidator = [
     ...exports.companyIdValidation,
-    body('name').notEmpty().withMessage('Time sheet name is required'),
-    body('status').notEmpty().withMessage('Time sheet status is required'),
-    body('status')
-        .isIn(client_1.TimeSheetsStatus)
-        .withMessage('Time sheet status is invalid'),
-    body('startDate').notEmpty().withMessage('Time sheet start date is required'),
-    body('endDate').notEmpty().withMessage('Time sheet end date is required'),
-    body('notes').notEmpty().withMessage('Time sheet notes required'),
+    // body('name').notEmpty().withMessage('Time sheet name is required'),
+    // body('status').notEmpty().withMessage('Time sheet status is required'),
+    // body('status')
+    // 	.isIn(TimeSheetsStatus)
+    // 	.withMessage('Time sheet status is invalid'),
+    // body('notes').notEmpty().withMessage('Time sheet notes required'),
+    body('payPeriodId').notEmpty().withMessage('Pay period id is required'),
 ];
 exports.payPeriodValidator = [
     ...exports.companyIdValidation,
     body('startDate').notEmpty().withMessage('Start date is required'),
     body('endDate').notEmpty().withMessage('End date is required'),
+];
+exports.timeSheetEmailValidators = [
+    ...exports.companyIdValidation,
+    body('timeSheetId').notEmpty().withMessage('Time sheet id is required'),
+    body('employeeList')
+        .isArray()
+        .withMessage('Employee list field must be an array')
+        .custom((value) => value.length > 0)
+        .withMessage('Employee list array must not be empty'),
+];
+exports.timeSheetExportValidators = [
+    ...exports.companyIdValidation,
+    body('timeSheetId').notEmpty().withMessage('Time sheet id is required'),
+    body('employeeId').notEmpty().withMessage('Employee id is required'),
 ];

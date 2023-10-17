@@ -255,6 +255,7 @@ model PayPeriod {
   createdAt         DateTime            @default(now())
   updatedAt         DateTime            @updatedAt
   timeActivities    TimeActivities[]
+  TimeSheets        TimeSheets?
 }
 
 model TimeActivities {
@@ -273,6 +274,8 @@ model TimeActivities {
   activityDate        DateTime
   payPeriodId         String?
   payPeriod           PayPeriod?            @relation(fields: [payPeriodId], references: [id])
+  timeSheetId         String?
+  timeSheet           TimeSheets?           @relation(fields: [timeSheetId], references: [id])
   createdAt           DateTime              @default(now())
   updatedAt           DateTime              @updatedAt
   SplitTimeActivities SplitTimeActivities[]
@@ -296,22 +299,25 @@ model SplitTimeActivities {
 }
 
 model TimeSheets {
-  id            String           @id @default(uuid())
-  name          String
-  totalHours    String
-  totalMinute   String
-  notes         String
-  status        TimeSheetsStatus
-  TimeSheetLogs TimeSheetLogs[]
-  companyId     String
-  company       Company          @relation(fields: [companyId], references: [id])
-  userId        String
-  createdBy     User             @relation(fields: [userId], references: [id])
-  startDate     DateTime?
-  endDate       DateTime?
-  SubmitedOn    DateTime
-  createdAt     DateTime         @default(now())
-  updatedAt     DateTime         @updatedAt
+  id             String           @id @default(uuid())
+  name           String
+  totalHours     String?
+  totalMinute    String?
+  notes          String?
+  status         String
+  TimeSheetLogs  TimeSheetLogs[]
+  companyId      String
+  company        Company          @relation(fields: [companyId], references: [id])
+  userId         String
+  createdBy      User             @relation(fields: [userId], references: [id])
+  startDate      DateTime?
+  endDate        DateTime?
+  timeActivities TimeActivities[]
+  payPeriodId    String           @unique
+  payPeriod      PayPeriod        @relation(fields: [payPeriodId], references: [id])
+  submittedOn    DateTime?
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime         @updatedAt
 }
 
 // connection b/w employee and time sheet
@@ -346,7 +352,7 @@ model Migrations {
   id          String   @id @default(uuid())
   name        String
   isCompleted Boolean  @default(false)
-  isFailed     Boolean  @default(false)
+  isFailed    Boolean  @default(false)
   runOn       DateTime @default(now())
 }
 
@@ -370,9 +376,4 @@ enum InvitationStatus {
   Pending
   Accepted
   Rejected
-}
-
-enum TimeSheetsStatus {
-  Published
-  Draft
 }

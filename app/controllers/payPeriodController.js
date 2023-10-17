@@ -59,7 +59,6 @@ class PayPeriodController {
                     startDate: new Date(startDate),
                     endDate: new Date(endDate),
                 };
-                console.log('DATA: ', data);
                 const isPermitted = yield (0, isAuthorizedUser_1.checkPermission)(req, companyId, {
                     permissionName: 'Pay Period',
                     permission: ['add'],
