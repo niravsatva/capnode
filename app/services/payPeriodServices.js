@@ -17,6 +17,8 @@ const prisma_1 = require("../client/prisma");
 const customError_1 = require("../models/customError");
 const repositories_1 = require("../repositories");
 const payPeriodRepository_1 = __importDefault(require("../repositories/payPeriodRepository"));
+const timeSheetRepository_1 = __importDefault(require("../repositories/timeSheetRepository"));
+const timeActivityServices_1 = __importDefault(require("./timeActivityServices"));
 class payPeriodServices {
     getAllPayPeriods(payPeriodData) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -100,6 +102,7 @@ class payPeriodServices {
         });
     }
     editPayPeriod(payPeriodData) {
+        var _a, _b, _c, _d, _e;
         return __awaiter(this, void 0, void 0, function* () {
             const companyId = payPeriodData.companyId;
             // Check If company exists
@@ -112,6 +115,25 @@ class payPeriodServices {
                 throw new customError_1.CustomError(400, 'Dates are already in pay period');
             }
             const data = yield payPeriodRepository_1.default.update(payPeriodData);
+            console.log('DATA: ' + data);
+            // // Update time sheet
+            if (data === null || data === void 0 ? void 0 : data.TimeSheets) {
+                const { timeActivitiesWithHours: timeActivities } = yield timeActivityServices_1.default.getAllTimeActivitiesServices({
+                    companyId: companyId,
+                    payPeriodId: data === null || data === void 0 ? void 0 : data.id,
+                });
+                const timeSheetData = {
+                    name: (_a = data === null || data === void 0 ? void 0 : data.TimeSheets) === null || _a === void 0 ? void 0 : _a.name,
+                    notes: (_b = data === null || data === void 0 ? void 0 : data.TimeSheets) === null || _b === void 0 ? void 0 : _b.name,
+                    status: (_c = data === null || data === void 0 ? void 0 : data.TimeSheets) === null || _c === void 0 ? void 0 : _c.status,
+                    companyId: (_d = data === null || data === void 0 ? void 0 : data.TimeSheets) === null || _d === void 0 ? void 0 : _d.companyId,
+                    userId: (_e = data === null || data === void 0 ? void 0 : data.TimeSheets) === null || _e === void 0 ? void 0 : _e.userId,
+                    payPeriodId: data === null || data === void 0 ? void 0 : data.id,
+                    timeActivities: timeActivities,
+                    findExistingTimeSheet: data === null || data === void 0 ? void 0 : data.TimeSheets,
+                };
+                yield timeSheetRepository_1.default.createTimeSheet(timeSheetData);
+            }
             return data;
         });
     }
