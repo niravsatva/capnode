@@ -85,6 +85,9 @@ class TimeSheetController {
                     where: {
                         payPeriodId,
                     },
+                    include: {
+                        timeActivities: true,
+                    },
                 });
                 if (findExistingTimeSheet) {
                     // Checking is the user is permitted

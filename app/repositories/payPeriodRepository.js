@@ -37,7 +37,7 @@ class PayPeriodRepository {
         return __awaiter(this, void 0, void 0, function* () {
             const payPeriodDetails = yield prisma_1.prisma.payPeriod.findUnique({
                 where: {
-                    id: payPeriodId
+                    id: payPeriodId,
                 },
             });
             if (payPeriodDetails && payPeriodDetails.companyId != companyId) {
@@ -119,6 +119,13 @@ class PayPeriodRepository {
                 data: {
                     startDate: startDate,
                     endDate: endDate,
+                },
+                include: {
+                    TimeSheets: {
+                        include: {
+                            timeActivities: true,
+                        },
+                    },
                 },
             });
             return payPeriod;

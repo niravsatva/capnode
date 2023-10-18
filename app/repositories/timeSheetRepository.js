@@ -62,6 +62,18 @@ class TimeSheetRepository {
             // 	},
             // });
             if (findExistingTimeSheet) {
+                yield prisma_1.prisma.timeSheets.update({
+                    where: {
+                        id: findExistingTimeSheet.id,
+                    },
+                    data: {
+                        timeActivities: {
+                            disconnect: findExistingTimeSheet === null || findExistingTimeSheet === void 0 ? void 0 : findExistingTimeSheet.timeActivities.map((timeActivityId) => ({
+                                id: timeActivityId.id,
+                            })),
+                        },
+                    },
+                });
                 const timeSheet = yield prisma_1.prisma.timeSheets.update({
                     where: {
                         id: findExistingTimeSheet.id,
