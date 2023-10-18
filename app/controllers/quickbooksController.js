@@ -25,6 +25,7 @@ const quickbooksServices_1 = __importDefault(require("../services/quickbooksServ
 const timeActivityServices_1 = __importDefault(require("../services/timeActivityServices"));
 const prisma_1 = require("../client/prisma");
 const moment_1 = __importDefault(require("moment"));
+const utils_1 = require("../utils/utils");
 // import axios from 'axios';
 // import timeActivityServices from '../services/timeActivityServices';
 class QuickbooksController {
@@ -295,7 +296,8 @@ class QuickbooksController {
                             return account;
                         }
                     });
-                    return (0, defaultResponseHelper_1.DefaultResponse)(res, 200, 'All accounts fetched successfully', finalAccounts);
+                    const data = (0, utils_1.sortArray)(finalAccounts, 'asc', 'Name');
+                    return (0, defaultResponseHelper_1.DefaultResponse)(res, 200, 'All accounts fetched successfully', data);
                 }
                 else {
                     return (0, defaultResponseHelper_1.DefaultResponse)(res, 200, 'Company status is not active');
@@ -329,7 +331,7 @@ class QuickbooksController {
                                 .format(),
                         },
                     });
-                    return (0, defaultResponseHelper_1.DefaultResponse)(res, 200, 'All accounts fetched successfully', (_a = customers === null || customers === void 0 ? void 0 : customers.QueryResponse) === null || _a === void 0 ? void 0 : _a.Customer);
+                    return (0, defaultResponseHelper_1.DefaultResponse)(res, 200, 'All customers fetched successfully', (_a = customers === null || customers === void 0 ? void 0 : customers.QueryResponse) === null || _a === void 0 ? void 0 : _a.Customer);
                 }
                 else {
                     return (0, defaultResponseHelper_1.DefaultResponse)(res, 200, 'Company status is not active');

@@ -50,7 +50,7 @@ const generatePdf = (pdfData, singleEmployee, customers) => {
       </style>
   </head>
   <body>
-      <div style="margin: 0; padding: 0; box-sizing: border-box; font-family: Arial"> 
+      <div style="margin: 0; padding: 0; box-sizing: border-box; font-family: Arial;"> 
 				<div style="margin-bottom:20px;  ">
 				<img src='https://costallocationspro.s3.amazonaws.com/cap-logonew.png' width="180px" style="float: left;"/>
 				<p style="text-align: center; padding-top: 12px; padding-right:150px;">Time Sheet</p>
@@ -83,7 +83,19 @@ const generatePdf = (pdfData, singleEmployee, customers) => {
         ${customerData}
       </tbody>
       </table>
-    </body>
+      <br/>
+      <p> I certify that the correct representation of actual hours worked for the time period shown above.
+         <table style="border-collapse: separate; border-spacing: 10px 5px; border: none;">
+          <tr>
+            <td style="padding: 5px; text-align: left; border: none;">Employee Signature :</td>
+            <td style="padding: 5px; text-align: left; border: none;">Supervisor Signature :</td>
+          </tr>
+          <tr>
+            <td style="padding: 5px; text-align: left; border: none;">Date: __________________</td>
+            <td style="padding: 5px; text-align: left; border: none;">Date: __________________</td>
+          </tr>
+        </table> 
+      </body>
   </html>
 `;
 };
