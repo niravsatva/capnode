@@ -41,6 +41,7 @@
 		"@types/node": "^20.4.0",
 		"@types/nodemailer": "^6.4.8",
 		"@types/pg": "^8.10.2",
+		"@types/uuid": "^9.0.6",
 		"@typescript-eslint/eslint-plugin": "^6.1.0",
 		"@typescript-eslint/parser": "^6.1.0",
 		"eslint": "^8.45.0",
@@ -77,6 +78,7 @@
 		"node-quickbooks": "^2.0.43",
 		"nodemailer": "^6.9.3",
 		"nodemon": "^3.0.1",
-		"pg": "^8.11.1"
+		"pg": "^8.11.1",
+		"uuid": "^9.0.1"
 	}
 }

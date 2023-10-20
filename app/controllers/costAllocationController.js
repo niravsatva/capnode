@@ -13,18 +13,54 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const validationHelper_1 = require("../helpers/validationHelper");
-const constAllocationService_1 = __importDefault(require("../services/constAllocationService"));
 const defaultResponseHelper_1 = require("../helpers/defaultResponseHelper");
+const customError_1 = require("../models/customError");
+const companyRepository_1 = __importDefault(require("../repositories/companyRepository"));
+const costallocationServices_1 = __importDefault(require("../services/costallocationServices"));
 class CostAllocationController {
     getCostAllocation(req, res, next) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 (0, validationHelper_1.checkValidation)(req);
-                const data = yield constAllocationService_1.default.getCostAllocationData(req.query.payPeriodId);
-                return (0, defaultResponseHelper_1.DefaultResponse)(res, 200, 'CostAllocationData', data);
+                const { companyId, page = 1, limit = 10, search = '', createdBy = '', type = '', sort = '', startDate = '', endDate = '', payPeriodId = null, } = req.query;
+                if (!companyId) {
+                    throw new customError_1.CustomError(404, 'Company id is required');
+                }
+                const companyDetails = yield companyRepository_1.default.getDetails(companyId);
+                if (!companyDetails) {
+                    throw new customError_1.CustomError(404, 'Company not found');
+                }
+                let formattedStartDate = '';
+                let formattedEndDate = '';
+                if (startDate && endDate) {
+                    // Format start date
+                    const newStart = new Date(startDate);
+                    newStart.setUTCHours(0, 0, 0, 0);
+                    formattedStartDate = newStart.toISOString();
+                    // Format end date
+                    const newEnd = new Date(endDate);
+                    const nextDate = new Date(newEnd);
+                    nextDate.setDate(newEnd.getDate() + 1);
+                    nextDate.setUTCHours(0, 0, 0, 0);
+                    formattedEndDate = nextDate.toISOString();
+                }
+                const data = {
+                    companyId: companyId,
+                    page: page,
+                    limit: limit,
+                    search: String(search),
+                    createdBy: String(createdBy),
+                    type: String(type),
+                    sort: String(sort),
+                    startDate: String(formattedStartDate),
+                    endDate: String(formattedEndDate),
+                    payPeriodId: String(payPeriodId),
+                };
+                const costAllocation = yield costallocationServices_1.default.getCostAllocationData(data);
+                return (0, defaultResponseHelper_1.DefaultResponse)(res, 200, 'Cost allocation fetched successfully', costAllocation);
             }
-            catch (error) {
-                next(error);
+            catch (err) {
+                next(err);
             }
         });
     }

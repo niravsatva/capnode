@@ -45,7 +45,17 @@ function testFun() {
         console.log('running');
     });
 }
+function defaultIndirectExpenseRate() {
+    return __awaiter(this, void 0, void 0, function* () {
+        yield prisma_1.prisma.configuration.updateMany({
+            data: {
+                indirectExpenseRate: 0
+            }
+        });
+    });
+}
 exports.migrationService = {
+    defaultIndirectExpenseRate,
     addPayRolePermissions,
     testFun
 };

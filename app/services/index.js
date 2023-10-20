@@ -12,7 +12,7 @@ const timeActivityServices_1 = __importDefault(require("./timeActivityServices")
 const configurationServices_1 = __importDefault(require("./configurationServices"));
 const employeeCostServices_1 = __importDefault(require("./employeeCostServices"));
 const payPeriodServices_1 = __importDefault(require("./payPeriodServices"));
-const constAllocationService_1 = __importDefault(require("./constAllocationService"));
+const costallocationServices_1 = __importDefault(require("./costallocationServices"));
 exports.default = {
     authServices: authServices_1.default,
     userServices: userServices_1.default,
@@ -23,5 +23,5 @@ exports.default = {
     configurationServices: configurationServices_1.default,
     employeeCostServices: employeeCostServices_1.default,
     payPeriodServices: payPeriodServices_1.default,
-    constAllocationService: constAllocationService_1.default
+    costallocationServices: costallocationServices_1.default,
 };

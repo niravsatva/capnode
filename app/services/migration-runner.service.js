@@ -15,7 +15,7 @@ const migrations_1 = require("../constants/migrations");
 const migration_service_1 = require("./migration.service");
 function runMigration() {
     return __awaiter(this, void 0, void 0, function* () {
-        console.log('Migration is running');
+        console.log('Migration started');
         for (let i = 0; i < migrations_1.migrations.length; i++) {
             let migrationId = '';
             const getMigration = yield prisma_1.prisma.migrations.findFirst({
@@ -28,6 +28,7 @@ function runMigration() {
             }
             try {
                 if (!getMigration) {
+                    console.log('Running Migration ', migrations_1.migrations[i]);
                     const createMigration = yield prisma_1.prisma.migrations.create({
                         data: {
                             name: migrations_1.migrations[i]

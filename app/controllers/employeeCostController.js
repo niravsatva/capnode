@@ -29,6 +29,7 @@ class EmployeeConstController {
                 const { companyId, date, page = 1, limit = 10, search, type, sort, isPdf, } = req.query;
                 let payPeriodId = req.query.payPeriodId;
                 const _date = new Date();
+                let systemPayPeriodId = false;
                 if (!payPeriodId) {
                     const payPeriodData = yield prisma_1.prisma.payPeriod.findFirst({
                         where: {
@@ -60,8 +61,8 @@ class EmployeeConstController {
                             endDate: 'desc'
                         }
                     });
-                    console.log(payPeriodData);
                     if (payPeriodData && payPeriodData.id) {
+                        systemPayPeriodId = true;
                         payPeriodId = payPeriodData.id;
                     }
                 }
@@ -98,7 +99,7 @@ class EmployeeConstController {
                     employeesMonthlyCost = yield employeeCostServices_1.default.getMonthlyCost(companyId, date, Number(page), Number(limit), search, type, sort, payPeriodId);
                 }
                 else {
-                    employeesMonthlyCost = yield employeeCostServices_1.default.getMonthlyCostV2(companyId, date, Number(page), Number(limit), search, type, sort, payPeriodId);
+                    employeesMonthlyCost = yield employeeCostServices_1.default.getMonthlyCostV2(companyId, date, Number(page), Number(limit), search, type, sort, payPeriodId, systemPayPeriodId);
                 }
                 return (0, defaultResponseHelper_1.DefaultResponse)(res, 200, 'Configurations fetched successfully', employeesMonthlyCost);
             }

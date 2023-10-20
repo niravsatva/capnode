@@ -71,7 +71,7 @@ class EmployeeCostService {
             }
         });
     }
-    getMonthlyCostV2(companyId, date, page, limit, search, type, sort, payPeriodId) {
+    getMonthlyCostV2(companyId, date, page, limit, search, type, sort, payPeriodId, systemPayPeriodId) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 // Offset
@@ -139,7 +139,7 @@ class EmployeeCostService {
                     });
                 }
                 const count = yield repositories_1.employeeCostRepository.count(companyId, searchCondition);
-                return { employees: employeeCostMappingData, count, payPeriodId };
+                return { employees: employeeCostMappingData, count, payPeriodId: systemPayPeriodId ? payPeriodId : null };
             }
             catch (error) {
                 throw error;
