@@ -41,29 +41,16 @@ class costAllocationRepository {
     }
     getCostAllocation(costAllocationData) {
         return __awaiter(this, void 0, void 0, function* () {
-            const { companyId, 
-            //offset,
-            //limit,
-            //searchCondition,
-            //filterConditions,
-            //sortCondition,
-            //dateFilters,
-            payPeriodId, timeSheetId, } = costAllocationData;
-            const costAllocations = yield prisma_1.prisma.employee.findMany({
-                where: {
-                    timeActivities: {
+            const { companyId, offset, limit, searchCondition, filterConditions, empFilterConditions, sortCondition, payPeriodId, timeSheetId, } = costAllocationData;
+            const query = Object.assign({ where: Object.assign(Object.assign(Object.assign({ companyId: companyId }, searchCondition), empFilterConditions), { timeActivities: {
                         some: {
-                            timeSheetId: timeSheetId
+                            timeSheetId: timeSheetId,
                         },
-                    },
-                },
-                select: {
+                    } }), select: {
                     fullName: true,
                     id: true,
                     timeActivities: {
-                        where: {
-                            timeSheetId: timeSheetId
-                        },
+                        where: Object.assign({ timeSheetId: timeSheetId }, filterConditions),
                     },
                     employeeCostField: {
                         include: {
@@ -76,16 +63,16 @@ class costAllocationRepository {
                             },
                         },
                     },
-                },
-            });
+                }, skip: offset, take: limit }, sortCondition);
+            const costAllocations = yield prisma_1.prisma.employee.findMany(query);
             let response = [];
             const companySection = yield prisma_1.prisma.configurationSection.findMany({
                 where: {
                     companyId,
                     no: {
-                        gt: 0
-                    }
-                }
+                        gt: 0,
+                    },
+                },
             });
             const sectionIds = companySection.map((e) => {
                 return e.id;
@@ -95,31 +82,34 @@ class costAllocationRepository {
                     companyId,
                     jsonId: 't1',
                     configurationSectionId: {
-                        in: sectionIds
-                    }
+                        in: sectionIds,
+                    },
                 },
             });
             const totalFields = companyFields.map((e) => {
                 return e.id;
             });
             const employeeRowSpanMapping = {
-                '': 1
+                '': 1,
             };
             yield Promise.all(costAllocations.map((costAllocation) => __awaiter(this, void 0, void 0, function* () {
                 const allTimeActivities = yield prisma_1.prisma.timeActivities.findMany({
                     where: {
                         timeSheetId,
-                        employeeId: costAllocation.id
-                    }
+                        employeeId: costAllocation.id,
+                    },
                 });
                 const totalTimeMin = this.totalHoursIntoMin(allTimeActivities);
-                employeeRowSpanMapping[costAllocation.fullName] = costAllocation.timeActivities.length;
+                employeeRowSpanMapping[costAllocation.fullName] =
+                    costAllocation.timeActivities.length;
                 const employeeCostMappingData = [];
                 if (costAllocation.employeeCostField.length) {
                     costAllocation.employeeCostField.forEach((singleEmployeeData) => {
                         const obj = {};
                         if (singleEmployeeData) {
-                            if (singleEmployeeData && singleEmployeeData.field && sectionIds.includes(singleEmployeeData.field.configurationSectionId)) {
+                            if (singleEmployeeData &&
+                                singleEmployeeData.field &&
+                                sectionIds.includes(singleEmployeeData.field.configurationSectionId)) {
                                 obj[singleEmployeeData.field.id] =
                                     singleEmployeeData.costValue[0].value;
                                 employeeCostMappingData.push(obj);
@@ -133,13 +123,14 @@ class costAllocationRepository {
                 let totalAllocationPercentage = 0;
                 costAllocation === null || costAllocation === void 0 ? void 0 : costAllocation.timeActivities.forEach((timeActivities, timeActivityIndex) => {
                     const costAllocationObj = {
-                        id: (0, uuid_1.v4)()
+                        id: (0, uuid_1.v4)(),
                     };
                     const hours = parseInt(timeActivities === null || timeActivities === void 0 ? void 0 : timeActivities.hours);
                     const minutes = parseInt(timeActivities === null || timeActivities === void 0 ? void 0 : timeActivities.minute);
                     const currActivitiesTime = this.hoursToMin(hours, minutes);
                     const allocation = this.allocationPercentage(Number(currActivitiesTime), Number(totalTimeMin));
-                    totalAllocationPercentage = totalAllocationPercentage + Number(allocation);
+                    totalAllocationPercentage =
+                        totalAllocationPercentage + Number(allocation);
                     if (timeActivityIndex === 0) {
                         costAllocationObj['employee-name'] = costAllocation.fullName;
                     }
@@ -149,8 +140,7 @@ class costAllocationRepository {
                     costAllocationObj['allocation'] = `${allocation}%`;
                     employeeCostMappingData.forEach((data) => {
                         const key = Object.keys(data)[0];
-                        const value = ((Number(allocation) * Number(data[key])) /
-                            100);
+                        const value = (Number(allocation) * Number(data[key])) / 100;
                         if (totalFields.includes(key)) {
                             if (allTotalColumnsObj[key]) {
                                 allTotalColumnsObj[key] = allTotalColumnsObj[key] + value;
@@ -162,8 +152,9 @@ class costAllocationRepository {
                         costAllocationObj[key] = value;
                     });
                     timeActivity.push(costAllocationObj);
-                    if ((costAllocation === null || costAllocation === void 0 ? void 0 : costAllocation.timeActivities.length) - 1 === timeActivityIndex) {
-                        const timeActivitiesTotalColumn = Object.assign(Object.assign({}, allTotalColumnsObj), { id: (0, uuid_1.v4)(), 'type': 'total', 'allocation': `${totalAllocationPercentage.toFixed(2)}%`, 'total-hours': totalTime, 'employee-name': '' });
+                    if ((costAllocation === null || costAllocation === void 0 ? void 0 : costAllocation.timeActivities.length) - 1 ===
+                        timeActivityIndex) {
+                        const timeActivitiesTotalColumn = Object.assign(Object.assign({}, allTotalColumnsObj), { id: (0, uuid_1.v4)(), type: 'total', allocation: `${totalAllocationPercentage.toFixed(2)}%`, 'total-hours': totalTime, 'employee-name': '' });
                         timeActivity.push(timeActivitiesTotalColumn);
                     }
                 });

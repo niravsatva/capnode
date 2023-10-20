@@ -16,6 +16,7 @@ const prisma_1 = require("../client/prisma");
 const costAllocationRepository_1 = __importDefault(require("../repositories/costAllocationRepository"));
 class CostAllocationServices {
     getCostAllocationData(costAllocationData) {
+        var _a;
         return __awaiter(this, void 0, void 0, function* () {
             const timeSheetData = yield prisma_1.prisma.timeSheets.findUnique({
                 where: {
@@ -25,8 +26,75 @@ class CostAllocationServices {
             if (!timeSheetData) {
                 return { result: [], employeeRowSpanMapping: {} };
             }
+            const offset = (Number(costAllocationData.page) - 1) * Number(costAllocationData.limit);
+            const filteredData = [];
+            const empFilteredData = [];
+            if (costAllocationData === null || costAllocationData === void 0 ? void 0 : costAllocationData.classId) {
+                filteredData.push({ classId: costAllocationData === null || costAllocationData === void 0 ? void 0 : costAllocationData.classId });
+            }
+            if (costAllocationData === null || costAllocationData === void 0 ? void 0 : costAllocationData.customerId) {
+                filteredData.push({ customerId: costAllocationData === null || costAllocationData === void 0 ? void 0 : costAllocationData.customerId });
+            }
+            if (costAllocationData === null || costAllocationData === void 0 ? void 0 : costAllocationData.employeeId) {
+                empFilteredData.push({
+                    id: costAllocationData === null || costAllocationData === void 0 ? void 0 : costAllocationData.employeeId,
+                });
+            }
+            const empFilterConditions = (empFilteredData === null || empFilteredData === void 0 ? void 0 : empFilteredData.length) > 0
+                ? {
+                    AND: empFilteredData,
+                    // eslint-disable-next-line no-mixed-spaces-and-tabs
+                }
+                : {};
+            const filterConditions = (filteredData === null || filteredData === void 0 ? void 0 : filteredData.length) > 0
+                ? {
+                    AND: filteredData,
+                    // eslint-disable-next-line no-mixed-spaces-and-tabs
+                }
+                : {};
+            const searchCondition = costAllocationData.search
+                ? {
+                    OR: [
+                        {
+                            fullName: {
+                                mode: 'insensitive',
+                                contains: costAllocationData.search,
+                            },
+                        },
+                    ],
+                    // eslint-disable-next-line no-mixed-spaces-and-tabs
+                }
+                : {};
+            // Conditions for sort
+            const sortCondition = {
+                orderBy: [
+                    {
+                        id: costAllocationData.type ? costAllocationData.type : 'asc',
+                    },
+                ],
+            };
+            if (costAllocationData.sort) {
+                sortCondition.orderBy.push({
+                    [costAllocationData.sort]: (_a = costAllocationData.type) !== null && _a !== void 0 ? _a : 'asc',
+                });
+            }
             costAllocationData.timeSheetId = String(timeSheetData.id);
-            const data = yield costAllocationRepository_1.default.getCostAllocation(costAllocationData);
+            const costAllocationRepofilter = {
+                companyId: costAllocationData.companyId,
+                offset: offset,
+                type: costAllocationData.type,
+                limit: Number(costAllocationData.limit),
+                searchCondition,
+                sortCondition,
+                filterConditions,
+                empFilterConditions,
+                classId: String(costAllocationData.classId),
+                customerId: String(costAllocationData.customerId),
+                employeeId: String(costAllocationData.employeeId),
+                isPercentage: costAllocationData.isPercentage,
+                payPeriodId: costAllocationData.payPeriodId,
+            };
+            const data = costAllocationRepository_1.default.getCostAllocation(costAllocationRepofilter);
             return data;
         });
     }

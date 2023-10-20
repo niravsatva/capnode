@@ -22,7 +22,7 @@ class CostAllocationController {
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 (0, validationHelper_1.checkValidation)(req);
-                const { companyId, page = 1, limit = 10, search = '', createdBy = '', type = '', sort = '', startDate = '', endDate = '', payPeriodId = null, } = req.query;
+                const { companyId, page = 1, limit = 10, search = '', createdBy = '', type = '', sort = '', classId = '', customerId = '', employeeId = '', startDate = '', endDate = '', payPeriodId = null, } = req.query;
                 if (!companyId) {
                     throw new customError_1.CustomError(404, 'Company id is required');
                 }
@@ -52,6 +52,9 @@ class CostAllocationController {
                     createdBy: String(createdBy),
                     type: String(type),
                     sort: String(sort),
+                    classId: String(classId),
+                    customerId: String(customerId),
+                    employeeId: String(employeeId),
                     startDate: String(formattedStartDate),
                     endDate: String(formattedEndDate),
                     payPeriodId: String(payPeriodId),
