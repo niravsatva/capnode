@@ -8,4 +8,6 @@ const controllers_1 = require("../controllers");
 const authMiddleware_1 = require("../middlewares/authMiddleware");
 const router = express_1.default.Router();
 router.get('/', authMiddleware_1.isAuthenticated, controllers_1.costAllocationController.getCostAllocation);
+router.get('/export-csv', authMiddleware_1.isAuthenticated, controllers_1.costAllocationController.exportCostAllocationCSV);
+router.get('/export-pdf', authMiddleware_1.isAuthenticated, controllers_1.costAllocationController.exportCostAllocationPDF);
 exports.default = router;

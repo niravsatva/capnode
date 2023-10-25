@@ -53,11 +53,11 @@ const generatePdf = (pdfData, singleEmployee, customers) => {
       <div style="margin: 0; padding: 0; box-sizing: border-box; font-family: Arial;"> 
 				<div style="margin-bottom:20px;  ">
 				<img src='https://costallocationspro.s3.amazonaws.com/cap-logonew.png' width="180px" style="float: left;"/>
-				<p style="text-align: center; padding-top: 12px; padding-right:150px;">Time Sheet</p>
+				<p style="text-align: center; padding-top: 12px; padding-right:150px; font-weight:800">Time Sheet</p>
 			</div>
       <br/> 
       <p>Employee Name: ${fullName}</p>
-      <p>Month: ${(0, moment_1.default)(startDate).format('MM/DD/YYYY')} - ${(0, moment_1.default)(endDate).format('MM/DD/YYYY')}</p>
+      <p>Pay Period: ${(0, moment_1.default)(startDate).format('MM/DD/YYYY')} - ${(0, moment_1.default)(endDate).format('MM/DD/YYYY')}</p>
       <p>Total Time: ${totalHours} Hours ${totalMinutes} Minutes</p>
 
       <table>
@@ -84,7 +84,7 @@ const generatePdf = (pdfData, singleEmployee, customers) => {
       </tbody>
       </table>
       <br/>
-      <p> I certify that the correct representation of actual hours worked for the time period shown above.
+      <p> I certify that this is a correct representation of actual hours worked for the time period shown above.
          <table style="border-collapse: separate; border-spacing: 10px 5px; border: none;">
           <tr>
             <td style="padding: 5px; text-align: left; border: none;">Employee Signature :</td>

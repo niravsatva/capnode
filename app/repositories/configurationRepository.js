@@ -24,7 +24,7 @@ class ConfigurationRepository {
                 const configuration = yield prisma_1.prisma.configuration.create({
                     data: {
                         settings: data_1.DefaultConfigurationSettings,
-                        indirectExpenseRate: 10,
+                        indirectExpenseRate: 0,
                         payrollMethod: 'Percentage',
                         company: { connect: { id: companyId } },
                     },

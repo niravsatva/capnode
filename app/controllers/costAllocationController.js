@@ -12,11 +12,14 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-const validationHelper_1 = require("../helpers/validationHelper");
+const fs_1 = require("fs");
+const moment_1 = __importDefault(require("moment"));
 const defaultResponseHelper_1 = require("../helpers/defaultResponseHelper");
+const validationHelper_1 = require("../helpers/validationHelper");
 const customError_1 = require("../models/customError");
 const companyRepository_1 = __importDefault(require("../repositories/companyRepository"));
 const costallocationServices_1 = __importDefault(require("../services/costallocationServices"));
+const costAllocationPdf_1 = require("../templates/costAllocationPdf");
 class CostAllocationController {
     getCostAllocation(req, res, next) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -61,6 +64,61 @@ class CostAllocationController {
                 };
                 const costAllocation = yield costallocationServices_1.default.getCostAllocationData(data);
                 return (0, defaultResponseHelper_1.DefaultResponse)(res, 200, 'Cost allocation fetched successfully', costAllocation);
+            }
+            catch (err) {
+                next(err);
+            }
+        });
+    }
+    exportCostAllocationCSV(req, res, next) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                const { companyId, search = '', type = '', sort = '', classId = '', customerId = '', employeeId = '', payPeriodId = null, } = req.query;
+                const data = {
+                    companyId: companyId,
+                    search: String(search),
+                    type: String(type),
+                    sort: String(sort),
+                    classId: String(classId),
+                    customerId: String(customerId),
+                    employeeId: String(employeeId),
+                    payPeriodId: String(payPeriodId),
+                };
+                const csvData = yield costallocationServices_1.default.exportCostAllocationCSV(data);
+                res.setHeader('Content-Type', 'text/csv');
+                const fileName = (0, moment_1.default)(new Date()).format('MMDDYYYYhhmmss');
+                res.setHeader('Content-Disposition', `attachment; filename=CostAllocation_${fileName}.csv`);
+                return res.status(200).end(csvData);
+            }
+            catch (err) {
+                next(err);
+            }
+        });
+    }
+    exportCostAllocationPDF(req, res, next) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                const { companyId, search = '', type = '', sort = '', classId = '', customerId = '', employeeId = '', payPeriodId = null, } = req.query;
+                const data = {
+                    companyId: companyId,
+                    search: String(search),
+                    type: String(type),
+                    sort: String(sort),
+                    classId: String(classId),
+                    customerId: String(customerId),
+                    employeeId: String(employeeId),
+                    payPeriodId: String(payPeriodId),
+                };
+                const { finalDataArr, counts, filePath, companyName } = yield costallocationServices_1.default.exportCostAllocationPDF(data);
+                const stream = yield (0, costAllocationPdf_1.generatePdf)(finalDataArr, counts, filePath, payPeriodId, companyName);
+                stream.on('close', () => __awaiter(this, void 0, void 0, function* () {
+                    const data = yield fs_1.promises.readFile(filePath);
+                    const base64String = Buffer.from(data).toString('base64');
+                    yield fs_1.promises.unlink(filePath);
+                    res.status(200).json({
+                        data: base64String,
+                    });
+                }));
             }
             catch (err) {
                 next(err);

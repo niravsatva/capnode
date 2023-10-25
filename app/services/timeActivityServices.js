@@ -228,6 +228,10 @@ class TimeActivityService {
             }
             const timeActivitiesCount = yield timeActivityRepository_1.default.getAllTimeActivitiesCount({
                 companyId: companyId,
+                filterConditions: filterConditions,
+                searchCondition: searchCondition,
+                sortCondition: sortCondition,
+                dateFilters: dateFilters,
             });
             return { timeActivitiesWithHours, timeActivitiesCount };
             // return { timeActivitiesWithHours, timeActivitiesCount, timeActivities };

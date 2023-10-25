@@ -32,7 +32,7 @@ class costAllocationRepository {
         }));
         return totalMinutes;
     }
-    minTohours(totalMinutes) {
+    minToHours(totalMinutes) {
         const totalHours = Math.floor(totalMinutes / 60);
         const remainingMinutes = totalMinutes % 60;
         return `${totalHours.toString().padStart(2, '0')}:${remainingMinutes
@@ -43,9 +43,7 @@ class costAllocationRepository {
         return __awaiter(this, void 0, void 0, function* () {
             const { companyId, offset, limit, searchCondition, filterConditions, empFilterConditions, sortCondition, payPeriodId, timeSheetId, } = costAllocationData;
             const query = Object.assign({ where: Object.assign(Object.assign(Object.assign({ companyId: companyId }, searchCondition), empFilterConditions), { timeActivities: {
-                        some: {
-                            timeSheetId: timeSheetId,
-                        },
+                        some: Object.assign({ timeSheetId: timeSheetId }, filterConditions),
                     } }), select: {
                     fullName: true,
                     id: true,
@@ -64,6 +62,12 @@ class costAllocationRepository {
                         },
                     },
                 }, skip: offset, take: limit }, sortCondition);
+            if (!offset) {
+                delete query['skip'];
+            }
+            if (!limit) {
+                delete query['take'];
+            }
             const costAllocations = yield prisma_1.prisma.employee.findMany(query);
             let response = [];
             const companySection = yield prisma_1.prisma.configurationSection.findMany({
@@ -92,7 +96,19 @@ class costAllocationRepository {
             const employeeRowSpanMapping = {
                 '': 1,
             };
-            yield Promise.all(costAllocations.map((costAllocation) => __awaiter(this, void 0, void 0, function* () {
+            const salarySection = companySection.find((e) => e.no === 1);
+            const salarySectionFields = companyFields
+                .filter((e) => e.configurationSectionId === (salarySection === null || salarySection === void 0 ? void 0 : salarySection.id))
+                .map((e) => {
+                return e.id;
+            });
+            const companyConfiguration = yield prisma_1.prisma.configuration.findFirst({
+                where: {
+                    companyId,
+                },
+            });
+            for (const singleCostAllocation of costAllocations) {
+                const costAllocation = singleCostAllocation;
                 const allTimeActivities = yield prisma_1.prisma.timeActivities.findMany({
                     where: {
                         timeSheetId,
@@ -118,9 +134,10 @@ class costAllocationRepository {
                     });
                 }
                 const timeActivity = [];
-                const totalTime = this.minTohours(totalTimeMin);
+                // const totalTime = this.minToHours(totalTimeMin);
                 const allTotalColumnsObj = {};
                 let totalAllocationPercentage = 0;
+                let availableTotalMinutes = 0;
                 costAllocation === null || costAllocation === void 0 ? void 0 : costAllocation.timeActivities.forEach((timeActivities, timeActivityIndex) => {
                     const costAllocationObj = {
                         id: (0, uuid_1.v4)(),
@@ -128,7 +145,11 @@ class costAllocationRepository {
                     const hours = parseInt(timeActivities === null || timeActivities === void 0 ? void 0 : timeActivities.hours);
                     const minutes = parseInt(timeActivities === null || timeActivities === void 0 ? void 0 : timeActivities.minute);
                     const currActivitiesTime = this.hoursToMin(hours, minutes);
-                    const allocation = this.allocationPercentage(Number(currActivitiesTime), Number(totalTimeMin));
+                    availableTotalMinutes = availableTotalMinutes + currActivitiesTime;
+                    let allocation = this.allocationPercentage(Number(currActivitiesTime), Number(totalTimeMin));
+                    if (!hours && !minutes) {
+                        allocation = '0.00';
+                    }
                     totalAllocationPercentage =
                         totalAllocationPercentage + Number(allocation);
                     if (timeActivityIndex === 0) {
@@ -149,18 +170,32 @@ class costAllocationRepository {
                                 allTotalColumnsObj[key] = value;
                             }
                         }
+                        if (salarySectionFields.includes(key)) {
+                            const directAllocation = (value * Number(companyConfiguration === null || companyConfiguration === void 0 ? void 0 : companyConfiguration.indirectExpenseRate)) /
+                                100;
+                            costAllocationObj['indirect-allocation'] = directAllocation;
+                            if (allTotalColumnsObj['indirect-allocation']) {
+                                allTotalColumnsObj['indirect-allocation'] =
+                                    allTotalColumnsObj['indirect-allocation'] + directAllocation;
+                            }
+                            else {
+                                allTotalColumnsObj['indirect-allocation'] = directAllocation;
+                            }
+                        }
                         costAllocationObj[key] = value;
                     });
                     timeActivity.push(costAllocationObj);
-                    if ((costAllocation === null || costAllocation === void 0 ? void 0 : costAllocation.timeActivities.length) - 1 ===
-                        timeActivityIndex) {
-                        const timeActivitiesTotalColumn = Object.assign(Object.assign({}, allTotalColumnsObj), { id: (0, uuid_1.v4)(), type: 'total', allocation: `${totalAllocationPercentage.toFixed(2)}%`, 'total-hours': totalTime, 'employee-name': '' });
+                    if ((costAllocation === null || costAllocation === void 0 ? void 0 : costAllocation.timeActivities.length) - 1 === timeActivityIndex) {
+                        const timeActivitiesTotalColumn = Object.assign(Object.assign({}, allTotalColumnsObj), { id: (0, uuid_1.v4)(), type: 'total', allocation: `${totalAllocationPercentage.toFixed(2)}%`, 'total-hours': this.minToHours(availableTotalMinutes), 'employee-name': '' });
                         timeActivity.push(timeActivitiesTotalColumn);
                     }
                 });
                 response = [...response, ...timeActivity];
-            })));
-            return { result: response, employeeRowSpanMapping };
+            }
+            const count = yield prisma_1.prisma.employee.count({
+                where: query.where,
+            });
+            return { result: response, employeeRowSpanMapping, count };
         });
     }
 }

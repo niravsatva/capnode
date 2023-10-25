@@ -206,11 +206,9 @@ class TimeActivityRepository {
     getAllTimeActivitiesCount(timeActivityData) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                const { companyId } = timeActivityData;
+                const { companyId, searchCondition, filterConditions, dateFilters } = timeActivityData;
                 const timeActivitiesCount = yield prisma_1.prisma.timeActivities.count({
-                    where: {
-                        companyId: companyId,
-                    },
+                    where: Object.assign(Object.assign(Object.assign({ companyId: companyId }, searchCondition), filterConditions), dateFilters),
                 });
                 return timeActivitiesCount;
             }

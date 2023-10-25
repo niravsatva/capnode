@@ -59,7 +59,11 @@ class QuickbooksClient {
                 return new Promise((resolve, reject) => {
                     const qbo = new QuickBooks(config_1.default.quickbooksClientId, config_1.default.quickbooksClientSecret, accessToken, true, realmId, config_1.default.quickbooksEnvironment == 'sandbox' ? true : false, true, null, '2.0', refreshToken);
                     qbo.findAccounts([
-                        { field: 'AccountType', value: 'Expense' },
+                        {
+                            field: 'AccountType',
+                            value: ['Expense', 'Other Expense'],
+                            operator: 'IN',
+                        },
                         { field: 'fetchAll', value: true },
                         { field: 'asc', value: 'Name' },
                     ], function (err, response) {
@@ -147,7 +151,6 @@ class QuickbooksClient {
                                 reject(err);
                             }
                             else {
-                                console.log('Time activity: ' + timeActivities);
                                 resolve(timeActivities);
                             }
                         });

@@ -149,5 +149,16 @@ class TimeSheetRepository {
             return timeSheet;
         });
     }
+    // Get timesheet by payperiod
+    getTimeSheetByPayPeriod(payperiodId) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const timeSheet = yield prisma_1.prisma.timeSheets.findUnique({
+                where: {
+                    payPeriodId: payperiodId,
+                },
+            });
+            return timeSheet;
+        });
+    }
 }
 exports.default = new TimeSheetRepository();

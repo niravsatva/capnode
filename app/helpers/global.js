@@ -1,6 +1,10 @@
 "use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getTotalMinutes = exports.minutesToHoursAndMinutes = exports.getSearchConditionSQL = exports.formatNumberWithCommas = exports.employeeFormationDataHandler = void 0;
+exports.getFormattedDates = exports.getTotalMinutes = exports.minutesToHoursAndMinutes = exports.getSearchConditionSQL = exports.formatNumberWithCommas = exports.employeeFormationDataHandler = void 0;
+const moment_1 = __importDefault(require("moment"));
 /* eslint-disable no-prototype-builtins */
 const employeeFormationDataHandler = (singleEmployeeData) => {
     const obj = {};
@@ -66,3 +70,7 @@ function getTotalMinutes(hours, minutes) {
     return totalMinutes;
 }
 exports.getTotalMinutes = getTotalMinutes;
+function getFormattedDates(startDate, endDate) {
+    return `${(0, moment_1.default)(startDate).format('MM/DD/YYYY')} - ${(0, moment_1.default)(endDate).format('MM/DD/YYYY')}`;
+}
+exports.getFormattedDates = getFormattedDates;
