@@ -217,8 +217,8 @@ class TimeActivityController {
     exportTimeActivity(req, res, next) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                const { companyId, search = '', classId = '', customerId = '', employeeId = '', payPeriodId = '', } = req.query;
-                const { timeActivities, companyDetails, payPeriodData } = yield timeActivityServices_1.default.exportTimeActivity(companyId, search, classId, customerId, employeeId, payPeriodId);
+                const { companyId, search = '', classId = '', customerId = '', employeeId = '', payPeriodId = '', sort = '', type = '', } = req.query;
+                const { timeActivities, companyDetails, payPeriodData } = yield timeActivityServices_1.default.exportTimeActivity(companyId, search, classId, customerId, employeeId, payPeriodId, sort, type);
                 const timeActivityData = JSON.parse(JSON.stringify(timeActivities));
                 const fileHeader = [
                     'Activity Date',
@@ -276,7 +276,7 @@ class TimeActivityController {
     exportTimeActivityExcel(req, res, next) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                const { companyId, search = '', classId = '', customerId = '', employeeId = '', startDate = '', endDate = '', payPeriodId = '', } = req.query;
+                const { companyId, search = '', classId = '', customerId = '', employeeId = '', startDate = '', endDate = '', payPeriodId = '', sort = '', type = '', } = req.query;
                 let formattedStartDate = '';
                 let formattedEndDate = '';
                 if (startDate && endDate) {
@@ -289,7 +289,7 @@ class TimeActivityController {
                     newEnd.setUTCHours(0, 0, 0, 0);
                     formattedEndDate = newEnd.toISOString();
                 }
-                const { timeActivities, companyDetails } = yield timeActivityServices_1.default.exportTimeActivity(companyId, search, classId, customerId, employeeId, payPeriodId);
+                const { timeActivities, companyDetails } = yield timeActivityServices_1.default.exportTimeActivity(companyId, search, classId, customerId, employeeId, payPeriodId, sort, type);
                 // Create a new Excel workbook and worksheet
                 const wb = new Excel.Workbook();
                 const ws = wb.addWorksheet('Sheet 1');

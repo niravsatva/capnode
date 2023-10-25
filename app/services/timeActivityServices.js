@@ -557,7 +557,7 @@ class TimeActivityService {
         });
     }
     // Export Time Activity
-    exportTimeActivity(companyId, search, classId, customerId, employeeId, payPeriodId) {
+    exportTimeActivity(companyId, search, classId, customerId, employeeId, payPeriodId, sort, type) {
         return __awaiter(this, void 0, void 0, function* () {
             let dateFilters = {};
             let payPeriodData;
@@ -645,10 +645,42 @@ class TimeActivityService {
                     ],
                 }
                 : {};
+            const sortCondition = sort
+                ? {
+                    orderBy: [
+                        {
+                            [sort]: type !== null && type !== void 0 ? type : 'asc',
+                        },
+                        {
+                            id: 'asc',
+                        },
+                    ],
+                }
+                : {
+                    orderBy: [
+                        {
+                            activityDate: 'desc',
+                        },
+                        {
+                            id: 'asc',
+                        },
+                    ],
+                };
+            if (sort === 'employee') {
+                sortCondition['orderBy'] = [
+                    {
+                        employee: {
+                            fullName: type,
+                        },
+                    },
+                    { id: 'asc' },
+                ];
+            }
             const getAllActivities = yield timeActivityRepository_1.default.getAllTimeActivityForExport({
                 companyId: companyId,
                 filterConditions: filterConditions,
                 searchCondition: searchCondition,
+                sortCondition: sortCondition,
                 dateFilters: dateFilters,
             });
             const timeActivities = [];

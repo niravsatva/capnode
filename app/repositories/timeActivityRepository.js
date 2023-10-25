@@ -483,11 +483,9 @@ class TimeActivityRepository {
     // Get all time activities for export
     getAllTimeActivityForExport(data) {
         return __awaiter(this, void 0, void 0, function* () {
-            const { companyId, filterConditions, searchCondition, dateFilters } = data;
+            const { companyId, filterConditions, searchCondition, dateFilters, sortCondition, } = data;
             try {
-                const timeActivities = yield prisma_1.prisma.timeActivities.findMany({
-                    where: Object.assign(Object.assign(Object.assign({ companyId: companyId }, searchCondition), filterConditions), dateFilters),
-                    include: {
+                const timeActivities = yield prisma_1.prisma.timeActivities.findMany(Object.assign({ where: Object.assign(Object.assign(Object.assign({ companyId: companyId }, searchCondition), filterConditions), dateFilters), include: {
                         employee: {
                             select: {
                                 id: true,
@@ -499,11 +497,9 @@ class TimeActivityRepository {
                                 employee: true,
                             },
                         },
-                    },
-                    orderBy: {
+                    }, orderBy: {
                         activityDate: 'desc',
-                    },
-                });
+                    } }, sortCondition));
                 return timeActivities;
             }
             catch (err) {
