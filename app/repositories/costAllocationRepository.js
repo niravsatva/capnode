@@ -20,7 +20,7 @@ class costAllocationRepository {
     }
     allocationPercentage(currMin, totalMin) {
         const percentage = (Number(currMin) / Number(totalMin)) * 100;
-        return percentage.toFixed(2);
+        return percentage;
     }
     totalHoursIntoMin(arr) {
         let totalMinutes = 0;
@@ -148,7 +148,7 @@ class costAllocationRepository {
                     availableTotalMinutes = availableTotalMinutes + currActivitiesTime;
                     let allocation = this.allocationPercentage(Number(currActivitiesTime), Number(totalTimeMin));
                     if (!hours && !minutes) {
-                        allocation = '0.00';
+                        allocation = 0;
                     }
                     totalAllocationPercentage =
                         totalAllocationPercentage + Number(allocation);
@@ -158,7 +158,7 @@ class costAllocationRepository {
                     costAllocationObj['total-hours'] = `${timeActivities.hours}:${timeActivities.minute}`;
                     costAllocationObj['customer-name'] = timeActivities === null || timeActivities === void 0 ? void 0 : timeActivities.customerName;
                     costAllocationObj['class-name'] = timeActivities === null || timeActivities === void 0 ? void 0 : timeActivities.className;
-                    costAllocationObj['allocation'] = `${allocation}%`;
+                    costAllocationObj['allocation'] = `${allocation.toFixed(2)}%`;
                     employeeCostMappingData.forEach((data) => {
                         const key = Object.keys(data)[0];
                         const value = (Number(allocation) * Number(data[key])) / 100;
