@@ -158,7 +158,7 @@ class costAllocationRepository {
                     costAllocationObj['total-hours'] = `${timeActivities.hours}:${timeActivities.minute}`;
                     costAllocationObj['customer-name'] = timeActivities === null || timeActivities === void 0 ? void 0 : timeActivities.customerName;
                     costAllocationObj['class-name'] = timeActivities === null || timeActivities === void 0 ? void 0 : timeActivities.className;
-                    costAllocationObj['allocation'] = `${allocation.toFixed(2)}%`;
+                    costAllocationObj['allocation'] = `${allocation.toFixed(4)}%`;
                     employeeCostMappingData.forEach((data) => {
                         const key = Object.keys(data)[0];
                         const value = (Number(allocation) * Number(data[key])) / 100;
