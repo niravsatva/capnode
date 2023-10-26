@@ -41,14 +41,14 @@ class costAllocationRepository {
     }
     getCostAllocation(costAllocationData) {
         return __awaiter(this, void 0, void 0, function* () {
-            const { companyId, offset, limit, searchCondition, filterConditions, empFilterConditions, sortCondition, payPeriodId, timeSheetId, } = costAllocationData;
-            const query = Object.assign({ where: Object.assign(Object.assign(Object.assign({ companyId: companyId }, searchCondition), empFilterConditions), { timeActivities: {
-                        some: Object.assign({ timeSheetId: timeSheetId }, filterConditions),
+            const { companyId, offset, limit, searchCondition, empFilterConditions, filterConditions, sortCondition, payPeriodId, timeSheetId, } = costAllocationData;
+            const query = Object.assign({ where: Object.assign(Object.assign({ companyId: companyId }, empFilterConditions), { timeActivities: {
+                        some: Object.assign(Object.assign({ timeSheetId: timeSheetId }, filterConditions), searchCondition),
                     } }), select: {
                     fullName: true,
                     id: true,
                     timeActivities: {
-                        where: Object.assign({ timeSheetId: timeSheetId }, filterConditions),
+                        where: Object.assign(Object.assign({ timeSheetId: timeSheetId }, filterConditions), searchCondition),
                     },
                     employeeCostField: {
                         include: {
