@@ -20,6 +20,7 @@ const customError_1 = require("../models/customError");
 const companyRepository_1 = __importDefault(require("../repositories/companyRepository"));
 const costallocationServices_1 = __importDefault(require("../services/costallocationServices"));
 const costAllocationPdf_1 = require("../templates/costAllocationPdf");
+const isAuthorizedUser_1 = require("../middlewares/isAuthorizedUser");
 class CostAllocationController {
     getCostAllocation(req, res, next) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -32,6 +33,14 @@ class CostAllocationController {
                 const companyDetails = yield companyRepository_1.default.getDetails(companyId);
                 if (!companyDetails) {
                     throw new customError_1.CustomError(404, 'Company not found');
+                }
+                // Checking is the user is permitted
+                const isPermitted = yield (0, isAuthorizedUser_1.checkPermission)(req, companyId, {
+                    permissionName: 'Cost Allocations',
+                    permission: ['view'],
+                });
+                if (!isPermitted) {
+                    throw new customError_1.CustomError(403, 'You are not authorized');
                 }
                 let formattedStartDate = '';
                 let formattedEndDate = '';
