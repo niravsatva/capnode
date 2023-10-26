@@ -31,8 +31,8 @@ const generatePdf = (costAllocationData, counts, filePath, payPeriodId, companyN
     const { salaryExpenseAccounts, fringeExpense, payrollTaxesExpense } = counts;
     const tableData = mapJSONDataToArray(costAllocationData);
     const salaryExpenseAccountsCounts = 5 + salaryExpenseAccounts;
-    const fringeExpenseCounts = salaryExpenseAccountsCounts + fringeExpense;
-    const payrollTaxesExpenseCounts = fringeExpenseCounts + payrollTaxesExpense;
+    const payrollTaxesExpenseCounts = salaryExpenseAccountsCounts + payrollTaxesExpense;
+    const fringeExpenseCounts = payrollTaxesExpenseCounts + fringeExpense;
     const doc = new pdfkit_1.default({ size: [tableData[0].length * 180, 3000] });
     // doc.pipe(stream);
     // Image
@@ -89,11 +89,11 @@ const generatePdf = (costAllocationData, counts, filePath, payPeriodId, companyN
                         doc.fillColor('#E7EFF8');
                     }
                     else if (j >= salaryExpenseAccountsCounts &&
-                        j < fringeExpenseCounts) {
+                        j < payrollTaxesExpenseCounts) {
                         doc.fillColor('#E1F1EB');
                     }
-                    else if (j >= fringeExpenseCounts &&
-                        j < payrollTaxesExpenseCounts) {
+                    else if (j >= payrollTaxesExpenseCounts &&
+                        j < fringeExpenseCounts) {
                         doc.fillColor('#F3EDE7');
                     }
                     else {
