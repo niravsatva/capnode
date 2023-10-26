@@ -382,8 +382,29 @@ exports.sections = [
         ],
     },
     {
-        sectionName: 'Fringe expense',
+        sectionName: 'Payroll Taxes Expense',
         no: 2,
+        fields: [
+            {
+                name: 'FICA',
+                type: 'Monthly',
+                jsonId: 'f1',
+            },
+            {
+                name: 'SUI',
+                type: 'Monthly',
+                jsonId: 'f2',
+            },
+            {
+                name: `Total Payroll Taxes`,
+                type: 'Monthly',
+                jsonId: 't1',
+            },
+        ],
+    },
+    {
+        sectionName: 'Fringe expense',
+        no: 3,
         fields: [
             {
                 name: 'Health Insurance',
@@ -402,27 +423,6 @@ exports.sections = [
             },
             {
                 name: `Total Fringe`,
-                type: 'Monthly',
-                jsonId: 't1',
-            },
-        ],
-    },
-    {
-        sectionName: 'Payroll Taxes Expense',
-        no: 3,
-        fields: [
-            {
-                name: 'FICA',
-                type: 'Monthly',
-                jsonId: 'f1',
-            },
-            {
-                name: 'SUI',
-                type: 'Monthly',
-                jsonId: 'f2',
-            },
-            {
-                name: `Total Payroll Taxes`,
                 type: 'Monthly',
                 jsonId: 't1',
             },

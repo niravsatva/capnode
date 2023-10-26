@@ -4,5 +4,6 @@ exports.migrations = void 0;
 exports.migrations = [
     'testFun',
     'addPayRolePermissions',
-    'defaultIndirectExpenseRate'
+    'defaultIndirectExpenseRate',
+    'sectionNoChanges'
 ];

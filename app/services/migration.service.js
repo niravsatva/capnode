@@ -54,7 +54,28 @@ function defaultIndirectExpenseRate() {
         });
     });
 }
+function sectionNoChanges() {
+    return __awaiter(this, void 0, void 0, function* () {
+        yield prisma_1.prisma.configurationSection.updateMany({
+            where: {
+                sectionName: 'Fringe expense'
+            },
+            data: {
+                no: 3
+            }
+        });
+        yield prisma_1.prisma.configurationSection.updateMany({
+            where: {
+                sectionName: 'Payroll Taxes Expense'
+            },
+            data: {
+                no: 2
+            }
+        });
+    });
+}
 exports.migrationService = {
+    sectionNoChanges,
     defaultIndirectExpenseRate,
     addPayRolePermissions,
     testFun
