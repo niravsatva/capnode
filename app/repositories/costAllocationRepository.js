@@ -116,8 +116,6 @@ class costAllocationRepository {
                     },
                 });
                 const totalTimeMin = this.totalHoursIntoMin(allTimeActivities);
-                employeeRowSpanMapping[costAllocation.fullName] =
-                    costAllocation.timeActivities.length;
                 const employeeCostMappingData = [];
                 if (costAllocation.employeeCostField.length) {
                     costAllocation.employeeCostField.forEach((singleEmployeeData) => {
@@ -138,7 +136,21 @@ class costAllocationRepository {
                 const allTotalColumnsObj = {};
                 let totalAllocationPercentage = 0;
                 let availableTotalMinutes = 0;
-                costAllocation === null || costAllocation === void 0 ? void 0 : costAllocation.timeActivities.forEach((timeActivities, timeActivityIndex) => {
+                //Array with time activities with same customer and class
+                const sameCustomerWithSameClass = [];
+                costAllocation === null || costAllocation === void 0 ? void 0 : costAllocation.timeActivities.forEach((timeActivities) => {
+                    const findSameTimeLog = sameCustomerWithSameClass.find((e) => e.customerName === timeActivities.customerName && e.className === timeActivities.className);
+                    if (findSameTimeLog) {
+                        findSameTimeLog.hours = parseInt(timeActivities === null || timeActivities === void 0 ? void 0 : timeActivities.hours) + parseInt(findSameTimeLog === null || findSameTimeLog === void 0 ? void 0 : findSameTimeLog.hours);
+                        findSameTimeLog.minutes = parseInt(timeActivities === null || timeActivities === void 0 ? void 0 : timeActivities.minute) + parseInt(findSameTimeLog.minutes);
+                    }
+                    else {
+                        sameCustomerWithSameClass.push(timeActivities);
+                    }
+                });
+                employeeRowSpanMapping[costAllocation.fullName] =
+                    sameCustomerWithSameClass.length;
+                sameCustomerWithSameClass.forEach((timeActivities, timeActivityIndex) => {
                     const costAllocationObj = {
                         id: (0, uuid_1.v4)(),
                     };
@@ -185,7 +197,7 @@ class costAllocationRepository {
                         costAllocationObj[key] = value;
                     });
                     timeActivity.push(costAllocationObj);
-                    if ((costAllocation === null || costAllocation === void 0 ? void 0 : costAllocation.timeActivities.length) - 1 === timeActivityIndex) {
+                    if (sameCustomerWithSameClass.length - 1 === timeActivityIndex) {
                         const timeActivitiesTotalColumn = Object.assign(Object.assign({}, allTotalColumnsObj), { id: (0, uuid_1.v4)(), type: 'total', allocation: `${totalAllocationPercentage.toFixed(2)}%`, 'total-hours': this.minToHours(availableTotalMinutes), 'employee-name': '' });
                         timeActivity.push(timeActivitiesTotalColumn);
                     }

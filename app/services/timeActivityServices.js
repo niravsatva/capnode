@@ -301,12 +301,13 @@ class TimeActivityService {
                 // Last sync does not exist - time activity sync for the first time
                 // Find all time activities from quickbooks
                 const timeActivities = yield quickbooksClient_1.default.getAllTimeActivities(accessToken, tenantId, refreshToken);
+                const allClasses = yield quickbooksClient_1.default.getAllClasses(accessToken, tenantId, refreshToken);
                 if (timeActivities &&
                     ((_b = (_a = timeActivities === null || timeActivities === void 0 ? void 0 : timeActivities.QueryResponse) === null || _a === void 0 ? void 0 : _a.TimeActivity) === null || _b === void 0 ? void 0 : _b.length) > 0) {
                     // Filtered vendors, fetching employees only
                     const filteredEmployees = (_d = (_c = timeActivities === null || timeActivities === void 0 ? void 0 : timeActivities.QueryResponse) === null || _c === void 0 ? void 0 : _c.TimeActivity) === null || _d === void 0 ? void 0 : _d.filter((timeActivity) => timeActivity === null || timeActivity === void 0 ? void 0 : timeActivity.EmployeeRef);
                     yield Promise.all(filteredEmployees === null || filteredEmployees === void 0 ? void 0 : filteredEmployees.map((timeActivity) => __awaiter(this, void 0, void 0, function* () {
-                        var _e, _f, _g, _h, _j, _k, _l;
+                        var _e, _f, _g, _h, _j, _k, _l, _m;
                         let hours = 0;
                         let minutes = 0;
                         if ((timeActivity === null || timeActivity === void 0 ? void 0 : timeActivity.Hours) !== null &&
@@ -343,18 +344,20 @@ class TimeActivityService {
                             hours = effectiveHours;
                             minutes = effectiveMinutes;
                         }
+                        const classObj = (_f = (_e = allClasses === null || allClasses === void 0 ? void 0 : allClasses.QueryResponse) === null || _e === void 0 ? void 0 : _e.Class) === null || _f === void 0 ? void 0 : _f.find((singleClass) => { var _a; return (singleClass === null || singleClass === void 0 ? void 0 : singleClass.Id) === ((_a = timeActivity === null || timeActivity === void 0 ? void 0 : timeActivity.ClassRef) === null || _a === void 0 ? void 0 : _a.value); });
                         const data = {
                             timeActivityId: timeActivity === null || timeActivity === void 0 ? void 0 : timeActivity.Id,
-                            classId: ((_e = timeActivity === null || timeActivity === void 0 ? void 0 : timeActivity.ClassRef) === null || _e === void 0 ? void 0 : _e.value) || null,
-                            className: ((_f = timeActivity === null || timeActivity === void 0 ? void 0 : timeActivity.ClassRef) === null || _f === void 0 ? void 0 : _f.name) || null,
-                            customerId: ((_g = timeActivity === null || timeActivity === void 0 ? void 0 : timeActivity.CustomerRef) === null || _g === void 0 ? void 0 : _g.value) || null,
-                            customerName: ((_h = timeActivity === null || timeActivity === void 0 ? void 0 : timeActivity.CustomerRef) === null || _h === void 0 ? void 0 : _h.name) || null,
-                            hours: ((_j = hours === null || hours === void 0 ? void 0 : hours.toString()) === null || _j === void 0 ? void 0 : _j.padStart(2, '0')) || '00',
-                            minute: ((_k = minutes === null || minutes === void 0 ? void 0 : minutes.toString()) === null || _k === void 0 ? void 0 : _k.padStart(2, '0')) || '00',
+                            classId: ((_g = timeActivity === null || timeActivity === void 0 ? void 0 : timeActivity.ClassRef) === null || _g === void 0 ? void 0 : _g.value) || null,
+                            className: (classObj === null || classObj === void 0 ? void 0 : classObj.FullyQualifiedName) || null,
+                            // className: timeActivity?.ClassRef?.name || null,
+                            customerId: ((_h = timeActivity === null || timeActivity === void 0 ? void 0 : timeActivity.CustomerRef) === null || _h === void 0 ? void 0 : _h.value) || null,
+                            customerName: ((_j = timeActivity === null || timeActivity === void 0 ? void 0 : timeActivity.CustomerRef) === null || _j === void 0 ? void 0 : _j.name) || null,
+                            hours: ((_k = hours === null || hours === void 0 ? void 0 : hours.toString()) === null || _k === void 0 ? void 0 : _k.padStart(2, '0')) || '00',
+                            minute: ((_l = minutes === null || minutes === void 0 ? void 0 : minutes.toString()) === null || _l === void 0 ? void 0 : _l.padStart(2, '0')) || '00',
                             // hours: timeActivity?.Hours?.toString() || '0',
                             // minute: timeActivity?.Minutes?.toString() || '0',
                             activityDate: timeActivity === null || timeActivity === void 0 ? void 0 : timeActivity.TxnDate,
-                            employeeId: (_l = timeActivity === null || timeActivity === void 0 ? void 0 : timeActivity.EmployeeRef) === null || _l === void 0 ? void 0 : _l.value,
+                            employeeId: (_m = timeActivity === null || timeActivity === void 0 ? void 0 : timeActivity.EmployeeRef) === null || _m === void 0 ? void 0 : _m.value,
                             companyId: companyId,
                         };
                         // Dump time activity in the database for the first time

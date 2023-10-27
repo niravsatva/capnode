@@ -62,6 +62,9 @@ class TimeSheetServices {
                         {
                             name: { contains: search, mode: 'insensitive' },
                         },
+                        {
+                            notes: { contains: search, mode: 'insensitive' },
+                        },
                     ],
                 }
                 : {};

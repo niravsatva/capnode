@@ -26,9 +26,19 @@ class CostAllocationServices {
     getCostAllocationData(costAllocationData) {
         var _a;
         return __awaiter(this, void 0, void 0, function* () {
-            const timeSheetData = yield prisma_1.prisma.timeSheets.findUnique({
+            const payPeriodData = yield prisma_1.prisma.payPeriod.findFirst({
+                where: {
+                    id: costAllocationData === null || costAllocationData === void 0 ? void 0 : costAllocationData.payPeriodId,
+                    companyId: costAllocationData === null || costAllocationData === void 0 ? void 0 : costAllocationData.companyId
+                }
+            });
+            if (!payPeriodData) {
+                throw new customError_1.CustomError(400, 'Invalid PayPeriod');
+            }
+            const timeSheetData = yield prisma_1.prisma.timeSheets.findFirst({
                 where: {
                     payPeriodId: costAllocationData === null || costAllocationData === void 0 ? void 0 : costAllocationData.payPeriodId,
+                    companyId: costAllocationData === null || costAllocationData === void 0 ? void 0 : costAllocationData.companyId
                 },
             });
             if (!timeSheetData) {
