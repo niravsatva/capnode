@@ -42,7 +42,7 @@ class costAllocationRepository {
     getCostAllocation(costAllocationData) {
         return __awaiter(this, void 0, void 0, function* () {
             const { companyId, offset, limit, searchCondition, empFilterConditions, filterConditions, sortCondition, payPeriodId, timeSheetId, } = costAllocationData;
-            const query = Object.assign({ where: Object.assign(Object.assign({ companyId: companyId }, empFilterConditions), { timeActivities: {
+            const query = Object.assign(Object.assign({ where: Object.assign(Object.assign({ companyId: companyId }, empFilterConditions), { timeActivities: {
                         some: Object.assign(Object.assign({ timeSheetId: timeSheetId }, filterConditions), searchCondition),
                     } }), select: {
                     fullName: true,
@@ -61,7 +61,9 @@ class costAllocationRepository {
                             },
                         },
                     },
-                }, skip: offset, take: limit }, sortCondition);
+                }, skip: offset, take: limit }, sortCondition), { orderBy: {
+                    fullName: 'asc',
+                } });
             if (!offset) {
                 delete query['skip'];
             }

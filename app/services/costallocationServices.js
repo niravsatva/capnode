@@ -255,7 +255,7 @@ class CostAllocationServices {
                         singleAllocation[key] != null) {
                         obj[finalFieldMapping[key]] =
                             typeof singleAllocation[key] === 'number'
-                                ? `$ ${Number(singleAllocation[key]).toFixed(2)}`
+                                ? `$ ${Number(singleAllocation[key]).toFixed(4)}`
                                 : singleAllocation[key];
                     }
                 });
@@ -422,7 +422,7 @@ class CostAllocationServices {
                         singleAllocation[key] != null) {
                         obj[finalFieldMapping[key]] =
                             typeof singleAllocation[key] === 'number'
-                                ? `$ ${Number(singleAllocation[key]).toFixed(2)}`
+                                ? `$ ${Number(singleAllocation[key]).toFixed(4)}`
                                 : singleAllocation[key];
                     }
                 });
