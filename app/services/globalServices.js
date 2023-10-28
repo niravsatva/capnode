@@ -20,7 +20,16 @@ class GlobalService {
             const { bodyHtml, footerHtml, headerHtml } = pdfData;
             const browser = yield puppeteer_1.default.launch({
                 headless: false,
-                args: ["--no-sandbox"]
+                args: [
+                    '--disable-gpu',
+                    '--disable-setuid-sandbox',
+                    '--no-sandbox',
+                    '--ignore-certificate-errors',
+                    '--disable-web-security',
+                    '--disable-features=IsolateOrigins',
+                    '--disable-site-isolation-trials'
+                ],
+                executablePath: ''
             });
             const page = yield browser.newPage();
             const htmlString = bodyHtml;
