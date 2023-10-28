@@ -137,6 +137,7 @@ class TimeSheetController {
                     timeSheetId: timeSheetId,
                     employeeList: employeeList,
                     companyId: companyId,
+                    userId: req.user.id,
                 };
                 yield timeSheetServices_1.default.emailTimeSheet(timeSheetData);
                 return (0, defaultResponseHelper_1.DefaultResponse)(res, 200, 'Email sent successfully');

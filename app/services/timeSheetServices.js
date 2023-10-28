@@ -155,7 +155,7 @@ class TimeSheetServices {
     emailTimeSheet(timeSheetData) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                const { timeSheetId, employeeList, companyId } = timeSheetData;
+                const { timeSheetId, employeeList, companyId, userId } = timeSheetData;
                 const companyDetails = yield repositories_1.companyRepository.getDetails(companyId);
                 if (!companyDetails) {
                     throw new customError_1.CustomError(400, 'Company not found');
@@ -164,6 +164,8 @@ class TimeSheetServices {
                 if (!timeSheetDetails) {
                     throw new customError_1.CustomError(400, 'Time sheet not found');
                 }
+                const loggedInUser = yield repositories_1.userRepository.getById(userId);
+                const fullName = `${loggedInUser.firstName} ${loggedInUser.lastName}`;
                 yield Promise.all(yield employeeList.map((singleEmployee) => __awaiter(this, void 0, void 0, function* () {
                     const data = {
                         employeeId: singleEmployee,
@@ -211,6 +213,8 @@ class TimeSheetServices {
                             pdfData: pdfData,
                             singleEmployee: employeeDetails,
                             customers: uniqueCustomers,
+                            userName: fullName,
+                            companyDetails,
                         }),
                     });
                     yield sqs.send(queueData);
