@@ -21,7 +21,7 @@ class GlobalService {
             const browser = yield puppeteer_1.default.launch({
                 "dumpio": true,
                 "headless": true,
-                "executablePath": '/usr/bin/chromium-browser',
+                //"executablePath": '/usr/bin/chromium-browser',
                 "args": [
                     '--disable-setuid-sandbox',
                     '--no-sandbox',
