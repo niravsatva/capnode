@@ -18,7 +18,10 @@ class GlobalService {
     generatePdf(pdfData) {
         return __awaiter(this, void 0, void 0, function* () {
             const { bodyHtml, footerHtml, headerHtml } = pdfData;
-            const browser = yield puppeteer_1.default.launch();
+            const browser = yield puppeteer_1.default.launch({
+                headless: false,
+                args: ["--no-sandbox"]
+            });
             const page = yield browser.newPage();
             const htmlString = bodyHtml;
             yield page.setContent(htmlString);
