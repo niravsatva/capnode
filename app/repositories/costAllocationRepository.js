@@ -92,9 +92,9 @@ class costAllocationRepository {
                     },
                 },
             });
-            const totalFields = companyFields.map((e) => {
-                return e.id;
-            });
+            // const totalFields = companyFields.map((e) => {
+            // 	return e.id;
+            // });
             const employeeRowSpanMapping = {
                 '': 1,
             };
@@ -176,14 +176,14 @@ class costAllocationRepository {
                     employeeCostMappingData.forEach((data) => {
                         const key = Object.keys(data)[0];
                         const value = (Number(allocation) * Number(data[key])) / 100;
-                        if (totalFields.includes(key)) {
-                            if (allTotalColumnsObj[key]) {
-                                allTotalColumnsObj[key] = allTotalColumnsObj[key] + value;
-                            }
-                            else {
-                                allTotalColumnsObj[key] = value;
-                            }
+                        if (allTotalColumnsObj[key]) {
+                            allTotalColumnsObj[key] = allTotalColumnsObj[key] + value;
                         }
+                        else {
+                            allTotalColumnsObj[key] = value;
+                        }
+                        // if (totalFields.includes(key)) {
+                        // }
                         if (salarySectionFields.includes(key)) {
                             const directAllocation = (value * Number(companyConfiguration === null || companyConfiguration === void 0 ? void 0 : companyConfiguration.indirectExpenseRate)) /
                                 100;
