@@ -33,10 +33,15 @@ class GlobalService {
             yield page.setContent(htmlString);
             // Generate the PDF as a buffer
             const pdfBuffer = yield page.pdf({
-                format: 'A4',
+                format: 'Letter',
                 displayHeaderFooter: true,
                 headerTemplate: headerHtml,
                 footerTemplate: footerHtml,
+                preferCSSPageSize: true,
+                margin: {
+                    top: '80px',
+                    bottom: '80px'
+                }
             });
             fs_1.default.writeFileSync('output.pdf', pdfBuffer);
             // Convert the buffer to a base64 string
