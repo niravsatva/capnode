@@ -18,10 +18,10 @@ class GlobalService {
     generatePdf(pdfData) {
         return __awaiter(this, void 0, void 0, function* () {
             const { bodyHtml, footerHtml, headerHtml } = pdfData;
+            console.log(pdfData);
             const browser = yield puppeteer_1.default.launch({
                 "dumpio": true,
                 "headless": true,
-                //"executablePath": '/usr/bin/chromium-browser',
                 "args": [
                     '--disable-setuid-sandbox',
                     '--no-sandbox',
@@ -42,7 +42,6 @@ class GlobalService {
             // Convert the buffer to a base64 string
             const pdfBase64 = pdfBuffer.toString('base64');
             // Log or return the base64-encoded PDF
-            console.log(pdfBase64);
             yield browser.close();
             return pdfBase64;
         });
