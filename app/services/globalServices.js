@@ -19,17 +19,14 @@ class GlobalService {
         return __awaiter(this, void 0, void 0, function* () {
             const { bodyHtml, footerHtml, headerHtml } = pdfData;
             const browser = yield puppeteer_1.default.launch({
-                headless: false,
-                args: [
-                    '--disable-gpu',
+                "dumpio": true,
+                "headless": true,
+                "executablePath": '/usr/bin/chromium-browser',
+                "args": [
                     '--disable-setuid-sandbox',
                     '--no-sandbox',
-                    '--ignore-certificate-errors',
-                    '--disable-web-security',
-                    '--disable-features=IsolateOrigins',
-                    '--disable-site-isolation-trials'
-                ],
-                executablePath: ''
+                    '--disable-gpu',
+                ]
             });
             const page = yield browser.newPage();
             const htmlString = bodyHtml;
