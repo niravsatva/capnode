@@ -74,9 +74,77 @@ function sectionNoChanges() {
         });
     });
 }
+function configurationSettingChanges() {
+    var _a;
+    return __awaiter(this, void 0, void 0, function* () {
+        const allConfigurations = yield prisma_1.prisma.configuration.findMany();
+        if (allConfigurations.length) {
+            for (const configuration of allConfigurations) {
+                const settings = configuration.settings;
+                if (((_a = settings['2']) === null || _a === void 0 ? void 0 : _a.placeHolder) === 'Select Fringe Expense') {
+                    const newSettings = Object.assign({}, settings);
+                    newSettings['2'] = Object.assign(Object.assign({}, settings['3']), { id: '2' });
+                    newSettings['3'] = Object.assign(Object.assign({}, settings['2']), { id: '3' });
+                    yield prisma_1.prisma.configuration.update({
+                        where: {
+                            id: configuration.id
+                        },
+                        data: {
+                            settings: newSettings
+                        }
+                    });
+                }
+            }
+        }
+    });
+}
+function fieldChanges() {
+    return __awaiter(this, void 0, void 0, function* () {
+        const sectionTwoConfigurationSection = yield prisma_1.prisma.configurationSection.findMany({
+            where: {
+                no: 2
+            },
+            select: {
+                fields: {
+                    where: {
+                        jsonId: 'f3'
+                    }
+                },
+                companyId: true,
+                id: true,
+                no: true,
+                sectionName: true
+            }
+        });
+        if (sectionTwoConfigurationSection.length) {
+            for (const section of sectionTwoConfigurationSection) {
+                const sectionThree = yield prisma_1.prisma.configurationSection.findFirst({
+                    where: {
+                        no: 3,
+                        companyId: section.companyId
+                    }
+                });
+                if (sectionThree) {
+                    for (const field of section.fields) {
+                        yield prisma_1.prisma.field.update({
+                            where: {
+                                id: field.id
+                            },
+                            data: {
+                                configurationSectionId: sectionThree === null || sectionThree === void 0 ? void 0 : sectionThree.id
+                            }
+                        });
+                    }
+                }
+            }
+        }
+    });
+}
 exports.migrationService = {
+    fieldChanges,
+    configurationSettingChanges,
     sectionNoChanges,
     defaultIndirectExpenseRate,
     addPayRolePermissions,
-    testFun
+    testFun,
 };

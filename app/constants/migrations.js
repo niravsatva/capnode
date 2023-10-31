@@ -5,5 +5,7 @@ exports.migrations = [
     'testFun',
     'addPayRolePermissions',
     'defaultIndirectExpenseRate',
-    'sectionNoChanges'
+    'sectionNoChanges',
+    'configurationSettingChanges',
+    'fieldChanges'
 ];

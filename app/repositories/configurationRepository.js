@@ -62,6 +62,36 @@ class ConfigurationRepository {
                     },
                     data: data,
                 });
+                const settings = data.settings;
+                const configurationSectionData = yield prisma_1.prisma.configurationSection.findMany({
+                    where: {
+                        companyId
+                    },
+                    select: {
+                        id: true,
+                        no: true
+                    }
+                });
+                for (const key in settings) {
+                    const section = configurationSectionData.find((e) => e.no === Number(key));
+                    for (const fieldKey in settings[key].fields) {
+                        if (section) {
+                            const fieldData = settings[key].fields[fieldKey];
+                            if (fieldData && section) {
+                                yield prisma_1.prisma.field.updateMany({
+                                    where: {
+                                        companyId,
+                                        jsonId: fieldKey,
+                                        configurationSectionId: section.id,
+                                    },
+                                    data: {
+                                        name: fieldData.label
+                                    }
+                                });
+                            }
+                        }
+                    }
+                }
                 return updatedConfiguration;
             }
             catch (err) {

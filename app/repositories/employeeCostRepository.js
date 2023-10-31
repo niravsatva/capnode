@@ -9,6 +9,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+/* eslint-disable @typescript-eslint/no-unused-vars */
 const prisma_1 = require("../client/prisma");
 class EmployeeCostRepository {
     // For get the monthly cost value per employee
@@ -612,7 +613,6 @@ class EmployeeCostRepository {
     updateMonthlyCost(employeeCostValueID, value, payPeriodId, isCalculatorValue) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                console.log('Pay period : ', payPeriodId, isCalculatorValue);
                 const updatedCost = yield prisma_1.prisma.employeeCostValue.update({
                     where: {
                         id: employeeCostValueID,
