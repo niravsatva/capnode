@@ -132,6 +132,18 @@ class EmployeeCostRepository {
     // Create monthly cost values for all employees
     createMonthlyCost(employees, companyId, payPeriodId) {
         return __awaiter(this, void 0, void 0, function* () {
+            let lastPayPeriodId = null;
+            const allPayPeriods = yield prisma_1.prisma.payPeriod.findMany({
+                where: {
+                    companyId,
+                    id: {
+                        not: payPeriodId
+                    }
+                }
+            });
+            if (allPayPeriods && allPayPeriods.length) {
+                lastPayPeriodId = allPayPeriods[allPayPeriods.length - 1].id;
+            }
             yield Promise.all(employees.map((singleEmployee) => __awaiter(this, void 0, void 0, function* () {
                 // Fetching all the fields of that employee
                 const employeeCostFields = yield prisma_1.prisma.employeeCostField.findMany({
@@ -190,6 +202,22 @@ class EmployeeCostRepository {
                         }
                     }
                     else {
+                        let value = '0.00';
+                        if (lastPayPeriodId) {
+                            const lastPayPeriodValue = yield prisma_1.prisma.employeeCostValue.findFirst({
+                                where: {
+                                    employeeCostField: {
+                                        id: singleEmployeeCostFields.id,
+                                        companyId
+                                    },
+                                    employeeId: singleEmployee.id,
+                                    payPeriodId: lastPayPeriodId
+                                }
+                            });
+                            if (lastPayPeriodValue) {
+                                value = lastPayPeriodValue.value;
+                            }
+                        }
                         yield prisma_1.prisma.employeeCostValue.create({
                             data: {
                                 employee: { connect: { id: singleEmployee.id } },
@@ -198,6 +226,7 @@ class EmployeeCostRepository {
                                 },
                                 payPeriod: { connect: { id: payPeriodId } },
                                 isPercentage: true,
+                                value
                             },
                         });
                     }

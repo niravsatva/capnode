@@ -223,5 +223,118 @@ class QuickbooksClient {
             }
         });
     }
+    // Get closing date
+    getClosingDate(accessToken, realmId, refreshToken) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                return new Promise((resolve, reject) => {
+                    const qbo = new QuickBooks(config_1.default.quickbooksClientId, config_1.default.quickbooksClientSecret, accessToken, true, realmId, config_1.default.quickbooksEnvironment == 'sandbox' ? true : false, true, null, '2.0', refreshToken);
+                    qbo.getPreferences(function (err, response) {
+                        var _a;
+                        return __awaiter(this, void 0, void 0, function* () {
+                            if (err) {
+                                reject(err);
+                            }
+                            else {
+                                const date = (_a = response === null || response === void 0 ? void 0 : response.AccountingInfoPrefs) === null || _a === void 0 ? void 0 : _a.BookCloseDate;
+                                resolve(date);
+                            }
+                        });
+                    });
+                });
+            }
+            catch (err) {
+                throw err;
+            }
+        });
+    }
+    createJournalEntry(accessToken, realmId, refreshToken, journalData) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                return new Promise((resolve, reject) => {
+                    const qbo = new QuickBooks(config_1.default.quickbooksClientId, config_1.default.quickbooksClientSecret, accessToken, true, realmId, config_1.default.quickbooksEnvironment == 'sandbox' ? true : false, true, null, '2.0', refreshToken);
+                    qbo.createJournalEntry(journalData, function (err, response) {
+                        return __awaiter(this, void 0, void 0, function* () {
+                            if (err) {
+                                reject(err);
+                            }
+                            else {
+                                resolve(response);
+                            }
+                        });
+                    });
+                });
+            }
+            catch (err) {
+                throw err;
+            }
+        });
+    }
+    updateJournalEntry(accessToken, realmId, refreshToken, journalData) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                return new Promise((resolve, reject) => {
+                    const qbo = new QuickBooks(config_1.default.quickbooksClientId, config_1.default.quickbooksClientSecret, accessToken, true, realmId, config_1.default.quickbooksEnvironment == 'sandbox' ? true : false, true, null, '2.0', refreshToken);
+                    qbo.updateJournalEntry(journalData, function (err, response) {
+                        return __awaiter(this, void 0, void 0, function* () {
+                            if (err) {
+                                reject(err);
+                            }
+                            else {
+                                resolve(response);
+                            }
+                        });
+                    });
+                });
+            }
+            catch (err) {
+                throw err;
+            }
+        });
+    }
+    getJournal(accessToken, realmId, refreshToken, journalId) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                return new Promise((resolve, reject) => {
+                    const qbo = new QuickBooks(config_1.default.quickbooksClientId, config_1.default.quickbooksClientSecret, accessToken, true, realmId, config_1.default.quickbooksEnvironment == 'sandbox' ? true : false, true, null, '2.0', refreshToken);
+                    qbo.getJournalEntry(journalId, function (err, response) {
+                        return __awaiter(this, void 0, void 0, function* () {
+                            if (err) {
+                                reject(err);
+                            }
+                            else {
+                                resolve(response);
+                            }
+                        });
+                    });
+                });
+            }
+            catch (err) {
+                throw err;
+            }
+        });
+    }
+    uploadFile(accessToken, realmId, refreshToken, fileName, fileType, fileData, entityName, entityId) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                return new Promise((resolve, reject) => {
+                    const qbo = new QuickBooks(config_1.default.quickbooksClientId, config_1.default.quickbooksClientSecret, accessToken, true, realmId, config_1.default.quickbooksEnvironment == 'sandbox' ? true : false, true, null, '2.0', refreshToken);
+                    qbo.upload(fileName, fileType, fileData, entityName, entityId, function (err, response) {
+                        return __awaiter(this, void 0, void 0, function* () {
+                            if (err) {
+                                reject(err);
+                            }
+                            else {
+                                resolve(response);
+                            }
+                        });
+                    });
+                });
+            }
+            catch (err) {
+                throw err;
+            }
+        });
+    }
 }
 exports.default = new QuickbooksClient();

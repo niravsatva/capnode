@@ -10,12 +10,25 @@ const generatePdf = (pdfData, singleEmployee, customers) => {
     const { fullName } = singleEmployee;
     let htmlData = ``;
     allTimeLogs === null || allTimeLogs === void 0 ? void 0 : allTimeLogs.forEach((singleTimeLog) => {
-        htmlData += `<tr>
+        if ((singleTimeLog === null || singleTimeLog === void 0 ? void 0 : singleTimeLog.SplitTimeActivities) &&
+            (singleTimeLog === null || singleTimeLog === void 0 ? void 0 : singleTimeLog.SplitTimeActivities.length) > 0) {
+            singleTimeLog === null || singleTimeLog === void 0 ? void 0 : singleTimeLog.SplitTimeActivities.forEach((singleSplitTimeLog) => {
+                htmlData += `<tr>
+                    <td>${(0, moment_1.default)(singleSplitTimeLog === null || singleSplitTimeLog === void 0 ? void 0 : singleSplitTimeLog.activityDate).format('MM/DD/YYYY')}</td>
+                      <td>${singleSplitTimeLog === null || singleSplitTimeLog === void 0 ? void 0 : singleSplitTimeLog.className}</td>
+                      <td>${singleSplitTimeLog === null || singleSplitTimeLog === void 0 ? void 0 : singleSplitTimeLog.customerName}</td>
+                      <td>${singleSplitTimeLog === null || singleSplitTimeLog === void 0 ? void 0 : singleSplitTimeLog.hours} : ${singleSplitTimeLog === null || singleSplitTimeLog === void 0 ? void 0 : singleSplitTimeLog.minute}</td>
+                    </tr>`;
+            });
+        }
+        else {
+            htmlData += `<tr>
                     <td>${(0, moment_1.default)(singleTimeLog === null || singleTimeLog === void 0 ? void 0 : singleTimeLog.activityDate).format('MM/DD/YYYY')}</td>
-                    <td>${singleTimeLog === null || singleTimeLog === void 0 ? void 0 : singleTimeLog.className}</td>
-                    <td>${singleTimeLog === null || singleTimeLog === void 0 ? void 0 : singleTimeLog.customerName}</td>
-                    <td>${singleTimeLog === null || singleTimeLog === void 0 ? void 0 : singleTimeLog.hours} : ${singleTimeLog === null || singleTimeLog === void 0 ? void 0 : singleTimeLog.minute}</td>
-                  </tr>`;
+                      <td>${singleTimeLog === null || singleTimeLog === void 0 ? void 0 : singleTimeLog.className}</td>
+                      <td>${singleTimeLog === null || singleTimeLog === void 0 ? void 0 : singleTimeLog.customerName}</td>
+                      <td>${singleTimeLog === null || singleTimeLog === void 0 ? void 0 : singleTimeLog.hours} : ${singleTimeLog === null || singleTimeLog === void 0 ? void 0 : singleTimeLog.minute}</td>
+                    </tr>`;
+        }
     });
     let customerData = ``;
     customers === null || customers === void 0 ? void 0 : customers.forEach((singleCustomer) => {

@@ -16,6 +16,7 @@ class TimeSheetRepository {
         return __awaiter(this, void 0, void 0, function* () {
             const { companyId, offset, limit, searchCondition, filterConditions, sortCondition, payPeriodFilter, } = timeSheetData;
             const timeSheets = yield prisma_1.prisma.timeSheets.findMany(Object.assign(Object.assign({ where: Object.assign(Object.assign(Object.assign({ companyId: companyId }, payPeriodFilter), searchCondition), filterConditions), skip: offset, take: limit }, sortCondition), { include: {
+                    payPeriod: true,
                     timeActivities: true,
                     createdBy: {
                         select: {
@@ -26,7 +27,9 @@ class TimeSheetRepository {
                         },
                     },
                 } }));
-            const count = yield prisma_1.prisma.timeSheets.count();
+            const count = yield prisma_1.prisma.timeSheets.count({
+                where: Object.assign(Object.assign(Object.assign({ companyId: companyId }, payPeriodFilter), searchCondition), filterConditions),
+            });
             return { timeSheets, count };
         });
     }

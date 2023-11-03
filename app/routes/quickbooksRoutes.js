@@ -23,4 +23,5 @@ router.post('/classes', authMiddleware_1.isAuthenticated, validators_1.quickbook
 router.post('/company', controllers_1.quickbooksController.getCompanyInfo);
 // Sync time activities for the first time
 router.post('/time-activities', authMiddleware_1.isAuthenticated, validators_1.quickbooksTimeActivityValidation, controllers_1.quickbooksController.getAllTimeActivities);
+router.post('/closingDates', controllers_1.quickbooksController.getClosingDateList);
 exports.default = router;

@@ -55,7 +55,7 @@ class ConfigurationController {
                 // Check validation for company
                 (0, validationHelper_1.checkValidation)(req);
                 const companyId = req.body.companyId;
-                const { settings, indirectExpenseRate, payrollMethod } = req.body;
+                const { settings, indirectExpenseRate, payrollMethod, decimalToFixedAmount, decimalToFixedPercentage } = req.body;
                 // Check If company exists
                 const companyDetails = yield repositories_1.companyRepository.getDetails(companyId);
                 if (!companyDetails) {
@@ -65,6 +65,8 @@ class ConfigurationController {
                     settings: settings,
                     indirectExpenseRate: indirectExpenseRate,
                     payrollMethod: payrollMethod,
+                    decimalToFixedAmount,
+                    decimalToFixedPercentage
                 };
                 // Update configuration
                 const updatedConfiguration = yield configurationRepository_1.default.updateConfiguration(companyId, data);

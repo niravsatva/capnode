@@ -12,6 +12,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+/* eslint-disable no-mixed-spaces-and-tabs */
 /* eslint-disable @typescript-eslint/no-var-requires */
 const moment_1 = __importDefault(require("moment"));
 const prisma_1 = require("../client/prisma");
@@ -30,8 +31,8 @@ class CostAllocationServices {
                 const payPeriodData = yield prisma_1.prisma.payPeriod.findFirst({
                     where: {
                         id: costAllocationData === null || costAllocationData === void 0 ? void 0 : costAllocationData.payPeriodId,
-                        companyId: costAllocationData === null || costAllocationData === void 0 ? void 0 : costAllocationData.companyId
-                    }
+                        companyId: costAllocationData === null || costAllocationData === void 0 ? void 0 : costAllocationData.companyId,
+                    },
                 });
                 if (!payPeriodData) {
                     throw new customError_1.CustomError(400, 'Invalid PayPeriod');
@@ -40,7 +41,7 @@ class CostAllocationServices {
             const timeSheetData = yield prisma_1.prisma.timeSheets.findFirst({
                 where: {
                     payPeriodId: costAllocationData === null || costAllocationData === void 0 ? void 0 : costAllocationData.payPeriodId,
-                    companyId: costAllocationData === null || costAllocationData === void 0 ? void 0 : costAllocationData.companyId
+                    companyId: costAllocationData === null || costAllocationData === void 0 ? void 0 : costAllocationData.companyId,
                 },
             });
             if (!timeSheetData) {
@@ -151,6 +152,9 @@ class CostAllocationServices {
                 throw new customError_1.CustomError(400, 'Invalid Pay Period');
             }
             const timeSheet = yield timeSheetRepository_1.default.getTimeSheetByPayPeriod(payPeriodId);
+            if (!timeSheet) {
+                throw new customError_1.CustomError(400, 'No cost allocation available for this pay period');
+            }
             const filteredData = [];
             const empFilteredData = [];
             if (costAllocationData === null || costAllocationData === void 0 ? void 0 : costAllocationData.classId) {
@@ -299,6 +303,9 @@ class CostAllocationServices {
                 throw new customError_1.CustomError(400, 'Invalid Pay Period');
             }
             const timeSheet = yield timeSheetRepository_1.default.getTimeSheetByPayPeriod(payPeriodId);
+            if (!timeSheet) {
+                throw new customError_1.CustomError(400, 'No cost allocation available for this pay period');
+            }
             const filteredData = [];
             const empFilteredData = [];
             if (costAllocationData === null || costAllocationData === void 0 ? void 0 : costAllocationData.classId) {

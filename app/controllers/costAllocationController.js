@@ -21,12 +21,13 @@ const companyRepository_1 = __importDefault(require("../repositories/companyRepo
 const costallocationServices_1 = __importDefault(require("../services/costallocationServices"));
 const costAllocationPdf_1 = require("../templates/costAllocationPdf");
 const isAuthorizedUser_1 = require("../middlewares/isAuthorizedUser");
+const prisma_1 = require("../client/prisma");
 class CostAllocationController {
     getCostAllocation(req, res, next) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 (0, validationHelper_1.checkValidation)(req);
-                const { companyId, page = 1, limit = 10, search = '', createdBy = '', type = '', sort = '', classId = '', customerId = '', employeeId = '', startDate = '', endDate = '', payPeriodId = null, } = req.query;
+                const { companyId, page = 1, limit = 10, search = '', createdBy = '', type = '', sort = '', classId = '', customerId = '', employeeId = '', payPeriodId = null, } = req.query;
                 if (!companyId) {
                     throw new customError_1.CustomError(404, 'Company id is required');
                 }
@@ -42,19 +43,37 @@ class CostAllocationController {
                 if (!isPermitted) {
                     throw new customError_1.CustomError(403, 'You are not authorized');
                 }
-                let formattedStartDate = '';
-                let formattedEndDate = '';
-                if (startDate && endDate) {
-                    // Format start date
-                    const newStart = new Date(startDate);
-                    newStart.setUTCHours(0, 0, 0, 0);
-                    formattedStartDate = newStart.toISOString();
-                    // Format end date
-                    const newEnd = new Date(endDate);
-                    const nextDate = new Date(newEnd);
-                    nextDate.setDate(newEnd.getDate() + 1);
-                    nextDate.setUTCHours(0, 0, 0, 0);
-                    formattedEndDate = nextDate.toISOString();
+                let _payPeriodId = payPeriodId;
+                const _date = new Date();
+                let systemPayPeriodId = false;
+                if (!_payPeriodId) {
+                    const payPeriodData = yield prisma_1.prisma.payPeriod.findFirst({
+                        where: {
+                            companyId: companyId,
+                            endDate: {
+                                gte: new Date(_date === null || _date === void 0 ? void 0 : _date.getFullYear(), _date === null || _date === void 0 ? void 0 : _date.getMonth(), 1),
+                                lte: new Date(_date.getFullYear(), _date.getMonth() + 1, 0)
+                            },
+                        },
+                        orderBy: {
+                            endDate: 'desc'
+                        }
+                    });
+                    if (payPeriodData && payPeriodData.id) {
+                        systemPayPeriodId = true;
+                        _payPeriodId = payPeriodData.id;
+                    }
+                }
+                if (_payPeriodId) {
+                    const validatePayPeriod = yield prisma_1.prisma.payPeriod.findFirst({
+                        where: {
+                            companyId: companyId,
+                            id: _payPeriodId,
+                        },
+                    });
+                    if (!validatePayPeriod) {
+                        throw new customError_1.CustomError(400, 'Invalid PayPeriod');
+                    }
                 }
                 const data = {
                     companyId: companyId,
@@ -67,12 +86,10 @@ class CostAllocationController {
                     classId: String(classId),
                     customerId: String(customerId),
                     employeeId: String(employeeId),
-                    startDate: String(formattedStartDate),
-                    endDate: String(formattedEndDate),
-                    payPeriodId: String(payPeriodId),
+                    payPeriodId: String(_payPeriodId),
                 };
                 const costAllocation = yield costallocationServices_1.default.getCostAllocationData(data);
-                return (0, defaultResponseHelper_1.DefaultResponse)(res, 200, 'Cost allocation fetched successfully', costAllocation);
+                return (0, defaultResponseHelper_1.DefaultResponse)(res, 200, 'Cost allocation fetched successfully', Object.assign(Object.assign({}, costAllocation), { currentDatePayPeriod: systemPayPeriodId ? _payPeriodId : null }));
             }
             catch (err) {
                 next(err);

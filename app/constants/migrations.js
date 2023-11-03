@@ -7,5 +7,10 @@ exports.migrations = [
     'defaultIndirectExpenseRate',
     'sectionNoChanges',
     'configurationSettingChanges',
-    'fieldChanges'
+    'fieldChanges',
+    'configurationFringeExpenseChanges',
+    'configurationPayRollExpenseChanges',
+    'configurationPayRollExpenseLabelChanges',
+    'configurationSalarySectionChanges',
+    'configurationFirstSectionChanges'
 ];

@@ -413,5 +413,20 @@ class QuickbooksController {
             }
         });
     }
+    // Get Closing date
+    getClosingDateList(req, res, next) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                const companyId = req.body.companyId;
+                // Get access token
+                const authResponse = yield quickbooksServices_1.default.getAccessToken(companyId);
+                const closingDateList = yield quickbooksClient_1.default.getClosingDate(authResponse.accessToken, authResponse.tenantID, authResponse.refreshToken);
+                return (0, defaultResponseHelper_1.DefaultResponse)(res, 200, 'Closing dates fetched successfully', closingDateList);
+            }
+            catch (err) {
+                next(err);
+            }
+        });
+    }
 }
 exports.default = new QuickbooksController();

@@ -140,7 +140,145 @@ function fieldChanges() {
         }
     });
 }
+function configurationFringeExpenseChanges() {
+    return __awaiter(this, void 0, void 0, function* () {
+        const allConfigurations = yield prisma_1.prisma.configuration.findMany();
+        if (allConfigurations.length) {
+            for (const configuration of allConfigurations) {
+                const settings = configuration.settings;
+                if (settings['3']) {
+                    const newSettings = Object.assign({}, settings);
+                    if (newSettings['3'].fields) {
+                        if (newSettings['3'].fields['f2']) {
+                            newSettings['3'].fields['f2'].deletable = true;
+                        }
+                    }
+                    if (newSettings['3'].fields) {
+                        if (newSettings['3'].fields['f3']) {
+                            newSettings['3'].fields['f3'].deletable = true;
+                        }
+                    }
+                    yield prisma_1.prisma.configuration.update({
+                        where: {
+                            id: configuration.id
+                        },
+                        data: {
+                            settings: newSettings
+                        }
+                    });
+                }
+            }
+        }
+    });
+}
+function configurationPayRollExpenseChanges() {
+    return __awaiter(this, void 0, void 0, function* () {
+        const allConfigurations = yield prisma_1.prisma.configuration.findMany();
+        if (allConfigurations.length) {
+            for (const configuration of allConfigurations) {
+                const settings = configuration.settings;
+                if (settings['2']) {
+                    const newSettings = Object.assign({}, settings);
+                    if (newSettings['2'].fields) {
+                        if (newSettings['2'].fields['f2']) {
+                            newSettings['2'].fields['f2'].deletable = true;
+                        }
+                    }
+                    yield prisma_1.prisma.configuration.update({
+                        where: {
+                            id: configuration.id
+                        },
+                        data: {
+                            settings: newSettings
+                        }
+                    });
+                }
+            }
+        }
+    });
+}
+function configurationPayRollExpenseLabelChanges() {
+    return __awaiter(this, void 0, void 0, function* () {
+        const allConfigurations = yield prisma_1.prisma.configuration.findMany();
+        if (allConfigurations.length) {
+            for (const configuration of allConfigurations) {
+                const settings = configuration.settings;
+                if (settings['2']) {
+                    const newSettings = Object.assign({}, settings);
+                    if (newSettings['2'].capMappingTitle) {
+                        newSettings['2'].capMappingTitle = 'Payroll Tax Expense';
+                    }
+                    yield prisma_1.prisma.configuration.update({
+                        where: {
+                            id: configuration.id
+                        },
+                        data: {
+                            settings: newSettings
+                        }
+                    });
+                }
+            }
+        }
+    });
+}
+function configurationSalarySectionChanges() {
+    return __awaiter(this, void 0, void 0, function* () {
+        const allConfigurations = yield prisma_1.prisma.configuration.findMany();
+        if (allConfigurations.length) {
+            for (const configuration of allConfigurations) {
+                const settings = configuration.settings;
+                if (settings['1']) {
+                    const newSettings = Object.assign({}, settings);
+                    if (newSettings['1'].fields) {
+                        if (newSettings['1'].fields['f2']) {
+                            newSettings['1'].fields['f2'].deletable = true;
+                        }
+                    }
+                    yield prisma_1.prisma.configuration.update({
+                        where: {
+                            id: configuration.id
+                        },
+                        data: {
+                            settings: newSettings
+                        }
+                    });
+                }
+            }
+        }
+    });
+}
+function configurationFirstSectionChanges() {
+    return __awaiter(this, void 0, void 0, function* () {
+        const allConfigurations = yield prisma_1.prisma.configuration.findMany();
+        if (allConfigurations.length) {
+            for (const configuration of allConfigurations) {
+                const settings = configuration.settings;
+                if (settings['1']) {
+                    const newSettings = Object.assign({}, settings);
+                    if (newSettings['0'].fields) {
+                        if (newSettings['0'].fields['f1']) {
+                            newSettings['0'].fields['f1'].label = 'Payroll Expense Pool';
+                        }
+                    }
+                    yield prisma_1.prisma.configuration.update({
+                        where: {
+                            id: configuration.id
+                        },
+                        data: {
+                            settings: newSettings
+                        }
+                    });
+                }
+            }
+        }
+    });
+}
 exports.migrationService = {
+    configurationFirstSectionChanges,
+    configurationSalarySectionChanges,
+    configurationPayRollExpenseLabelChanges,
+    configurationPayRollExpenseChanges,
+    configurationFringeExpenseChanges,
     fieldChanges,
     configurationSettingChanges,
     sectionNoChanges,

@@ -25,6 +25,7 @@ const payPeriodRepository_1 = __importDefault(require("../repositories/payPeriod
 const timeSheetRepository_1 = __importDefault(require("../repositories/timeSheetRepository"));
 const timeSheetPdf_1 = require("../templates/timeSheetPdf");
 const timeActivityServices_1 = __importDefault(require("./timeActivityServices"));
+const utils_1 = require("../utils/utils");
 const sqs = new client_sqs_1.SQSClient(aws_1.awsConfig);
 class TimeSheetServices {
     // Get all time sheets
@@ -295,7 +296,8 @@ class TimeSheetServices {
             // 			object[singleActivity.employee.id] = minutes;
             // 		}
             // 	});
-            return newEmployees;
+            const finalData = (0, utils_1.sortArray)(newEmployees, 'asc', 'employeeName');
+            return finalData;
         });
     }
     exportTimeSheetPdf(timeSheetData) {
