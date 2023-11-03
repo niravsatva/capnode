@@ -36,6 +36,7 @@ model User {
   createdAt                    DateTime      @default(now())
   updatedAt                    DateTime      @updatedAt
   timeSheets                   TimeSheets[]
+  Journal                      Journal[]
 }
 
 model Token {
@@ -77,6 +78,7 @@ model Company {
   timeSheets                 TimeSheets[]
   hoursOver                  HoursOver[]
   payPeriod                  PayPeriod[]
+  Journal                    Journal[]
 }
 
 model Role {
@@ -140,14 +142,16 @@ model Invitations {
 }
 
 model Configuration {
-  id                  String          @id @default(uuid())
-  settings            Json
-  indirectExpenseRate Float?
-  payrollMethod       PayrollMethods?
-  company             Company?        @relation(fields: [companyId], references: [id])
-  companyId           String          @unique
-  createdAt           DateTime        @default(now())
-  updatedAt           DateTime        @updatedAt
+  id                       String          @id @default(uuid())
+  settings                 Json
+  indirectExpenseRate      Float?
+  payrollMethod            PayrollMethods?
+  company                  Company?        @relation(fields: [companyId], references: [id])
+  decimalToFixedPercentage Int?            @default(4)
+  decimalToFixedAmount     Int?            @default(2)
+  companyId                String          @unique
+  createdAt                DateTime        @default(now())
+  updatedAt                DateTime        @updatedAt
 }
 
 model Employee {
@@ -256,6 +260,7 @@ model PayPeriod {
   updatedAt         DateTime            @updatedAt
   timeActivities    TimeActivities[]
   TimeSheets        TimeSheets?
+  Journal           Journal?
 }
 
 model TimeActivities {
@@ -354,6 +359,24 @@ model Migrations {
   isCompleted Boolean  @default(false)
   isFailed    Boolean  @default(false)
   runOn       DateTime @default(now())
+}
+
+model Journal {
+  id              String    @id @default(uuid())
+  date            DateTime
+  notes           String?
+  status          Int
+  amount          String
+  qboJournalNo    Int
+  qboJournalTrnId String?
+  payPeriodId     String    @unique
+  payPeriod       PayPeriod @relation(fields: [payPeriodId], references: [id])
+  companyId       String?
+  company         Company?  @relation(fields: [companyId], references: [id])
+  createdById     String
+  createdBy       User      @relation(fields: [createdById], references: [id])
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @default(now())
 }
 
 enum PayrollMethods {
