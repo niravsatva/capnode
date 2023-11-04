@@ -124,7 +124,6 @@ class EmployeeCostService {
                         obj['totalLaborBurden'] = '0.00';
                         if (singleEmployeeData && (singleEmployeeData === null || singleEmployeeData === void 0 ? void 0 : singleEmployeeData.employeeCostField)) {
                             singleEmployeeData.employeeCostField.forEach((singleFieldObj) => {
-                                console.log(singleFieldObj)
                                 if (singleFieldObj && singleFieldObj.field) {
                                     obj[singleFieldObj.field.id] =
                                         singleFieldObj.costValue[0].value;
