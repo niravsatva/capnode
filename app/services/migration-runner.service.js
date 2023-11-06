@@ -47,6 +47,7 @@ function runMigration() {
                 }
             }
             catch (error) {
+                console.log(error);
                 yield prisma_1.prisma.migrations.update({
                     where: {
                         id: migrationId
