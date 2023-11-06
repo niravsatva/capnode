@@ -279,7 +279,11 @@ function configurationFirstSectionChanges() {
 }
 function addClosingDateToPayPeriod() {
     return __awaiter(this, void 0, void 0, function* () {
-        const allNullClosingDatePayPeriods = yield prisma_1.prisma.payPeriod.findMany();
+        const allNullClosingDatePayPeriods = yield prisma_1.prisma.payPeriod.findMany({
+            where: {
+                closingDate: null
+            }
+        });
         if (allNullClosingDatePayPeriods && allNullClosingDatePayPeriods.length) {
             for (const payPeriod of allNullClosingDatePayPeriods) {
                 yield prisma_1.prisma.payPeriod.update({
