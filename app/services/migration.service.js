@@ -284,7 +284,6 @@ function addClosingDateToPayPeriod() {
                 closingDate: null
             }
         });
-        console.log(allNullClosingDatePayPeriods);
         if (allNullClosingDatePayPeriods && allNullClosingDatePayPeriods.length) {
             for (const payPeriod of allNullClosingDatePayPeriods) {
                 yield prisma_1.prisma.payPeriod.update({
