@@ -14,6 +14,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const moment_timezone_1 = __importDefault(require("moment-timezone"));
 const config_1 = __importDefault(require("../../config"));
+const data_1 = require("../constants/data");
 /* eslint-disable @typescript-eslint/no-var-requires */
 const QuickBooks = require('node-quickbooks');
 class QuickbooksClient {
@@ -320,6 +321,38 @@ class QuickbooksClient {
                 return new Promise((resolve, reject) => {
                     const qbo = new QuickBooks(config_1.default.quickbooksClientId, config_1.default.quickbooksClientSecret, accessToken, true, realmId, config_1.default.quickbooksEnvironment == 'sandbox' ? true : false, true, null, '2.0', refreshToken);
                     qbo.upload(fileName, fileType, fileData, entityName, entityId, function (err, response) {
+                        return __awaiter(this, void 0, void 0, function* () {
+                            if (err) {
+                                reject(err);
+                            }
+                            else {
+                                resolve(response);
+                            }
+                        });
+                    });
+                });
+            }
+            catch (err) {
+                throw err;
+            }
+        });
+    }
+    createChartOfAccount(accessToken, realmId, refreshToken, accountData) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                const { name, currencyValue, accountType } = accountData;
+                const currency = data_1.supportedQBOCurrencies.find((singleCurrency) => singleCurrency.value === currencyValue);
+                const data = {
+                    Name: name,
+                    AccountType: accountType,
+                    CurrencyRef: {
+                        value: currency === null || currency === void 0 ? void 0 : currency.value,
+                        name: currency === null || currency === void 0 ? void 0 : currency.name
+                    },
+                };
+                return new Promise((resolve, reject) => {
+                    const qbo = new QuickBooks(config_1.default.quickbooksClientId, config_1.default.quickbooksClientSecret, accessToken, true, realmId, config_1.default.quickbooksEnvironment == 'sandbox' ? true : false, true, null, '2.0', refreshToken);
+                    qbo.createAccount(data, function (err, response) {
                         return __awaiter(this, void 0, void 0, function* () {
                             if (err) {
                                 reject(err);

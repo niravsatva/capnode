@@ -348,6 +348,7 @@ class JournalService {
             if (!validatePayPeriod) {
                 throw new customError_1.CustomError(400, 'Invalid pay period');
             }
+            let amount = '0';
             const findExistingJournal = yield prisma_1.prisma.journal.findFirst({
                 where: {
                     companyId: data.companyId,
@@ -365,12 +366,31 @@ class JournalService {
             }
             else {
                 journalData = yield prisma_1.prisma.journal.create({
-                    data
+                    data: Object.assign(Object.assign({}, data), { amount })
                 });
             }
+            const journalEntries = yield this.getJournalEntriesByPayPeriod({
+                companyId: data.companyId,
+                payPeriodId: journalData.payPeriodId
+            }, true);
+            if (journalEntries && journalEntries.length) {
+                if (journalEntries[journalEntries.length - 1]) {
+                    if (journalEntries[journalEntries.length - 1].debit) {
+                        amount = journalEntries[journalEntries.length - 1].debit;
+                    }
+                }
+            }
+            yield prisma_1.prisma.journal.update({
+                where: {
+                    id: journalData.id
+                },
+                data: {
+                    amount
+                }
+            });
             if (journalData.status === journalInterface_1.EJournalStatus.PUBLISHED) {
                 try {
-                    const response = yield this.publishJournalToQBO(journalData);
+                    const response = yield this.publishJournalToQBO(journalData, journalEntries);
                     if (response) {
                         yield prisma_1.prisma.journal.update({
                             where: {
@@ -401,14 +421,10 @@ class JournalService {
             return journalData;
         });
     }
-    publishJournalToQBO(journalData) {
+    publishJournalToQBO(journalData, journalEntries) {
         return __awaiter(this, void 0, void 0, function* () {
-            const journalEntries = yield this.getJournalEntriesByPayPeriod({
-                companyId: journalData.companyId,
-                payPeriodId: journalData.payPeriodId
-            }, true);
             if (!journalEntries || !journalEntries.length) {
-                throw new customError_1.CustomError(400, 'Cannot port empty journal entries');
+                throw new customError_1.CustomError(400, 'Cannot post empty journal entries');
             }
             const journalDataQBO = {
                 Line: this.createQBOJournalLineItems(journalEntries),

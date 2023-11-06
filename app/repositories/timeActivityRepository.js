@@ -36,6 +36,11 @@ class TimeActivityRepository {
                                 activityDate: true,
                             },
                         },
+                        timeSheet: {
+                            include: {
+                                payPeriod: true
+                            }
+                        }
                     }, skip: offset, take: limit }, sortCondition);
                 if (!offset) {
                     delete query['skip'];

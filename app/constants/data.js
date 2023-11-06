@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.sections = exports.DefaultConfigurationSettings = exports.DefaultAdminPermissions = exports.DefaultPermissions = void 0;
+exports.currencyValues = exports.supportedAccountTypes = exports.supportedQBOCurrencies = exports.sections = exports.DefaultConfigurationSettings = exports.DefaultAdminPermissions = exports.DefaultPermissions = void 0;
 exports.DefaultPermissions = [
     { permissionName: 'Dashboard', sortId: 1 },
     { permissionName: 'Employee Cost', sortId: 2 },
@@ -208,7 +208,7 @@ exports.DefaultConfigurationSettings = {
                 editable: true,
                 deletable: false,
                 isEditing: false,
-            }
+            },
         },
         addMore: true,
         toolTip: 'Salary Expense Accounts:  These are the Salary expense accounts, if the user add a new account here, it will be added as new columns in Cost allocation ',
@@ -229,7 +229,7 @@ exports.DefaultConfigurationSettings = {
                 editable: true,
                 deletable: false,
                 isEditing: false,
-            }
+            },
         },
         addMore: true,
         toolTip: 'Payroll Taxes Expense: These are the Payroll expense accounts, if the user add new account here, it will be added as new column in Cost allocation',
@@ -250,7 +250,7 @@ exports.DefaultConfigurationSettings = {
                 editable: true,
                 deletable: false,
                 isEditing: false,
-            }
+            },
         },
         addMore: true,
         toolTip: 'Salary Expense Accounts:  These are the Salary expense accounts, if the user add a new account here, it will be added as new columns in Cost allocation',
@@ -393,3 +393,32 @@ exports.sections = [
         ],
     },
 ];
+exports.supportedQBOCurrencies = [
+    {
+        value: 'USD',
+        name: 'United States Dollar',
+        symbol: '$',
+    },
+    {
+        value: 'EUR',
+        name: 'Euro',
+        symbol: '€',
+    },
+    {
+        value: 'GBP',
+        name: 'British Pound Sterling',
+        symbol: '£',
+    },
+    {
+        value: 'CAD',
+        name: 'Canadian Dollar',
+        symbol: 'C$',
+    },
+    {
+        value: 'AUD',
+        name: 'Australian Dollar',
+        symbol: 'A$',
+    },
+];
+exports.supportedAccountTypes = ['Expense'];
+exports.currencyValues = ['USD'];

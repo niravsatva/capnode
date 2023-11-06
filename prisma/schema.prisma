@@ -254,6 +254,7 @@ model PayPeriod {
   endDate           DateTime
   status            Int                 @default(1)
   companyId         String
+  closingDate       DateTime?
   company           Company             @relation(fields: [companyId], references: [id])
   employeeCostValue EmployeeCostValue[]
   createdAt         DateTime            @default(now())

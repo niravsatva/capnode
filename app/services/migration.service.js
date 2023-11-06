@@ -8,8 +8,12 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.migrationService = void 0;
+const moment_1 = __importDefault(require("moment"));
 const prisma_1 = require("../client/prisma");
 function addPayRolePermissions() {
     return __awaiter(this, void 0, void 0, function* () {
@@ -273,7 +277,29 @@ function configurationFirstSectionChanges() {
         }
     });
 }
+function addClosingDateToPayPeriod() {
+    return __awaiter(this, void 0, void 0, function* () {
+        const allNullClosingDatePayPeriods = yield prisma_1.prisma.payPeriod.findMany({
+            where: {
+                closingDate: null
+            }
+        });
+        if (allNullClosingDatePayPeriods && allNullClosingDatePayPeriods.length) {
+            for (const payPeriod of allNullClosingDatePayPeriods) {
+                yield prisma_1.prisma.payPeriod.update({
+                    where: {
+                        id: payPeriod.id
+                    },
+                    data: {
+                        closingDate: (0, moment_1.default)(payPeriod.endDate).endOf('month').toDate()
+                    }
+                });
+            }
+        }
+    });
+}
 exports.migrationService = {
+    addClosingDateToPayPeriod,
     configurationFirstSectionChanges,
     configurationSalarySectionChanges,
     configurationPayRollExpenseLabelChanges,

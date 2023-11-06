@@ -12,6 +12,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.companyValidation = void 0;
 const defaultResponseHelper_1 = require("../helpers/defaultResponseHelper");
 const validationHelper_1 = require("../helpers/validationHelper");
 const isAuthorizedUser_1 = require("../middlewares/isAuthorizedUser");
@@ -28,6 +29,16 @@ const moment_1 = __importDefault(require("moment"));
 const utils_1 = require("../utils/utils");
 // import axios from 'axios';
 // import timeActivityServices from '../services/timeActivityServices';
+const companyValidation = (companyId) => __awaiter(void 0, void 0, void 0, function* () {
+    if (!companyId) {
+        throw new customError_1.CustomError(400, 'Company id is required');
+    }
+    const companyDetails = yield repositories_1.companyRepository.getDetails(companyId);
+    if (!companyDetails) {
+        throw new customError_1.CustomError(400, 'Company not found');
+    }
+});
+exports.companyValidation = companyValidation;
 class QuickbooksController {
     // Get Quickbooks Auth URI
     getQuickbooksAuthUri(req, res, next) {
@@ -417,10 +428,41 @@ class QuickbooksController {
     getClosingDateList(req, res, next) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                const companyId = req.body.companyId;
+                const companyId = req.query.companyId;
+                if (!companyId) {
+                    throw new customError_1.CustomError(400, 'Company id is required');
+                }
+                const companyDetails = yield repositories_1.companyRepository.getDetails(companyId);
+                if (!companyDetails) {
+                    throw new customError_1.CustomError(400, 'Company not found');
+                }
                 // Get access token
                 const authResponse = yield quickbooksServices_1.default.getAccessToken(companyId);
                 const closingDateList = yield quickbooksClient_1.default.getClosingDate(authResponse.accessToken, authResponse.tenantID, authResponse.refreshToken);
+                return (0, defaultResponseHelper_1.DefaultResponse)(res, 200, 'Closing dates fetched successfully', closingDateList);
+            }
+            catch (err) {
+                next(err);
+            }
+        });
+    }
+    // Create Chart Of Account
+    createChartOfAccount(req, res, next) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                const companyId = req.body.companyId;
+                const { name, value, accountType = 'Expense', currencyValue = 'USD', } = req.body;
+                (0, validationHelper_1.checkValidation)(req);
+                (0, exports.companyValidation)(companyId);
+                const data = {
+                    name: name,
+                    value: value,
+                    accountType: accountType,
+                    currencyValue: currencyValue,
+                };
+                // Get access token
+                const authResponse = yield quickbooksServices_1.default.getAccessToken(companyId);
+                const closingDateList = yield quickbooksClient_1.default.createChartOfAccount(authResponse.accessToken, authResponse.tenantID, authResponse.refreshToken, data);
                 return (0, defaultResponseHelper_1.DefaultResponse)(res, 200, 'Closing dates fetched successfully', closingDateList);
             }
             catch (err) {

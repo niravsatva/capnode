@@ -21,6 +21,7 @@ const repositories_1 = require("../repositories");
 const timeActivityRepository_1 = __importDefault(require("../repositories/timeActivityRepository"));
 const quickbooksServices_1 = __importDefault(require("./quickbooksServices"));
 const payPeriodRepository_1 = __importDefault(require("../repositories/payPeriodRepository"));
+const dayjs_1 = __importDefault(require("dayjs"));
 class TimeActivityService {
     // Get all time activities
     getAllTimeActivitiesServices(timeActivityData) {
@@ -224,7 +225,19 @@ class TimeActivityService {
                     sortCondition: sortCondition,
                     dateFilters: dateFilters,
                 });
-                timeActivitiesWithHours = yield this.calculateTimeActivitiesWithHours(timeActivities);
+                const calActivitiesWithHours = yield this.calculateTimeActivitiesWithHours(timeActivities);
+                timeActivitiesWithHours = [];
+                calActivitiesWithHours.forEach((activity) => {
+                    let isAccountClosed = false;
+                    if (activity.timeSheet) {
+                        if (activity.timeSheet.payPeriod && activity.timeSheet.payPeriod.closingDate) {
+                            if (!((0, dayjs_1.default)(new Date()) < (0, dayjs_1.default)(activity.timeSheet.payPeriod.closingDate).endOf('day'))) {
+                                isAccountClosed = true;
+                            }
+                        }
+                    }
+                    timeActivitiesWithHours.push(Object.assign(Object.assign({}, activity), { isAccountClosed }));
+                });
             }
             const timeActivitiesCount = yield timeActivityRepository_1.default.getAllTimeActivitiesCount({
                 companyId: companyId,

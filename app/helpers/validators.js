@@ -1,7 +1,8 @@
 "use strict";
 // import { TimeSheetsStatus } from '../enum';
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.journalValidator = exports.timeSheetExportValidators = exports.timeSheetEmailValidators = exports.payPeriodValidator = exports.createTimeSheetValidator = exports.deleteAllSplitTimeActivity = exports.deleteSplitTimeActivity = exports.createSplitTimeActivity = exports.employeeCostUpdateValidation = exports.employeeCostCreateValidation = exports.deleteConfigurationFieldValidation = exports.updateConfigurationFieldValidation = exports.addConfigurationFieldValidation = exports.deleteTimeActivityValidation = exports.createTimeActivityValidation = exports.updateTimeActivityValidation = exports.timeActivityValidation = exports.employeeValidation = exports.companyConfigurationValidation = exports.companyGetConfigurationValidation = exports.quickbooksTimeActivityValidation = exports.quickbooksAccountsValidation = exports.quickbooksCustomersValidation = exports.quickbooksClassValidation = exports.quickbooksEmployeeValidation = exports.updateUserByAdminValidation = exports.permissionRoleValidationRules = exports.deleteRoleValidationRules = exports.updateRoleValidationRules = exports.createRoleValidationRules = exports.companyIdValidationRules = exports.updateProfileValidationRules = exports.deleteUserFromCompanyRules = exports.inviteUserValidationRules = exports.changePasswordValidationRules = exports.forgotPasswordValidationRules = exports.loginValidationRules = exports.companyIdValidation = void 0;
+exports.chartOfAccountsValidation = exports.journalValidator = exports.timeSheetExportValidators = exports.timeSheetEmailValidators = exports.payPeriodValidator = exports.createTimeSheetValidator = exports.deleteAllSplitTimeActivity = exports.deleteSplitTimeActivity = exports.createSplitTimeActivity = exports.employeeCostUpdateValidation = exports.employeeCostCreateValidation = exports.deleteConfigurationFieldValidation = exports.updateConfigurationFieldValidation = exports.addConfigurationFieldValidation = exports.deleteTimeActivityValidation = exports.createTimeActivityValidation = exports.updateTimeActivityValidation = exports.timeActivityValidation = exports.employeeValidation = exports.companyConfigurationValidation = exports.companyGetConfigurationValidation = exports.quickbooksTimeActivityValidation = exports.quickbooksAccountsValidation = exports.quickbooksCustomersValidation = exports.quickbooksClassValidation = exports.quickbooksEmployeeValidation = exports.updateUserByAdminValidation = exports.permissionRoleValidationRules = exports.deleteRoleValidationRules = exports.updateRoleValidationRules = exports.createRoleValidationRules = exports.companyIdValidationRules = exports.updateProfileValidationRules = exports.deleteUserFromCompanyRules = exports.inviteUserValidationRules = exports.changePasswordValidationRules = exports.forgotPasswordValidationRules = exports.loginValidationRules = exports.companyIdValidation = void 0;
+const data_1 = require("../constants/data");
 /* eslint-disable @typescript-eslint/no-var-requires */
 const { body } = require('express-validator');
 // CompanyId Validation
@@ -264,6 +265,7 @@ exports.payPeriodValidator = [
     ...exports.companyIdValidation,
     body('startDate').notEmpty().withMessage('Start date is required'),
     body('endDate').notEmpty().withMessage('End date is required'),
+    body('closingDate').notEmpty().withMessage('Closing date is required'),
 ];
 exports.timeSheetEmailValidators = [
     ...exports.companyIdValidation,
@@ -285,4 +287,24 @@ exports.journalValidator = [
     body('date').notEmpty().withMessage('Journal Date is required'),
     body('qboJournalNo').notEmpty().withMessage('Journal number is required'),
     body('status').notEmpty().withMessage('Status is required'),
+];
+exports.chartOfAccountsValidation = [
+    ...exports.companyIdValidation,
+    body('name').notEmpty().withMessage('Name is required'),
+    body('accountType').custom((value) => {
+        if (value) {
+            if (!data_1.supportedAccountTypes.includes(value)) {
+                throw new Error('Value must be one of the allowed values');
+            }
+        }
+        return true;
+    }),
+    body('currencyValue').custom((value) => {
+        if (value) {
+            if (!data_1.currencyValues.includes(value)) {
+                throw new Error('Value must be one of the allowed values');
+            }
+        }
+        return true;
+    }),
 ];

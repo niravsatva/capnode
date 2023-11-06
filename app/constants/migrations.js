@@ -12,5 +12,6 @@ exports.migrations = [
     'configurationPayRollExpenseChanges',
     'configurationPayRollExpenseLabelChanges',
     'configurationSalarySectionChanges',
-    'configurationFirstSectionChanges'
+    'configurationFirstSectionChanges',
+    'addClosingDateToPayPeriod'
 ];

@@ -90,9 +90,9 @@ class costAllocationRepository {
                     },
                 },
             });
-            // const totalFields = companyFields.map((e) => {
-            // 	return e.id;
-            // });
+            const totalFields = companyFields.map((e) => {
+                return e.id;
+            });
             const employeeRowSpanMapping = {
                 Total: 1,
             };
@@ -111,6 +111,7 @@ class costAllocationRepository {
             if (companyConfiguration && companyConfiguration.decimalToFixedPercentage) {
                 percentageToFixed = companyConfiguration.decimalToFixedPercentage;
             }
+            let grandTotal = 0;
             for (const singleCostAllocation of costAllocations) {
                 const costAllocation = singleCostAllocation;
                 const allTimeActivities = yield prisma_1.prisma.timeActivities.findMany({
@@ -182,6 +183,9 @@ class costAllocationRepository {
                     employeeCostMappingData.forEach((data) => {
                         const key = Object.keys(data)[0];
                         const value = (Number(allocation) * Number(data[key])) / 100;
+                        if (totalFields.includes(key)) {
+                            grandTotal = grandTotal + value;
+                        }
                         if (allTotalColumnsObj[key]) {
                             allTotalColumnsObj[key] = allTotalColumnsObj[key] + value;
                         }
@@ -194,6 +198,7 @@ class costAllocationRepository {
                             const directAllocation = (value * Number(companyConfiguration === null || companyConfiguration === void 0 ? void 0 : companyConfiguration.indirectExpenseRate)) /
                                 100;
                             costAllocationObj['indirect-allocation'] = directAllocation;
+                            grandTotal = grandTotal + directAllocation;
                             if (allTotalColumnsObj['indirect-allocation']) {
                                 allTotalColumnsObj['indirect-allocation'] =
                                     allTotalColumnsObj['indirect-allocation'] + directAllocation;
@@ -215,7 +220,7 @@ class costAllocationRepository {
             const count = yield prisma_1.prisma.employee.count({
                 where: query.where,
             });
-            return { result: response, employeeRowSpanMapping, count };
+            return { result: response, employeeRowSpanMapping, count, grandTotal };
         });
     }
     getCostAllocationForJournal(costAllocationData) {
