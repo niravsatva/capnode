@@ -113,7 +113,7 @@ class DashboardServices {
             });
             const labels = [];
             const values = [];
-            Object.keys(finalMapping).forEach((key) => {
+            Object.keys(finalMapping).sort().forEach((key) => {
                 labels.push(key);
                 values.push(finalMapping[key]);
             });
