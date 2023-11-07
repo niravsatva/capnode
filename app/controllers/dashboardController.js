@@ -20,7 +20,17 @@ class DashboardController {
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 const { companyId, year } = req.query;
-                const { data, labels, max } = yield dashboardServices_1.default.getSalaryExpenseByMonthService(companyId, year);
+                // const { data, labels, max } =
+                // 	await dashboardServices.getSalaryExpenseByPayPeriod(
+                // 		companyId as string,
+                // 		year as string
+                // 	);
+                // return DefaultResponse(res, 200, 'Journal fetched successfully', {
+                // 	data,
+                // 	labels,
+                // 	max,
+                // });
+                const { data, labels, max } = yield dashboardServices_1.default.getSalaryExpenseByPayPeriod(companyId, year);
                 return (0, defaultResponseHelper_1.DefaultResponse)(res, 200, 'Journal fetched successfully', {
                     data,
                     labels,
@@ -39,7 +49,7 @@ class DashboardController {
                 if (!companyId) {
                     throw new customError_1.CustomError(400, 'Company id is required');
                 }
-                const expensesByCustomer = yield dashboardServices_1.default.getExpensesByCustomer(companyId);
+                const expensesByCustomer = yield dashboardServices_1.default.getExpensesByCustomer(companyId, req.query.year);
                 return (0, defaultResponseHelper_1.DefaultResponse)(res, 200, 'Expenses by customers fetched successfully', expensesByCustomer);
             }
             catch (err) {
@@ -50,7 +60,7 @@ class DashboardController {
     getJournalGraphData(req, res, next) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                const data = yield dashboardServices_1.default.getAllJournalsWithPayPeriod(req.query.companyId);
+                const data = yield dashboardServices_1.default.getAllJournalsWithPayPeriod(req.query.companyId, req.query.year);
                 return (0, defaultResponseHelper_1.DefaultResponse)(res, 200, '', data);
             }
             catch (error) {

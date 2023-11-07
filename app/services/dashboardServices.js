@@ -49,7 +49,7 @@ class DashboardServices {
             return { data, labels, max };
         });
     }
-    getExpensesByCustomer(companyId) {
+    getExpensesByCustomer(companyId, currentYear) {
         return __awaiter(this, void 0, void 0, function* () {
             if (!companyId) {
                 const error = new customError_1.CustomError(400, 'Company id is required');
@@ -59,7 +59,7 @@ class DashboardServices {
             if (!company) {
                 throw new customError_1.CustomError(400, 'Company not found');
             }
-            const year = new Date().getFullYear();
+            const year = currentYear ? currentYear : new Date().getFullYear();
             const startDateOfYear = new Date(`${Number(year)}-01-01T00:00:00.000Z`);
             const endDateOfYear = new Date(`${Number(year) + 1}-01-01T00:00:00.000Z`);
             const payPeriods = yield prisma_1.prisma.payPeriod.findMany({
@@ -113,16 +113,74 @@ class DashboardServices {
             });
             const labels = [];
             const values = [];
-            Object.keys(finalMapping).sort().forEach((key) => {
+            Object.keys(finalMapping)
+                .sort()
+                .forEach((key) => {
                 labels.push(key);
                 values.push(finalMapping[key]);
             });
             return { labels, values };
         });
     }
-    getAllJournalsWithPayPeriod(companyId) {
+    getSalaryExpenseByPayPeriod(companyId, year) {
         return __awaiter(this, void 0, void 0, function* () {
-            const currentYear = new Date().getFullYear();
+            const currentYear = year ? year : new Date().getFullYear();
+            const startDateOfYear = new Date(`${Number(currentYear)}-01-01T00:00:00.000Z`);
+            const endDateOfYear = new Date(`${Number(currentYear) + 1}-01-01T00:00:00.000Z`);
+            const currentYearPayPeriods = yield prisma_1.prisma.payPeriod.findMany({
+                where: {
+                    companyId,
+                    OR: [
+                        {
+                            startDate: {
+                                gte: startDateOfYear,
+                                lt: endDateOfYear,
+                            },
+                        },
+                        {
+                            endDate: {
+                                gte: startDateOfYear,
+                                lt: endDateOfYear,
+                            },
+                        },
+                    ],
+                },
+            });
+            const payPeriodIds = currentYearPayPeriods.map((payPeriod) => {
+                return payPeriod.id;
+            });
+            const journalData = yield prisma_1.prisma.journal.findMany({
+                where: {
+                    companyId,
+                    payPeriodId: {
+                        in: payPeriodIds,
+                    },
+                },
+                include: {
+                    payPeriod: true,
+                },
+                orderBy: {
+                    payPeriod: {
+                        endDate: 'asc',
+                    },
+                },
+            });
+            const labels = [];
+            const data = [];
+            journalData.forEach((journal) => {
+                var _a;
+                data.push(journal === null || journal === void 0 ? void 0 : journal.amount);
+                labels.push((0, moment_1.default)((_a = journal === null || journal === void 0 ? void 0 : journal.payPeriod) === null || _a === void 0 ? void 0 : _a.endDate).format('MM/DD/YYYY'));
+            });
+            const number = Math.max(...data);
+            const nearest1000 = Math.ceil(number / 1000) * 1000;
+            const max = nearest1000 > number ? nearest1000 : nearest1000 + 1000;
+            return { data, labels, max };
+        });
+    }
+    getAllJournalsWithPayPeriod(companyId, year) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const currentYear = year ? year : new Date().getFullYear();
             const startDateOfYear = new Date(`${Number(currentYear)}-01-01T00:00:00.000Z`);
             const endDateOfYear = new Date(`${Number(currentYear) + 1}-01-01T00:00:00.000Z`);
             const currentYearPayPeriods = yield prisma_1.prisma.payPeriod.findMany({

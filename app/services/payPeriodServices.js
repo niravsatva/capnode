@@ -77,17 +77,22 @@ class payPeriodServices {
     }
     createNewPayPeriod(payPeriodData) {
         return __awaiter(this, void 0, void 0, function* () {
-            const { companyId, startDate, endDate, closingDate } = payPeriodData;
+            const { companyId, startDate, endDate } = payPeriodData;
             // Check If company exists
             const companyDetails = yield repositories_1.companyRepository.getDetails(companyId);
             if (!companyDetails) {
                 throw new customError_1.CustomError(400, 'Company not found');
             }
-            if (endDate > closingDate ||
-                (0, moment_1.default)(endDate).format('MM/DD/YYYY') ===
-                    (0, moment_1.default)(closingDate).format('MM/DD/YYYY')) {
-                throw new customError_1.CustomError(400, 'Pay period must be greater than closing date');
-            }
+            // if (
+            // 	endDate > closingDate ||
+            // 	moment(endDate).format('MM/DD/YYYY') ===
+            // 		moment(closingDate).format('MM/DD/YYYY')
+            // ) {
+            // 	throw new CustomError(
+            // 		400,
+            // 		'Pay period must be greater than closing date'
+            // 	);
+            // }
             if (endDate < startDate) {
                 throw new customError_1.CustomError(400, 'Start date must be before end date');
             }

@@ -26,7 +26,7 @@ class TimeActivityService {
     // Get all time activities
     getAllTimeActivitiesServices(timeActivityData) {
         return __awaiter(this, void 0, void 0, function* () {
-            const { companyId, search, sort, page, limit, type, classId, customerId, employeeId, isOverHours, payPeriodId, year, } = timeActivityData;
+            const { companyId, search, sort, page, limit, type, classId, customerId, employeeId, isOverHours, payPeriodId, year, closingDate } = timeActivityData;
             // let yearFilter = {};
             // if (year) {
             // 	yearFilter = {
@@ -229,8 +229,8 @@ class TimeActivityService {
                 calActivitiesWithHours.forEach((activity) => {
                     let isAccountClosed = false;
                     if (activity.timeSheet) {
-                        if (activity.timeSheet.payPeriod && activity.timeSheet.payPeriod.closingDate) {
-                            if (!((0, dayjs_1.default)(new Date()) < (0, dayjs_1.default)(activity.timeSheet.payPeriod.closingDate).endOf('day'))) {
+                        if (activity.timeSheet.payPeriod && closingDate) {
+                            if ((0, dayjs_1.default)(activity.timeSheet.payPeriod.endDate) < (0, dayjs_1.default)(closingDate).endOf('day')) {
                                 isAccountClosed = true;
                             }
                         }

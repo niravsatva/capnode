@@ -264,8 +264,7 @@ exports.createTimeSheetValidator = [
 exports.payPeriodValidator = [
     ...exports.companyIdValidation,
     body('startDate').notEmpty().withMessage('Start date is required'),
-    body('endDate').notEmpty().withMessage('End date is required'),
-    body('closingDate').notEmpty().withMessage('Closing date is required'),
+    body('endDate').notEmpty().withMessage('End date is required')
 ];
 exports.timeSheetEmailValidators = [
     ...exports.companyIdValidation,

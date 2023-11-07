@@ -52,8 +52,7 @@ class PayPeriodRepository {
                 data: {
                     startDate: payPeriodData.startDate,
                     endDate: payPeriodData.endDate,
-                    company: { connect: { id: payPeriodData.companyId } },
-                    closingDate: payPeriodData.closingDate,
+                    company: { connect: { id: payPeriodData.companyId } }
                 },
             });
             return payPeriod;

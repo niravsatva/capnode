@@ -52,13 +52,12 @@ class PayPeriodController {
     createPayPeriod(req, res, next) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                const { companyId, startDate, endDate, closingDate } = req.body;
+                const { companyId, startDate, endDate } = req.body;
                 (0, validationHelper_1.checkValidation)(req);
                 const data = {
                     companyId: companyId,
                     startDate: new Date(startDate),
-                    endDate: new Date(endDate),
-                    closingDate: new Date(closingDate),
+                    endDate: new Date(endDate)
                 };
                 const isPermitted = yield (0, isAuthorizedUser_1.checkPermission)(req, companyId, {
                     permissionName: 'Pay Period',
