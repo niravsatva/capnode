@@ -120,7 +120,6 @@ class payPeriodServices {
                 throw new customError_1.CustomError(400, 'Dates are already in pay period');
             }
             const data = yield payPeriodRepository_1.default.update(payPeriodData);
-            console.log('DATA: ' + data);
             // // Update time sheet
             if (data === null || data === void 0 ? void 0 : data.TimeSheets) {
                 const { timeActivitiesWithHours: timeActivities } = yield timeActivityServices_1.default.getAllTimeActivitiesServices({

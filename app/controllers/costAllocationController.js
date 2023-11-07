@@ -29,11 +29,11 @@ class CostAllocationController {
                 (0, validationHelper_1.checkValidation)(req);
                 const { companyId, page = 1, limit = 10, search = '', createdBy = '', type = '', sort = '', classId = '', customerId = '', employeeId = '', payPeriodId = null, } = req.query;
                 if (!companyId) {
-                    throw new customError_1.CustomError(404, 'Company id is required');
+                    throw new customError_1.CustomError(400, 'Company id is required');
                 }
                 const companyDetails = yield companyRepository_1.default.getDetails(companyId);
                 if (!companyDetails) {
-                    throw new customError_1.CustomError(404, 'Company not found');
+                    throw new customError_1.CustomError(400, 'Company not found');
                 }
                 // Checking is the user is permitted
                 const isPermitted = yield (0, isAuthorizedUser_1.checkPermission)(req, companyId, {
@@ -90,6 +90,77 @@ class CostAllocationController {
                 };
                 const costAllocation = yield costallocationServices_1.default.getCostAllocationData(data);
                 return (0, defaultResponseHelper_1.DefaultResponse)(res, 200, 'Cost allocation fetched successfully', Object.assign(Object.assign({}, costAllocation), { currentDatePayPeriod: systemPayPeriodId ? _payPeriodId : null }));
+            }
+            catch (err) {
+                next(err);
+            }
+        });
+    }
+    getCostAllocationGrandTotal(req, res, next) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                (0, validationHelper_1.checkValidation)(req);
+                const { companyId, page = 1, limit = 10, search = '', createdBy = '', type = '', sort = '', classId = '', customerId = '', employeeId = '', payPeriodId = null, } = req.query;
+                if (!companyId) {
+                    throw new customError_1.CustomError(400, 'Company id is required');
+                }
+                const companyDetails = yield companyRepository_1.default.getDetails(companyId);
+                if (!companyDetails) {
+                    throw new customError_1.CustomError(400, 'Company not found');
+                }
+                // Checking is the user is permitted
+                const isPermitted = yield (0, isAuthorizedUser_1.checkPermission)(req, companyId, {
+                    permissionName: 'Cost Allocations',
+                    permission: ['view'],
+                });
+                if (!isPermitted) {
+                    throw new customError_1.CustomError(403, 'You are not authorized');
+                }
+                let _payPeriodId = payPeriodId;
+                const _date = new Date();
+                if (!_payPeriodId) {
+                    const payPeriodData = yield prisma_1.prisma.payPeriod.findFirst({
+                        where: {
+                            companyId: companyId,
+                            endDate: {
+                                gte: new Date(_date === null || _date === void 0 ? void 0 : _date.getFullYear(), _date === null || _date === void 0 ? void 0 : _date.getMonth(), 1),
+                                lte: new Date(_date.getFullYear(), _date.getMonth() + 1, 0)
+                            },
+                        },
+                        orderBy: {
+                            endDate: 'desc'
+                        }
+                    });
+                    if (payPeriodData && payPeriodData.id) {
+                        _payPeriodId = payPeriodData.id;
+                    }
+                }
+                if (_payPeriodId) {
+                    const validatePayPeriod = yield prisma_1.prisma.payPeriod.findFirst({
+                        where: {
+                            companyId: companyId,
+                            id: _payPeriodId,
+                        },
+                    });
+                    if (!validatePayPeriod) {
+                        throw new customError_1.CustomError(400, 'Invalid PayPeriod');
+                    }
+                }
+                const data = {
+                    companyId: companyId,
+                    page: page,
+                    limit: limit,
+                    search: String(search),
+                    createdBy: String(createdBy),
+                    type: String(type),
+                    sort: String(sort),
+                    classId: String(classId),
+                    customerId: String(customerId),
+                    employeeId: String(employeeId),
+                    payPeriodId: String(_payPeriodId),
+                };
+                const grandTotalRow = yield costallocationServices_1.default.getCostAllocationDataGrandTotal(data);
+                return (0, defaultResponseHelper_1.DefaultResponse)(res, 200, 'Cost allocation grand total row fetched successfully', grandTotalRow);
             }
             catch (err) {
                 next(err);

@@ -49,5 +49,15 @@ class QuickbooksService {
             }
         });
     }
+    buildHierarchy(flatArray, parentId = null) {
+        const children = [];
+        for (const item of flatArray) {
+            if (item.parentId === parentId) {
+                const child = Object.assign(Object.assign({}, item), { children: this.buildHierarchy(flatArray, item.value) });
+                children.push(child);
+            }
+        }
+        return children.length > 0 ? children : [];
+    }
 }
 exports.default = new QuickbooksService();

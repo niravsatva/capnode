@@ -13,6 +13,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const globalServices_1 = __importDefault(require("../services/globalServices"));
+const logger_1 = require("../utils/logger");
 // import { DefaultResponse } from '../helpers/defaultResponseHelper';
 class GlobalController {
     pdfGenerator(req, res, next) {
@@ -46,6 +47,7 @@ class GlobalController {
                 // console.log('PDF: ', pdf);
             }
             catch (err) {
+                logger_1.logger.error('Error while making pdf ', err);
                 next(err);
             }
         });

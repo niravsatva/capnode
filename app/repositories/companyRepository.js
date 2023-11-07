@@ -10,6 +10,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const prisma_1 = require("../client/prisma");
+const logger_1 = require("../utils/logger");
 class CompanyRepository {
     getAll() {
         return __awaiter(this, void 0, void 0, function* () {
@@ -153,7 +154,7 @@ class CompanyRepository {
                 return updatedCompany;
             }
             catch (err) {
-                console.log('Err: ', err);
+                logger_1.logger.error('Err: ', err);
                 throw err;
             }
         });

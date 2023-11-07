@@ -10,8 +10,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.timeLogPdfGenerate = void 0;
-const timeLogPdfGenerate = (allTimeLogs, startDate, endDate, employee, totalHours) => __awaiter(void 0, void 0, void 0, function* () {
-    console.log('TEST: ', allTimeLogs, startDate, endDate, employee, totalHours);
+const timeLogPdfGenerate = (allTimeLogs) => __awaiter(void 0, void 0, void 0, function* () {
     return `
   <!DOCTYPE html>
   <html>

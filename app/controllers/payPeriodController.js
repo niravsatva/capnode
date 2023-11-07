@@ -78,7 +78,6 @@ class PayPeriodController {
     editPayPeriod(req, res, next) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                console.log('IIINNN');
                 const { id } = req.params;
                 const { companyId, startDate, endDate } = req.body;
                 (0, validationHelper_1.checkValidation)(req);

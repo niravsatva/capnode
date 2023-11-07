@@ -603,7 +603,6 @@ class EmployeeCostRepository {
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 const dateCopy = new Date(date);
-                console.log('Date : ', dateCopy);
                 // For hours
                 yield Promise.all(employees.map((singleEmployee) => __awaiter(this, void 0, void 0, function* () {
                     yield prisma_1.prisma.employeeCostValue.create({

@@ -11,6 +11,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.checkPermission = void 0;
 const prisma_1 = require("../client/prisma");
+const logger_1 = require("../utils/logger");
 // Assuming you have the necessary imports and setup for Prisma and Express
 const checkPermission = (req, companyId, requiredPermission) => __awaiter(void 0, void 0, void 0, function* () {
     const { id } = req.user; // Assuming you have stored the user ID in the request object
@@ -39,7 +40,7 @@ const checkPermission = (req, companyId, requiredPermission) => __awaiter(void 0
         }
     }
     catch (err) {
-        console.error('Error while checking user permissions:', err);
+        logger_1.logger.error('Error while checking user permissions:', err);
     }
 });
 exports.checkPermission = checkPermission;

@@ -211,7 +211,6 @@ class EmployeeConstController {
                     finalDataArr.forEach((singleData) => {
                         Object.entries(singleData).map((singleField) => {
                             if (singleField[0] in totalObject) {
-                                console.log('TOTAL: ', totalObject);
                                 totalObject[singleField[0]] += Number(singleField[1].split(' ')[1].replace(/,/g, ''));
                             }
                             else {
@@ -241,7 +240,6 @@ class EmployeeConstController {
                     `\n`;
                 // const exportingData = [...extraData, ...finalDataArr];
                 const csvData = jsonData.parse(finalDataArr);
-                console.log(JSON.stringify(totalObject));
                 // const totalData = jsonData.parse([totalObject]);
                 const finalData = csvData +
                     '\n' +

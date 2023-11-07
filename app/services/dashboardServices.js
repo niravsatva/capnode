@@ -19,13 +19,13 @@ const dashboardRepository_1 = __importDefault(require("../repositories/dashboard
 const costAllocationRepository_1 = __importDefault(require("../repositories/costAllocationRepository"));
 const moment_1 = __importDefault(require("moment"));
 class DashboardServices {
-    getSalaryExpenseByMonthService(companyId) {
+    getSalaryExpenseByMonthService(companyId, year) {
         return __awaiter(this, void 0, void 0, function* () {
             const companyDetails = yield repositories_1.companyRepository.getDetails(companyId);
             if (!companyDetails) {
                 throw new customError_1.CustomError(400, 'Company not found');
             }
-            const journals = yield dashboardRepository_1.default.getSalaryExpenseByMonth(companyId);
+            const journals = yield dashboardRepository_1.default.getSalaryExpenseByMonth(companyId, year);
             const labels = [];
             const data = [];
             const obj = {};
@@ -39,7 +39,7 @@ class DashboardServices {
                 }
             });
             Object.entries(obj).forEach((singleData) => {
-                const currentYear = new Date().getFullYear();
+                const currentYear = year || new Date().getFullYear();
                 labels.push(`${singleData[0]}-${currentYear}`);
                 data.push(Number(Number(singleData[1]).toFixed(2)));
             });
@@ -79,7 +79,7 @@ class DashboardServices {
                             },
                         },
                     ],
-                }
+                },
             });
             const payPeriodIds = payPeriods.map((e) => {
                 return e.id;
@@ -88,16 +88,16 @@ class DashboardServices {
                 where: {
                     companyId,
                     payPeriodId: {
-                        in: payPeriodIds
-                    }
-                }
+                        in: payPeriodIds,
+                    },
+                },
             });
             let response = [];
             for (const timeSheet of timeSheets) {
                 const data = {
                     companyId,
                     payPeriodId: timeSheet.payPeriodId,
-                    timeSheetId: timeSheet.id
+                    timeSheetId: timeSheet.id,
                 };
                 const costAllocation = yield costAllocationRepository_1.default.getExpensesByCustomer(data);
                 response = [...response, ...costAllocation];
@@ -142,7 +142,7 @@ class DashboardServices {
                             },
                         },
                     ],
-                }
+                },
             });
             const payPeriodIds = currentYearPayPeriods.map((payPeriod) => {
                 return payPeriod.id;
@@ -151,17 +151,17 @@ class DashboardServices {
                 where: {
                     companyId,
                     payPeriodId: {
-                        in: payPeriodIds
-                    }
+                        in: payPeriodIds,
+                    },
                 },
                 include: {
-                    payPeriod: true
+                    payPeriod: true,
                 },
                 orderBy: {
                     payPeriod: {
-                        endDate: 'desc'
-                    }
-                }
+                        endDate: 'desc',
+                    },
+                },
             });
             const graphData = [];
             if (journalData && journalData.length) {
@@ -169,7 +169,7 @@ class DashboardServices {
                     graphData.push({
                         payPeriodId: journal.payPeriodId,
                         payPeriodName: `${(0, moment_1.default)(journal.payPeriod.startDate).format('MM/DD/YYYY')} - ${(0, moment_1.default)(journal.payPeriod.endDate).format('MM/DD/YYYY')}`,
-                        amount: journal.amount
+                        amount: journal.amount,
                     });
                 });
             }

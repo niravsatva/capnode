@@ -159,7 +159,6 @@ class UserServices {
             try {
                 const adminUser = yield repositories_1.userRepository.getById(invitedBy);
                 const finalName = adminUser.firstName + ' ' + adminUser.lastName;
-                console.log('final name: ' + finalName);
                 // Find user by Email
                 const user = yield repositories_1.userRepository.getByEmail(email);
                 // Check if role exists

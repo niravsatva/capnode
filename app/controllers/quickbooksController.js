@@ -27,6 +27,7 @@ const timeActivityServices_1 = __importDefault(require("../services/timeActivity
 const prisma_1 = require("../client/prisma");
 const moment_1 = __importDefault(require("moment"));
 const utils_1 = require("../utils/utils");
+const logger_1 = require("../utils/logger");
 // import axios from 'axios';
 // import timeActivityServices from '../services/timeActivityServices';
 const companyValidation = (companyId) => __awaiter(void 0, void 0, void 0, function* () {
@@ -51,7 +52,7 @@ class QuickbooksController {
                 return (0, defaultResponseHelper_1.DefaultResponse)(res, 200, 'Quickbooks AuthUri retrieved successfully', qboAuthorizeUrl);
             }
             catch (err) {
-                console.log('Err: ', err);
+                logger_1.logger.error('Err: ', err);
                 next(err);
             }
         });
@@ -467,6 +468,32 @@ class QuickbooksController {
             }
             catch (err) {
                 next(err);
+            }
+        });
+    }
+    getCustomerOptions(req, res, next) {
+        return __awaiter(this, void 0, void 0, function* () {
+            // Check validation for company id
+            (0, validationHelper_1.checkValidation)(req);
+            const companyId = req.body.companyId;
+            // Get access token
+            const authResponse = yield quickbooksServices_1.default.getAccessToken(companyId);
+            if ((authResponse === null || authResponse === void 0 ? void 0 : authResponse.status) == true) {
+                // Get All Customers from Quickbooks
+                const customers = yield quickbooksClient_1.default.getAllCustomers(authResponse === null || authResponse === void 0 ? void 0 : authResponse.accessToken, authResponse === null || authResponse === void 0 ? void 0 : authResponse.tenantID, authResponse === null || authResponse === void 0 ? void 0 : authResponse.refreshToken);
+                const formattedCustomers = customers === null || customers === void 0 ? void 0 : customers.QueryResponse.Customer.map((customer) => {
+                    return {
+                        value: customer.Id,
+                        Id: customer.Id,
+                        parentId: (customer === null || customer === void 0 ? void 0 : customer.ParentRef) ? customer === null || customer === void 0 ? void 0 : customer.ParentRef.value : null,
+                        title: customer.DisplayName,
+                    };
+                });
+                const finalCustomers = quickbooksServices_1.default.buildHierarchy(formattedCustomers, null);
+                return (0, defaultResponseHelper_1.DefaultResponse)(res, 200, 'Customers fetched successfully', [
+                    { value: '', title: 'Select Customer', children: [] },
+                    ...finalCustomers,
+                ]);
             }
         });
     }

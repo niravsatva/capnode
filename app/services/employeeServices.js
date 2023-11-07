@@ -24,49 +24,49 @@ class EmployeeServices {
     getEmployees(employeeData) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                const { page, limit, search, filter, type, sort, companyId } = employeeData;
+                // page, limit, search, filter, type, sort,
+                const { companyId } = employeeData;
                 // Check if company exists or not
                 const companyDetails = yield repositories_1.companyRepository.getDetails(companyId);
                 if (!companyDetails) {
                     throw new customError_1.CustomError(404, 'Company not found');
                 }
                 // Offset
-                const offset = (Number(page) - 1) * Number(limit);
-                // Conditions for filtering
-                const filterConditions = filter
-                    ? { status: filter == 'true' ? true : false }
-                    : {};
-                // Conditions for search
-                const searchCondition = search
-                    ? {
-                        OR: [
-                            {
-                                firstName: {
-                                    mode: 'insensitive',
-                                    contains: search,
-                                },
-                            },
-                            {
-                                lastName: {
-                                    mode: 'insensitive',
-                                    contains: search,
-                                },
-                            },
-                            {
-                                email: { contains: search, mode: 'insensitive' },
-                            },
-                        ],
-                    }
-                    : {};
-                // Conditions for sort
-                const sortCondition = sort
-                    ? {
-                        orderBy: {
-                            [sort]: type !== null && type !== void 0 ? type : 'asc',
-                        },
-                    }
-                    : {};
-                console.log(offset, filterConditions, sortCondition, searchCondition);
+                // const offset = (Number(page) - 1) * Number(limit);
+                // // Conditions for filtering
+                // const filterConditions: Record<string, any> = filter
+                // 	? { status: filter == 'true' ? true : false }
+                // 	: {};
+                // // Conditions for search
+                // const searchCondition = search
+                // 	? {
+                // 			OR: [
+                // 				{
+                // 					firstName: {
+                // 						mode: 'insensitive',
+                // 						contains: search as string,
+                // 					},
+                // 				},
+                // 				{
+                // 					lastName: {
+                // 						mode: 'insensitive',
+                // 						contains: search as string,
+                // 					},
+                // 				},
+                // 				{
+                // 					email: { contains: search as string, mode: 'insensitive' },
+                // 				},
+                // 			],
+                // 	  }
+                // 	: {};
+                // // Conditions for sort
+                // const sortCondition = sort
+                // 	? {
+                // 			orderBy: {
+                // 				[sort as string]: type ?? 'asc',
+                // 			},
+                // 	  }
+                // 	: {};
                 // Get all employees by company id
                 const employees = yield repositories_1.employeeRepository.getAllEmployeesByCompanyId(companyId);
                 return employees;

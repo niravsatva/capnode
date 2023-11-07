@@ -11,6 +11,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 const prisma_1 = require("../client/prisma");
 const customError_1 = require("../models/customError");
+const logger_1 = require("../utils/logger");
 class TimeActivityRepository {
     getAllTimeActivities(timeActivityData) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -72,7 +73,7 @@ class TimeActivityRepository {
                 return timeActivities;
             }
             catch (err) {
-                console.log(err);
+                logger_1.logger.error(err);
                 throw err;
             }
         });
@@ -130,7 +131,6 @@ class TimeActivityRepository {
 								LIMIT ${limit}`;
                 if (isOverHours) {
                     const timeActivities = yield prisma_1.prisma.$queryRawUnsafe(queryString);
-                    console.log('Time: ', timeActivities);
                     const finalData = timeActivities.map((singleActivity) => {
                         const data = {
                             id: singleActivity === null || singleActivity === void 0 ? void 0 : singleActivity.id,
@@ -515,8 +515,7 @@ class TimeActivityRepository {
     // Get employee hours
     getEmployeeHours(data) {
         return __awaiter(this, void 0, void 0, function* () {
-            const { companyId, employeeId, year, fieldId } = data;
-            console.log('YEAR: ', year);
+            const { companyId, employeeId, fieldId } = data;
             try {
                 const employeeCostFieldId = yield prisma_1.prisma.employeeCostField.findFirst({
                     where: {

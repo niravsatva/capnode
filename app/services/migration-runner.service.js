@@ -12,10 +12,11 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.runMigration = void 0;
 const prisma_1 = require("../client/prisma");
 const migrations_1 = require("../constants/migrations");
+const logger_1 = require("../utils/logger");
 const migration_service_1 = require("./migration.service");
 function runMigration() {
     return __awaiter(this, void 0, void 0, function* () {
-        console.log('Migration started');
+        logger_1.logger.info('Migration started');
         for (let i = 0; i < migrations_1.migrations.length; i++) {
             let migrationId = '';
             const getMigration = yield prisma_1.prisma.migrations.findFirst({
@@ -28,7 +29,7 @@ function runMigration() {
             }
             try {
                 if (!getMigration) {
-                    console.log('Running Migration ', migrations_1.migrations[i]);
+                    logger_1.logger.info('Running Migration ', migrations_1.migrations[i]);
                     const createMigration = yield prisma_1.prisma.migrations.create({
                         data: {
                             name: migrations_1.migrations[i]
@@ -47,6 +48,7 @@ function runMigration() {
                 }
             }
             catch (error) {
+                logger_1.logger.error(`Error while running migration`, error);
                 yield prisma_1.prisma.migrations.update({
                     where: {
                         id: migrationId
@@ -57,7 +59,7 @@ function runMigration() {
                 });
             }
         }
-        console.log('Migration completed');
+        logger_1.logger.info('Migration completed');
     });
 }
 exports.runMigration = runMigration;

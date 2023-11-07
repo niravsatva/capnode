@@ -15,6 +15,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.migrationService = void 0;
 const moment_1 = __importDefault(require("moment"));
 const prisma_1 = require("../client/prisma");
+const logger_1 = require("../utils/logger");
 function addPayRolePermissions() {
     return __awaiter(this, void 0, void 0, function* () {
         const allRoles = yield prisma_1.prisma.role.findMany();
@@ -46,7 +47,7 @@ function addPayRolePermissions() {
 }
 function testFun() {
     return __awaiter(this, void 0, void 0, function* () {
-        console.log('running');
+        logger_1.logger.info('running');
     });
 }
 function defaultIndirectExpenseRate() {

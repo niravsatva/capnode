@@ -146,7 +146,6 @@ class ConfigurationRepository {
                     },
                 });
                 const percentAndHourArray = [true, false];
-                console.log(companyId, percentAndHourArray);
                 const listOfPeriod = yield payPeriodRepository_1.default.getAll({
                     companyId,
                     dateFilter: {},

@@ -95,6 +95,7 @@ class costAllocationRepository {
             });
             const employeeRowSpanMapping = {
                 Total: 1,
+                'Grand Total': 1
             };
             const salarySection = companySection.find((e) => e.no === 1);
             const salarySectionFields = companyFields
@@ -211,7 +212,7 @@ class costAllocationRepository {
                     });
                     timeActivity.push(costAllocationObj);
                     if (sameCustomerWithSameClass.length - 1 === timeActivityIndex) {
-                        const timeActivitiesTotalColumn = Object.assign(Object.assign({}, allTotalColumnsObj), { id: (0, uuid_1.v4)(), type: 'total', allocation: `${totalAllocationPercentage.toFixed(percentageToFixed)}%`, 'total-hours': this.minToHours(availableTotalMinutes), 'employee-name': 'Total' });
+                        const timeActivitiesTotalColumn = Object.assign(Object.assign({}, allTotalColumnsObj), { id: (0, uuid_1.v4)(), type: 'total', allocation: `${totalAllocationPercentage.toFixed(percentageToFixed)}%`, 'total-hours': this.minToHours(availableTotalMinutes), 'employee-name': 'Total', 'totalHoursInMinutes': availableTotalMinutes });
                         timeActivity.push(timeActivitiesTotalColumn);
                     }
                 });
@@ -222,6 +223,29 @@ class costAllocationRepository {
             });
             return { result: response, employeeRowSpanMapping, count, grandTotal };
         });
+    }
+    getGrandTotalRowCostAllocation(response) {
+        if (!response || !response.length) {
+            return null;
+        }
+        const notIncludeFields = ['employee-name', 'allocation', 'customer-name', 'class-name'];
+        const totalMapping = {};
+        response.forEach((row) => {
+            Object.keys(row).forEach((key) => {
+                if (!notIncludeFields.includes(key)) {
+                    if (totalMapping[key]) {
+                        totalMapping[key] = row[key] + totalMapping[key];
+                    }
+                    else {
+                        totalMapping[key] = row[key];
+                    }
+                }
+            });
+        });
+        totalMapping['total-hours'] = this.minToHours(totalMapping['totalHoursInMinutes']);
+        totalMapping['employee-name'] = 'Grand Total';
+        totalMapping['type'] = 'grandTotal';
+        return totalMapping;
     }
     getCostAllocationForJournal(costAllocationData) {
         return __awaiter(this, void 0, void 0, function* () {

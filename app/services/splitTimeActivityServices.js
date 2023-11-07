@@ -18,7 +18,6 @@ const timeActivityRepository_1 = __importDefault(require("../repositories/timeAc
 class SplitTimeActivityServices {
     createSplitTimeActivity(parentActivityId, employeeId, splitTimeActivityData) {
         return __awaiter(this, void 0, void 0, function* () {
-            console.log('Object: ', splitTimeActivityData);
             const parentTimeActivity = yield timeActivityRepository_1.default.getSingleTimeActivity(parentActivityId);
             if (!parentTimeActivity) {
                 throw new customError_1.CustomError(404, 'Time activity not found');

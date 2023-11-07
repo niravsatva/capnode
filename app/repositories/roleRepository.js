@@ -11,6 +11,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 const prisma_1 = require("../client/prisma");
 const data_1 = require("../constants/data");
+const logger_1 = require("../utils/logger");
 // type SortCondition = {
 // 	orderBy: {
 // 		[key: string]: 'asc' | 'desc';
@@ -142,7 +143,7 @@ class RoleRepositories {
                 }
             }
             catch (error) {
-                console.log(error);
+                logger_1.logger.error(error);
                 throw error;
             }
         });
@@ -295,7 +296,6 @@ class RoleRepositories {
                 return total + 1;
             }
             catch (err) {
-                console.log(err);
                 throw err;
             }
         });

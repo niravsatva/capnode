@@ -44,7 +44,6 @@ class TimeActivityService {
             // 		],
             // 	};
             // }
-            // console.log('YEAR: ', yearFilter);
             let dateFilters = {};
             if (payPeriodId) {
                 // Get pay period details

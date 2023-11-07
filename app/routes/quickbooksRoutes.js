@@ -19,6 +19,7 @@ router.put('/', authMiddleware_1.isAuthenticated, controllers_1.quickbooksContro
 router.post('/employees', authMiddleware_1.isAuthenticated, validators_1.quickbooksEmployeeValidation, controllers_1.quickbooksController.getAllQBEmployees);
 router.post('/accounts', authMiddleware_1.isAuthenticated, validators_1.quickbooksAccountsValidation, controllers_1.quickbooksController.getAllAccounts);
 router.post('/customers', authMiddleware_1.isAuthenticated, validators_1.quickbooksCustomersValidation, controllers_1.quickbooksController.getAllCustomer);
+router.post('/customer-options', authMiddleware_1.isAuthenticated, validators_1.quickbooksCustomersValidation, controllers_1.quickbooksController.getCustomerOptions);
 router.post('/classes', authMiddleware_1.isAuthenticated, validators_1.quickbooksClassValidation, controllers_1.quickbooksController.getAllClasses);
 router.post('/company', controllers_1.quickbooksController.getCompanyInfo);
 // Sync time activities for the first time

@@ -100,7 +100,6 @@ class PayPeriodRepository {
                 },
             });
             for (const payPeriod of allPayPeriods) {
-                console.log('object');
                 if (startDate < new Date(payPeriod.endDate).setUTCHours(23, 59, 59, 59) &&
                     endDate > new Date(payPeriod.startDate).setUTCHours(0, 0, 0, 0)) {
                     return { isInPayPeriod: true, payPeriod: payPeriod }; // The date is in a pay period

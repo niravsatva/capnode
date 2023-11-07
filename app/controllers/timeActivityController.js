@@ -21,6 +21,7 @@ const isAuthorizedUser_1 = require("../middlewares/isAuthorizedUser");
 const axios_1 = __importDefault(require("axios"));
 const moment_1 = __importDefault(require("moment"));
 const fs_1 = __importDefault(require("fs"));
+const logger_1 = require("../utils/logger");
 const Excel = require('excel4node');
 // import moment from 'moment';
 const dataExporter = require('json2csv').Parser;
@@ -344,14 +345,13 @@ class TimeActivityController {
                 const excelFileName = `${fileName}.xlsx`;
                 wb.write(excelFileName, (err) => {
                     if (err) {
-                        console.error('Error writing Excel file:', err);
+                        logger_1.logger.error('Error writing Excel file:', err);
                         res.status(500).json({ error: 'Error generating Excel file' });
                     }
                     else {
-                        console.log('Excel file generated:', excelFileName);
                         res.download(excelFileName, (err) => {
                             if (err) {
-                                console.error('Error sending Excel file:', err);
+                                logger_1.logger.error('Error sending Excel file:', err);
                                 res.status(500).json({ error: 'Error sending Excel file' });
                             }
                             else {

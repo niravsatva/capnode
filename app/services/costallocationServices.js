@@ -129,8 +129,117 @@ class CostAllocationServices {
                 payPeriodId: costAllocationData.payPeriodId,
                 timeSheetId: timeSheetData.id,
             };
-            const data = costAllocationRepository_1.default.getCostAllocation(costAllocationRepofilter);
+            const data = yield costAllocationRepository_1.default.getCostAllocation(costAllocationRepofilter);
             return data;
+        });
+    }
+    getCostAllocationDataGrandTotal(costAllocationData) {
+        var _a;
+        return __awaiter(this, void 0, void 0, function* () {
+            if (costAllocationData === null || costAllocationData === void 0 ? void 0 : costAllocationData.payPeriodId) {
+                const payPeriodData = yield prisma_1.prisma.payPeriod.findFirst({
+                    where: {
+                        id: costAllocationData === null || costAllocationData === void 0 ? void 0 : costAllocationData.payPeriodId,
+                        companyId: costAllocationData === null || costAllocationData === void 0 ? void 0 : costAllocationData.companyId,
+                    },
+                });
+                if (!payPeriodData) {
+                    throw new customError_1.CustomError(400, 'Invalid PayPeriod');
+                }
+            }
+            const timeSheetData = yield prisma_1.prisma.timeSheets.findFirst({
+                where: {
+                    payPeriodId: costAllocationData === null || costAllocationData === void 0 ? void 0 : costAllocationData.payPeriodId,
+                    companyId: costAllocationData === null || costAllocationData === void 0 ? void 0 : costAllocationData.companyId,
+                },
+            });
+            if (!timeSheetData) {
+                return null;
+            }
+            const filteredData = [];
+            const empFilteredData = [];
+            if (costAllocationData === null || costAllocationData === void 0 ? void 0 : costAllocationData.classId) {
+                filteredData.push({ classId: costAllocationData === null || costAllocationData === void 0 ? void 0 : costAllocationData.classId });
+            }
+            if (costAllocationData === null || costAllocationData === void 0 ? void 0 : costAllocationData.customerId) {
+                filteredData.push({ customerId: costAllocationData === null || costAllocationData === void 0 ? void 0 : costAllocationData.customerId });
+            }
+            if (costAllocationData === null || costAllocationData === void 0 ? void 0 : costAllocationData.employeeId) {
+                empFilteredData.push({
+                    id: costAllocationData === null || costAllocationData === void 0 ? void 0 : costAllocationData.employeeId,
+                });
+            }
+            const empFilterConditions = (empFilteredData === null || empFilteredData === void 0 ? void 0 : empFilteredData.length) > 0
+                ? {
+                    AND: empFilteredData,
+                    // eslint-disable-next-line no-mixed-spaces-and-tabs
+                }
+                : {};
+            const filterConditions = (filteredData === null || filteredData === void 0 ? void 0 : filteredData.length) > 0
+                ? {
+                    AND: filteredData,
+                    // eslint-disable-next-line no-mixed-spaces-and-tabs
+                }
+                : {};
+            const searchCondition = costAllocationData.search
+                ? {
+                    OR: [
+                        {
+                            className: {
+                                contains: costAllocationData.search,
+                                mode: 'insensitive',
+                            },
+                        },
+                        {
+                            customerName: {
+                                contains: costAllocationData.search,
+                                mode: 'insensitive',
+                            },
+                        },
+                        {
+                            employee: {
+                                fullName: {
+                                    contains: costAllocationData.search,
+                                    mode: 'insensitive',
+                                },
+                            },
+                        },
+                    ],
+                    // eslint-disable-next-line no-mixed-spaces-and-tabs
+                }
+                : {};
+            // Conditions for sort
+            const sortCondition = {
+                orderBy: [],
+            };
+            if (costAllocationData.sort) {
+                sortCondition.orderBy.push({
+                    [costAllocationData.sort]: (_a = costAllocationData.type) !== null && _a !== void 0 ? _a : 'asc',
+                });
+            }
+            sortCondition.orderBy.push({
+                id: 'desc',
+            });
+            costAllocationData.timeSheetId = String(timeSheetData.id);
+            const costAllocationRepofilter = {
+                companyId: costAllocationData.companyId,
+                offset: null,
+                type: costAllocationData.type,
+                limit: null,
+                searchCondition,
+                sortCondition,
+                filterConditions,
+                empFilterConditions,
+                classId: String(costAllocationData.classId),
+                customerId: String(costAllocationData.customerId),
+                employeeId: String(costAllocationData.employeeId),
+                isPercentage: costAllocationData.isPercentage,
+                payPeriodId: costAllocationData.payPeriodId,
+                timeSheetId: timeSheetData.id,
+            };
+            const data = yield costAllocationRepository_1.default.getCostAllocation(costAllocationRepofilter);
+            const totalRowMapping = costAllocationRepository_1.default.getGrandTotalRowCostAllocation(data.result.filter((e) => e['employee-name'] === 'Total'));
+            return totalRowMapping;
         });
     }
     exportCostAllocationCSV(costAllocationData) {

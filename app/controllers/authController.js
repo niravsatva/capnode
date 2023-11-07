@@ -31,6 +31,7 @@ const tokenRepository_1 = __importDefault(require("../repositories/tokenReposito
 const authServices_1 = __importDefault(require("../services/authServices"));
 const customError_1 = require("../models/customError");
 const tokenHelper_1 = require("../helpers/tokenHelper");
+const logger_1 = require("../utils/logger");
 class AuthController {
     // Register User
     register(req, res, next) {
@@ -75,7 +76,7 @@ class AuthController {
                 return (0, defaultResponseHelper_1.DefaultResponse)(res, 201, 'User registration successful, please check your email for accessing your account');
             }
             catch (err) {
-                console.log(err);
+                logger_1.logger.error(err);
                 next(err);
             }
         });
@@ -110,7 +111,7 @@ class AuthController {
                 );
             }
             catch (err) {
-                console.log('Err: ', err);
+                logger_1.logger.error('Err: ', err);
                 next(err);
             }
         });
@@ -216,7 +217,7 @@ class AuthController {
                 return (0, defaultResponseHelper_1.DefaultResponse)(res, 200, 'Profile updated successfully', profileData);
             }
             catch (err) {
-                console.log(err);
+                logger_1.logger.error(err);
                 next(err);
             }
         });

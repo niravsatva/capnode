@@ -16,18 +16,8 @@ const routes_1 = __importDefault(require("./app/routes"));
 require("./app/config/db");
 const config_1 = __importDefault(require("./config"));
 const migration_runner_service_1 = require("./app/services/migration-runner.service");
+const logger_1 = require("./app/utils/logger");
 const app = (0, express_1.default)();
-// app.use(cookieParser());
-// Connection pool to store session in the database
-// const pool = new Pool({
-// 	user: config?.databaseUser,
-// 	host: config?.databaseHost,
-// 	database: config?.databaseName,
-// 	password: config?.databasePassword,
-// 	port: Number(config?.databasePort),
-// });
-// Create session client
-// const PgSession = pgSession(session);
 //  TO ACCESS COOKIE FROM THE FRONTEND  ADD "withCredentials: true" WITH EACH REQUEST
 app.use((0, cors_1.default)({
     origin: config_1.default === null || config_1.default === void 0 ? void 0 : config_1.default.reactAppBaseUrl,
@@ -37,27 +27,10 @@ app.use((0, cors_1.default)({
 app.use(body_parser_1.default.json());
 app.use(body_parser_1.default.urlencoded({ extended: true }));
 (0, migration_runner_service_1.runMigration)();
-// Create a new session
-// app.use(
-// 	session({
-// 		store: new PgSession({
-// 			pool: pool as any, // provide the Prisma instance connection
-// 			tableName: 'session', // specify the name of the session table in the database
-// 		}),
-// 		secret: config?.sessionSecretKey,
-// 		resave: false,
-// 		saveUninitialized: false,
-// 		cookie: {
-// 			secure: false,
-// 			httpOnly: true,
-// 			maxAge: 30 * 24 * 60 * 60 * 1000, // Session expiration time (1 day) - time in milliseconds
-// 		},
-// 	})
-// );
 // Import routes
 app.use('/', routes_1.default);
 const PORT = config_1.default.port || 8080;
 // Server configuration
 app.listen(PORT, () => {
-    console.log('Server is listening on port ', PORT);
+    logger_1.logger.info('Server is listening on port ', PORT);
 });

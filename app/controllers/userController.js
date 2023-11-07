@@ -45,7 +45,6 @@ class UserController {
                 return (0, defaultResponseHelper_1.DefaultResponse)(res, 200, 'Users fetched successfully', users, total, Number(page));
             }
             catch (err) {
-                console.log(err);
                 next(err);
             }
         });
@@ -146,7 +145,7 @@ class UserController {
                     // text: `Please use the following token to reset your password: ${forgotPasswordToken}`,
                 };
                 yield (0, emailHelper_1.default)(deletedUserMailOptions);
-                yield Promise.all(yield adminEmails.map((item) => __awaiter(this, void 0, void 0, function* () {
+                yield Promise.all(adminEmails.map((item) => __awaiter(this, void 0, void 0, function* () {
                     var _a, _b, _c, _d, _e, _f;
                     let adminUserName;
                     if (((_a = item === null || item === void 0 ? void 0 : item.user) === null || _a === void 0 ? void 0 : _a.firstName) && ((_b = item === null || item === void 0 ? void 0 : item.user) === null || _b === void 0 ? void 0 : _b.lastName)) {

@@ -18,7 +18,6 @@ class GlobalService {
     generatePdf(pdfData) {
         return __awaiter(this, void 0, void 0, function* () {
             const { bodyHtml, footerHtml, headerHtml } = pdfData;
-            console.log(pdfData);
             const browser = yield puppeteer_1.default.launch({
                 "dumpio": true,
                 "headless": true,

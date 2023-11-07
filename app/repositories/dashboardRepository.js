@@ -11,15 +11,15 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 const prisma_1 = require("../client/prisma");
 class DashboardRepository {
-    getSalaryExpenseByMonth(companyId) {
+    getSalaryExpenseByMonth(companyId, year) {
         return __awaiter(this, void 0, void 0, function* () {
             const currentYear = new Date().getFullYear();
             const journals = yield prisma_1.prisma.journal.findMany({
                 where: {
                     companyId: companyId,
                     date: {
-                        gte: new Date(`${currentYear}-01-01T00:00:00.000Z`),
-                        lte: new Date(`${currentYear}-12-31T23:59:59.999Z`),
+                        gte: new Date(`${year ? year : currentYear}-01-01T00:00:00.000Z`),
+                        lte: new Date(`${year ? year : currentYear}-12-31T23:59:59.999Z`),
                     },
                 },
                 orderBy: {
