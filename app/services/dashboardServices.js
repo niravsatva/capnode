@@ -234,5 +234,36 @@ class DashboardServices {
             return graphData;
         });
     }
+    getEmployeeHoursGraphData(companyId, userId) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const companyData = yield prisma_1.prisma.companyRole.findFirst({
+                where: {
+                    userId,
+                    companyId
+                }
+            });
+            if (!companyData) {
+                throw new customError_1.CustomError(400, 'You are not allow to access this company data');
+            }
+            const year = new Date().getFullYear();
+            const query = `SELECT 
+						ta."employeeId" as employeeId,
+						e."fullName" as employeeName,
+						(ROUND(sum(ta."minute"::numeric) / 60 + sum(ta."hours"::numeric), 2)) as totalHours
+						FROM public."TimeActivities" ta 
+						inner join public."Employee" e on ta."employeeId" = e."id"
+						where extract('Year' from ta."activityDate") = '${year}' and ta."companyId" = '${companyId}'
+						group by ta."employeeId", e."fullName"
+						order by e."fullName" asc`;
+            const graphData = yield prisma_1.prisma.$queryRawUnsafe(query);
+            const labels = [];
+            const data = [];
+            graphData.forEach((singleObj) => {
+                labels.push(singleObj.employeename);
+                data.push(singleObj.totalhours);
+            });
+            return { data, labels };
+        });
+    }
 }
 exports.default = new DashboardServices();

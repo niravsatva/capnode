@@ -10,4 +10,5 @@ const dashboardRoutes = (0, express_1.Router)();
 dashboardRoutes.get('/salary-by-month', authMiddleware_1.isAuthenticated, dashboardController_1.default.getSalaryExpenseByMonth);
 dashboardRoutes.get('/salary-by-customer', authMiddleware_1.isAuthenticated, dashboardController_1.default.getExpensesByCustomer);
 dashboardRoutes.get('/summary-by-payPeriod', authMiddleware_1.isAuthenticated, dashboardController_1.default.getJournalGraphData);
+dashboardRoutes.get('/hours-by-employee', authMiddleware_1.isAuthenticated, dashboardController_1.default.getEmployeeHoursGraphData);
 exports.default = dashboardRoutes;

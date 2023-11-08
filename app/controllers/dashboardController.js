@@ -60,7 +60,27 @@ class DashboardController {
     getJournalGraphData(req, res, next) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                const data = yield dashboardServices_1.default.getAllJournalsWithPayPeriod(req.query.companyId, req.query.year);
+                const { companyId } = req.query;
+                if (!companyId) {
+                    throw new customError_1.CustomError(400, 'Company id is required');
+                }
+                const data = yield dashboardServices_1.default.getAllJournalsWithPayPeriod(companyId, req.query.year);
+                return (0, defaultResponseHelper_1.DefaultResponse)(res, 200, '', data);
+            }
+            catch (error) {
+                next(error);
+            }
+        });
+    }
+    getEmployeeHoursGraphData(req, res, next) {
+        var _a;
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                const { companyId } = req.query;
+                if (!companyId) {
+                    throw new customError_1.CustomError(400, 'Company id is required');
+                }
+                const data = yield dashboardServices_1.default.getEmployeeHoursGraphData(req.query.companyId, (_a = req.user) === null || _a === void 0 ? void 0 : _a.id);
                 return (0, defaultResponseHelper_1.DefaultResponse)(res, 200, '', data);
             }
             catch (error) {
