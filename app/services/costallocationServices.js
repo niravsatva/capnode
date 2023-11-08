@@ -329,6 +329,10 @@ class CostAllocationServices {
                 timeSheetId: timeSheet && timeSheet.id,
             };
             const costAllocation = yield costAllocationRepository_1.default.getCostAllocation(data);
+            const totalRowMapping = costAllocationRepository_1.default.getGrandTotalRowCostAllocation(costAllocation.result.filter((e) => e['employee-name'] === 'Total'));
+            if (totalRowMapping) {
+                costAllocation.result = [...costAllocation.result, totalRowMapping];
+            }
             const sectionWiseFields = yield prisma_1.prisma.configurationSection.findMany({
                 where: {
                     companyId: companyId,
@@ -480,6 +484,10 @@ class CostAllocationServices {
                 timeSheetId: timeSheet && timeSheet.id,
             };
             const costAllocation = yield costAllocationRepository_1.default.getCostAllocation(data);
+            const totalRowMapping = costAllocationRepository_1.default.getGrandTotalRowCostAllocation(costAllocation.result.filter((e) => e['employee-name'] === 'Total'));
+            if (totalRowMapping) {
+                costAllocation.result = [...costAllocation.result, totalRowMapping];
+            }
             const sectionWiseFields = yield prisma_1.prisma.configurationSection.findMany({
                 where: {
                     companyId: companyId,

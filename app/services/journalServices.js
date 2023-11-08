@@ -400,6 +400,14 @@ class JournalService {
                                 qboJournalTrnId: response
                             }
                         });
+                        yield prisma_1.prisma.timeSheets.update({
+                            where: {
+                                payPeriodId: journalData.payPeriodId,
+                            },
+                            data: {
+                                status: 'Published'
+                            }
+                        });
                     }
                 }
                 catch (error) {
@@ -409,6 +417,14 @@ class JournalService {
                         },
                         data: {
                             status: journalInterface_1.EJournalStatus.DRAFT
+                        }
+                    });
+                    yield prisma_1.prisma.timeSheets.update({
+                        where: {
+                            payPeriodId: journalData.payPeriodId,
+                        },
+                        data: {
+                            status: 'Draft'
                         }
                     });
                     let customErrorMessage = 'Error while posting journal in Quickbooks';
