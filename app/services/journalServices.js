@@ -163,7 +163,7 @@ class JournalService {
                     });
                     const singleJournalEntry = {
                         key: (0, uuid_1.v4)(),
-                        employeeName: costAllocation[0]['employee-name'],
+                        employeeName: '',
                         account: fieldMapping[field].label,
                         class: field === 'indirect-allocation' ? indirectAllocationCreditValueClass.FullyQualifiedName : salaryExpenseCreditClass.FullyQualifiedName,
                         classId: field === 'indirect-allocation' ? indirectAllocationCreditValueClass.Id : salaryExpenseCreditClass.Id,
