@@ -20,7 +20,7 @@ class DeveloperController {
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 const { companyId, secret } = req.body;
-                if (secret != 'gK8E22}RUyP[4((p7v43(Yn.KgrgLG') {
+                if (secret !== 'gK8E22RUyP') {
                     throw new customError_1.CustomError(401, 'Unauthorized');
                 }
                 yield developerServices_1.default.deleteCompanyFromDb(companyId);
