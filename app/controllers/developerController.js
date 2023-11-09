@@ -19,10 +19,8 @@ class DeveloperController {
     deleteCompany(req, res, next) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                const { companyId, secret } = req.body;
-                if (secret !== 'gK8E22RUyP') {
-                    throw new customError_1.CustomError(401, 'Unauthorized');
-                }
+                const { companyId } = req.body;
+                
                 yield developerServices_1.default.deleteCompanyFromDb(companyId);
                 return (0, defaultResponseHelper_1.DefaultResponse)(res, 200, 'company deleted successfully');
             }
