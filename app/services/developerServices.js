@@ -95,6 +95,11 @@ class DeveloperService {
                     companyId
                 }
             });
+            yield prisma_1.prisma.company.delete({
+                where: {
+                    id: companyId
+                }
+            });
         });
     }
 }
