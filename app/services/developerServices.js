@@ -24,6 +24,9 @@ class DeveloperService {
                         in: companyRoles.map((e) => {
                             return e.roleId;
                         })
+                    },
+                    roleName: {
+                        notIn: ['Admin', 'Company Admin']
                     }
                 }
             });

@@ -8,6 +8,7 @@ const body_parser_1 = __importDefault(require("body-parser"));
 // import pgSession from 'connect-pg-simple';
 // import cookieParser from 'cookie-parser';
 const cors_1 = __importDefault(require("cors"));
+const helmet_1 = __importDefault(require("helmet"));
 const express_1 = __importDefault(require("express"));
 // import session from 'express-session';
 // import { Pool } from 'pg';
@@ -18,12 +19,8 @@ const config_1 = __importDefault(require("./config"));
 const migration_runner_service_1 = require("./app/services/migration-runner.service");
 const logger_1 = require("./app/utils/logger");
 const app = (0, express_1.default)();
-//  TO ACCESS COOKIE FROM THE FRONTEND  ADD "withCredentials: true" WITH EACH REQUEST
-app.use((0, cors_1.default)({
-    origin: config_1.default === null || config_1.default === void 0 ? void 0 : config_1.default.reactAppBaseUrl,
-    methods: ['POST', 'PUT', 'GET', 'DELETE', 'OPTIONS', 'HEAD'],
-    credentials: true,
-}));
+app.use((0, helmet_1.default)());
+app.use((0, cors_1.default)());
 app.use(body_parser_1.default.json());
 app.use(body_parser_1.default.urlencoded({ extended: true }));
 (0, migration_runner_service_1.runMigration)();

@@ -329,14 +329,9 @@ exports.sections = [
         no: 1,
         fields: [
             {
-                name: 'Gross Wage',
+                name: 'Salary',
                 type: 'Monthly',
                 jsonId: 'f1',
-            },
-            {
-                name: 'Vacation/PTO',
-                type: 'Monthly',
-                jsonId: 'f2',
             },
             {
                 name: 'Total Salary',
@@ -346,18 +341,13 @@ exports.sections = [
         ],
     },
     {
-        sectionName: 'Payroll Taxes Expense',
+        sectionName: 'Payroll Tax Expense',
         no: 2,
         fields: [
             {
-                name: 'FICA',
+                name: 'Employer Payroll Taxes',
                 type: 'Monthly',
                 jsonId: 'f1',
-            },
-            {
-                name: 'SUI',
-                type: 'Monthly',
-                jsonId: 'f2',
             },
             {
                 name: `Total Payroll Taxes`,
@@ -374,16 +364,6 @@ exports.sections = [
                 name: 'Health Insurance',
                 type: 'Monthly',
                 jsonId: 'f1',
-            },
-            {
-                name: 'Retirement',
-                type: 'Monthly',
-                jsonId: 'f2',
-            },
-            {
-                name: `Worker's Comp`,
-                type: 'Monthly',
-                jsonId: 'f3',
             },
             {
                 name: `Total Fringe`,
