@@ -228,6 +228,7 @@ class DashboardServices {
                         payPeriodId: journal.payPeriodId,
                         payPeriodName: `${(0, moment_1.default)(journal.payPeriod.startDate).format('MM/DD/YYYY')} - ${(0, moment_1.default)(journal.payPeriod.endDate).format('MM/DD/YYYY')}`,
                         amount: journal.amount,
+                        status: journal.status,
                     });
                 });
             }
@@ -239,8 +240,8 @@ class DashboardServices {
             const companyData = yield prisma_1.prisma.companyRole.findFirst({
                 where: {
                     userId,
-                    companyId
-                }
+                    companyId,
+                },
             });
             if (!companyData) {
                 throw new customError_1.CustomError(400, 'You are not allow to access this company data');

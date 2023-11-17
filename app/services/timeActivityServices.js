@@ -26,7 +26,7 @@ class TimeActivityService {
     // Get all time activities
     getAllTimeActivitiesServices(timeActivityData) {
         return __awaiter(this, void 0, void 0, function* () {
-            const { companyId, search, sort, page, limit, type, classId, customerId, employeeId, isOverHours, payPeriodId, year, closingDate } = timeActivityData;
+            const { companyId, search, sort, page, limit, type, classId, customerId, employeeId, isOverHours, payPeriodId, year, closingDate, } = timeActivityData;
             // let yearFilter = {};
             // if (year) {
             // 	yearFilter = {
@@ -230,7 +230,8 @@ class TimeActivityService {
                     let isAccountClosed = false;
                     if (activity.timeSheet) {
                         if (activity.timeSheet.payPeriod && closingDate) {
-                            if ((0, dayjs_1.default)(activity.timeSheet.payPeriod.endDate) < (0, dayjs_1.default)(closingDate).endOf('day')) {
+                            if ((0, dayjs_1.default)(activity.timeSheet.payPeriod.endDate) <
+                                (0, dayjs_1.default)(closingDate).endOf('day')) {
                                 isAccountClosed = true;
                             }
                         }
@@ -431,7 +432,7 @@ class TimeActivityService {
                 // LAMBDA FUNCTION CALL
                 // For local API
                 // Get employees by last sync from Quickbooks
-                const newTimeActivities = yield (quickbooksClient_1.default === null || quickbooksClient_1.default === void 0 ? void 0 : quickbooksClient_1.default.getTimeActivitiesByLastSync(authResponse === null || authResponse === void 0 ? void 0 : authResponse.accessToken, authResponse === null || authResponse === void 0 ? void 0 : authResponse.tenantID, authResponse === null || authResponse === void 0 ? void 0 : authResponse.refreshToken, companyDetails === null || companyDetails === void 0 ? void 0 : companyDetails.timeActivitiesLastSyncDate));
+                const newTimeActivities = yield (quickbooksClient_1.default === null || quickbooksClient_1.default === void 0 ? void 0 : quickbooksClient_1.default.getTimeActivitiesByLastSync(authResponse === null || authResponse === void 0 ? void 0 : authResponse.accessToken, authResponse === null || authResponse === void 0 ? void 0 : authResponse.tenantID, authResponse === null || authResponse === void 0 ? void 0 : authResponse.refreshToken, companyDetails === null || companyDetails === void 0 ? void 0 : companyDetails.timeActivitiesLastSyncDate, companyId));
                 // If new records found
                 let timeActivityArr = [];
                 if (newTimeActivities &&

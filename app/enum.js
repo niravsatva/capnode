@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.TimeSheetsStatus = exports.PayPeriodStatus = exports.ResponseStatus = void 0;
+exports.SyncLogsStatus = exports.QBOModules = exports.TimeSheetsStatus = exports.PayPeriodStatus = exports.ResponseStatus = void 0;
 var ResponseStatus;
 (function (ResponseStatus) {
     ResponseStatus[ResponseStatus["Success"] = 200] = "Success";
@@ -20,3 +20,14 @@ var TimeSheetsStatus;
     TimeSheetsStatus["PUBLISHED"] = "Published";
     TimeSheetsStatus["DRAFT"] = "Draft";
 })(TimeSheetsStatus || (exports.TimeSheetsStatus = TimeSheetsStatus = {}));
+var QBOModules;
+(function (QBOModules) {
+    QBOModules["EMPLOYEE"] = "Employee";
+    QBOModules["TIME_ACTIVITY"] = "TimeActivity";
+    QBOModules["JOURNAL"] = "Journal";
+})(QBOModules || (exports.QBOModules = QBOModules = {}));
+var SyncLogsStatus;
+(function (SyncLogsStatus) {
+    SyncLogsStatus[SyncLogsStatus["SUCCESS"] = 1] = "SUCCESS";
+    SyncLogsStatus[SyncLogsStatus["FAILURE"] = 2] = "FAILURE";
+})(SyncLogsStatus || (exports.SyncLogsStatus = SyncLogsStatus = {}));

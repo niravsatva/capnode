@@ -145,7 +145,7 @@ class EmployeeServices {
                 // LAMBDA FUNCTION CALL
                 // For local API
                 // Get employees by last sync from Quickbooks
-                const newEmployees = yield (quickbooksClient_1.default === null || quickbooksClient_1.default === void 0 ? void 0 : quickbooksClient_1.default.getEmployeesByLastSync(authResponse === null || authResponse === void 0 ? void 0 : authResponse.accessToken, authResponse === null || authResponse === void 0 ? void 0 : authResponse.tenantID, authResponse === null || authResponse === void 0 ? void 0 : authResponse.refreshToken, companyDetails === null || companyDetails === void 0 ? void 0 : companyDetails.employeeLastSyncDate));
+                const newEmployees = yield (quickbooksClient_1.default === null || quickbooksClient_1.default === void 0 ? void 0 : quickbooksClient_1.default.getEmployeesByLastSync(authResponse === null || authResponse === void 0 ? void 0 : authResponse.accessToken, authResponse === null || authResponse === void 0 ? void 0 : authResponse.tenantID, authResponse === null || authResponse === void 0 ? void 0 : authResponse.refreshToken, companyDetails === null || companyDetails === void 0 ? void 0 : companyDetails.employeeLastSyncDate, companyId));
                 // If new records found
                 let employeeArr = [];
                 if (((_b = (_a = newEmployees === null || newEmployees === void 0 ? void 0 : newEmployees.QueryResponse) === null || _a === void 0 ? void 0 : _a.Employee) === null || _b === void 0 ? void 0 : _b.length) > 0) {

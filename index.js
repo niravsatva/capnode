@@ -21,13 +21,13 @@ const logger_1 = require("./app/utils/logger");
 const app = (0, express_1.default)();
 app.use((0, helmet_1.default)());
 app.use((0, cors_1.default)());
-app.use(body_parser_1.default.json());
-app.use(body_parser_1.default.urlencoded({ extended: true }));
+app.use(body_parser_1.default.json({ limit: '50mb' }));
+app.use(body_parser_1.default.urlencoded({ extended: true, limit: '50mb' }));
 (0, migration_runner_service_1.runMigration)();
 // Import routes
-app.use('/', routes_1.default);
+app.use(`/${config_1.default.routeBasePath}`, routes_1.default);
 const PORT = config_1.default.port || 8080;
 // Server configuration
 app.listen(PORT, () => {
-    logger_1.logger.info('Server is listening on port ', PORT);
+    logger_1.logger.info('Server is listening on port ' + PORT);
 });

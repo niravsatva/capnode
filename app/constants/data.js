@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.currencyValues = exports.supportedAccountTypes = exports.supportedQBOCurrencies = exports.sections = exports.DefaultConfigurationSettings = exports.DefaultAdminPermissions = exports.DefaultPermissions = void 0;
+exports.currencyValues = exports.supportedAccountTypes = exports.supportedQBOCurrencies = exports.sectionPreLive = exports.sections = exports.DefaultConfigurationSettings = exports.DefaultAdminPermissions = exports.DefaultPermissions = void 0;
 exports.DefaultPermissions = [
     { permissionName: 'Dashboard', sortId: 1 },
     { permissionName: 'Employee Cost', sortId: 2 },
@@ -364,6 +364,83 @@ exports.sections = [
                 name: 'Health Insurance',
                 type: 'Monthly',
                 jsonId: 'f1',
+            },
+            {
+                name: `Total Fringe`,
+                type: 'Monthly',
+                jsonId: 't1',
+            },
+        ],
+    },
+];
+//Note: Do not use this const
+exports.sectionPreLive = [
+    {
+        sectionName: 'Employee Type',
+        no: 0,
+        fields: [
+            {
+                name: 'Employee Type',
+                type: 'Monthly',
+                jsonId: 'f1',
+            },
+            {
+                name: 'Maximum allocate hours per year',
+                type: 'Yearly',
+                jsonId: 'f2',
+            },
+            {
+                name: 'Maximum Vacation/PTO hours per year',
+                type: 'Yearly',
+                jsonId: 'f3',
+            },
+        ],
+    },
+    {
+        sectionName: 'Salary Expense Accounts',
+        no: 1,
+        fields: [
+            {
+                name: 'Salary',
+                type: 'Monthly',
+                jsonId: 'f1',
+            },
+            {
+                name: 'Total Salary',
+                type: 'Monthly',
+                jsonId: 't1',
+            },
+        ],
+    },
+    {
+        sectionName: 'Payroll Tax Expense',
+        no: 2,
+        fields: [
+            {
+                name: 'Employer Payroll Taxes',
+                type: 'Monthly',
+                jsonId: 'f1',
+            },
+            {
+                name: `Total Payroll Taxes`,
+                type: 'Monthly',
+                jsonId: 't1',
+            },
+        ],
+    },
+    {
+        sectionName: 'Fringe expense',
+        no: 3,
+        fields: [
+            {
+                name: 'Health Insurance',
+                type: 'Monthly',
+                jsonId: 'f1',
+            },
+            {
+                name: 'Retirement',
+                type: 'Monthly',
+                jsonId: 'f2',
             },
             {
                 name: `Total Fringe`,

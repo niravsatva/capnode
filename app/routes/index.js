@@ -22,6 +22,7 @@ const payPeriodRoutes_1 = __importDefault(require("./payPeriodRoutes"));
 const costAllocationRoutes_1 = __importDefault(require("./costAllocationRoutes"));
 const journalRoutes_1 = __importDefault(require("./journalRoutes"));
 const dashboardRoutes_1 = __importDefault(require("./dashboardRoutes"));
+const syncLogsRoutes_1 = __importDefault(require("./syncLogsRoutes"));
 const developerRoutes_1 = __importDefault(require("./developerRoutes"));
 const requestLogger_1 = require("../middlewares/requestLogger");
 const router = express_1.default.Router();
@@ -42,6 +43,7 @@ router.use('/pay-periods', payPeriodRoutes_1.default);
 router.use('/cost-allocation', costAllocationRoutes_1.default);
 router.use('/journal', journalRoutes_1.default);
 router.use("/dashboard", dashboardRoutes_1.default);
+router.use('/sync-logs', syncLogsRoutes_1.default);
 router.use('/developer', developerRoutes_1.default);
 router.use('/test', (req, res) => {
     return res.json({ data: 'Hello world!' });

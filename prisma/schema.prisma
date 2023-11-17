@@ -79,6 +79,7 @@ model Company {
   hoursOver                  HoursOver[]
   payPeriod                  PayPeriod[]
   Journal                    Journal[]
+  SyncLogs                   SyncLogs[]
 }
 
 model Role {
@@ -249,19 +250,20 @@ model EmployeeCostValue {
 // }
 
 model PayPeriod {
-  id                String              @id @default(uuid())
-  startDate         DateTime
-  endDate           DateTime
-  status            Int                 @default(1)
-  companyId         String
-  closingDate       DateTime?
-  company           Company             @relation(fields: [companyId], references: [id])
-  employeeCostValue EmployeeCostValue[]
-  createdAt         DateTime            @default(now())
-  updatedAt         DateTime            @updatedAt
-  timeActivities    TimeActivities[]
-  TimeSheets        TimeSheets?
-  Journal           Journal?
+  id                 String              @id @default(uuid())
+  startDate          DateTime
+  endDate            DateTime
+  status             Int                 @default(1)
+  companyId          String
+  closingDate        DateTime?
+  company            Company             @relation(fields: [companyId], references: [id])
+  employeeCostValue  EmployeeCostValue[]
+  isJournalPublished Boolean             @default(false)
+  createdAt          DateTime            @default(now())
+  updatedAt          DateTime            @updatedAt
+  timeActivities     TimeActivities[]
+  TimeSheets         TimeSheets?
+  Journal            Journal?
 }
 
 model TimeActivities {
@@ -378,6 +380,17 @@ model Journal {
   createdBy       User      @relation(fields: [createdById], references: [id])
   createdAt       DateTime  @default(now())
   updatedAt       DateTime  @default(now())
+}
+
+model SyncLogs {
+  id         String @id @default(uuid())
+  moduleName String
+  status     Int
+  message    String
+  companyId String
+  company   Company @relation(fields: [companyId], references: [id])
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 enum PayrollMethods {

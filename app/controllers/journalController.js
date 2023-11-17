@@ -43,7 +43,7 @@ class JournalController {
     getAllJournals(req, res, next) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                const { companyId, page = 1, limit = 10, search = '', status = '', type = '', sort = '', payPeriodId = '', } = req.query;
+                const { companyId, page = 1, limit = 10, search = '', status = '', type = '', sort = '', payPeriodId = '', year } = req.query;
                 const data = {
                     companyId: companyId,
                     payPeriodId: payPeriodId,
@@ -53,6 +53,7 @@ class JournalController {
                     status: Number(status),
                     type: String(type),
                     sort: String(sort),
+                    year: String(year),
                 };
                 // Checking is the user is permitted
                 const isPermitted = yield (0, isAuthorizedUser_1.checkPermission)(req, companyId, {

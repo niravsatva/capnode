@@ -13,5 +13,7 @@ exports.migrations = [
     'configurationPayRollExpenseLabelChanges',
     'configurationSalarySectionChanges',
     'configurationFirstSectionChanges',
-    'addClosingDateToPayPeriod'
+    'addClosingDateToPayPeriod',
+    'updatePublishedJournalPayPeriods',
+    'syncMissingField'
 ];

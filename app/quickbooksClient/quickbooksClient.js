@@ -15,6 +15,8 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const moment_timezone_1 = __importDefault(require("moment-timezone"));
 const config_1 = __importDefault(require("../../config"));
 const data_1 = require("../constants/data");
+const prisma_1 = require("../client/prisma");
+const enum_1 = require("../enum");
 /* eslint-disable @typescript-eslint/no-var-requires */
 const QuickBooks = require('node-quickbooks');
 class QuickbooksClient {
@@ -164,10 +166,12 @@ class QuickbooksClient {
         });
     }
     // Get employees by last sync date
-    getEmployeesByLastSync(accessToken, realmId, refreshToken, lastSyncDate) {
+    getEmployeesByLastSync(accessToken, realmId, refreshToken, lastSyncDate, companyId) {
+        var _a, _b, _c, _d, _e, _f, _g, _h, _j;
         return __awaiter(this, void 0, void 0, function* () {
+            const start = Date.now();
             try {
-                return new Promise((resolve, reject) => {
+                const employeeData = yield new Promise((resolve, reject) => {
                     const qbo = new QuickBooks(config_1.default.quickbooksClientId, config_1.default.quickbooksClientSecret, accessToken, true, realmId, config_1.default.quickbooksEnvironment == 'sandbox' ? true : false, true, null, '2.0', refreshToken);
                     qbo.findEmployees([
                         { field: 'Active', value: [true, false], operator: 'IN' },
@@ -188,17 +192,46 @@ class QuickbooksClient {
                         });
                     });
                 });
+                const duration = Date.now() - start;
+                yield prisma_1.prisma.syncLogs.create({
+                    data: {
+                        moduleName: enum_1.QBOModules.EMPLOYEE,
+                        status: enum_1.SyncLogsStatus.SUCCESS,
+                        message: `New ${((_b = (_a = employeeData === null || employeeData === void 0 ? void 0 : employeeData.QueryResponse) === null || _a === void 0 ? void 0 : _a.Employee) === null || _b === void 0 ? void 0 : _b.length)
+                            ? (_d = (_c = employeeData === null || employeeData === void 0 ? void 0 : employeeData.QueryResponse) === null || _c === void 0 ? void 0 : _c.Employee) === null || _d === void 0 ? void 0 : _d.length
+                            : 0} employees synced successfully in ${Number(duration) / 1000} seconds.`,
+                        companyId: companyId,
+                    },
+                });
+                return employeeData;
             }
-            catch (err) {
-                throw err;
+            catch (error) {
+                let customErrorMessage = 'Error while posting journal in Quickbooks';
+                if (error &&
+                    (error === null || error === void 0 ? void 0 : error.Fault) &&
+                    ((_e = error.Fault) === null || _e === void 0 ? void 0 : _e.Error) &&
+                    error.Fault.Error.length) {
+                    customErrorMessage = `${(_g = (_f = error === null || error === void 0 ? void 0 : error.Fault) === null || _f === void 0 ? void 0 : _f.Error[0]) === null || _g === void 0 ? void 0 : _g.Message}: ${(_j = (_h = error === null || error === void 0 ? void 0 : error.Fault) === null || _h === void 0 ? void 0 : _h.Error[0]) === null || _j === void 0 ? void 0 : _j.Detail}`;
+                }
+                yield prisma_1.prisma.syncLogs.create({
+                    data: {
+                        moduleName: enum_1.QBOModules.EMPLOYEE,
+                        status: enum_1.SyncLogsStatus.FAILURE,
+                        message: customErrorMessage,
+                        companyId: companyId,
+                    },
+                });
+                throw error;
             }
         });
     }
     // Get time activities by last sync date
-    getTimeActivitiesByLastSync(accessToken, realmId, refreshToken, lastSyncDate) {
+    getTimeActivitiesByLastSync(accessToken, realmId, refreshToken, lastSyncDate, companyId) {
+        var _a, _b, _c, _d, _e, _f, _g, _h, _j;
         return __awaiter(this, void 0, void 0, function* () {
+            const start = Date.now();
             try {
-                return new Promise((resolve, reject) => {
+                const timeActivityData = yield new Promise((resolve, reject) => {
                     const qbo = new QuickBooks(config_1.default.quickbooksClientId, config_1.default.quickbooksClientSecret, accessToken, true, realmId, config_1.default.quickbooksEnvironment == 'sandbox' ? true : false, true, null, '2.0', refreshToken);
                     qbo.findTimeActivities([
                         {
@@ -218,9 +251,36 @@ class QuickbooksClient {
                         });
                     });
                 });
+                const duration = Date.now() - start;
+                yield prisma_1.prisma.syncLogs.create({
+                    data: {
+                        moduleName: enum_1.QBOModules.TIME_ACTIVITY,
+                        status: enum_1.SyncLogsStatus.SUCCESS,
+                        message: `New ${((_b = (_a = timeActivityData === null || timeActivityData === void 0 ? void 0 : timeActivityData.QueryResponse) === null || _a === void 0 ? void 0 : _a.TimeActivity) === null || _b === void 0 ? void 0 : _b.length)
+                            ? (_d = (_c = timeActivityData === null || timeActivityData === void 0 ? void 0 : timeActivityData.QueryResponse) === null || _c === void 0 ? void 0 : _c.TimeActivity) === null || _d === void 0 ? void 0 : _d.length
+                            : 0} time activities synced successfully in ${Number(duration) / 1000} seconds.`,
+                        companyId: companyId,
+                    },
+                });
+                return timeActivityData;
             }
-            catch (err) {
-                throw err;
+            catch (error) {
+                let customErrorMessage = 'Error while posting journal in Quickbooks';
+                if (error &&
+                    (error === null || error === void 0 ? void 0 : error.Fault) &&
+                    ((_e = error.Fault) === null || _e === void 0 ? void 0 : _e.Error) &&
+                    error.Fault.Error.length) {
+                    customErrorMessage = `${(_g = (_f = error === null || error === void 0 ? void 0 : error.Fault) === null || _f === void 0 ? void 0 : _f.Error[0]) === null || _g === void 0 ? void 0 : _g.Message}: ${(_j = (_h = error === null || error === void 0 ? void 0 : error.Fault) === null || _h === void 0 ? void 0 : _h.Error[0]) === null || _j === void 0 ? void 0 : _j.Detail}`;
+                }
+                yield prisma_1.prisma.syncLogs.create({
+                    data: {
+                        moduleName: enum_1.QBOModules.EMPLOYEE,
+                        status: enum_1.SyncLogsStatus.FAILURE,
+                        message: customErrorMessage,
+                        companyId: companyId,
+                    },
+                });
+                throw error;
             }
         });
     }
@@ -347,7 +407,7 @@ class QuickbooksClient {
                     AccountType: accountType,
                     CurrencyRef: {
                         value: currency === null || currency === void 0 ? void 0 : currency.value,
-                        name: currency === null || currency === void 0 ? void 0 : currency.name
+                        name: currency === null || currency === void 0 ? void 0 : currency.name,
                     },
                 };
                 return new Promise((resolve, reject) => {

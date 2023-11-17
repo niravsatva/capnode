@@ -16,20 +16,11 @@ const dashboardServices_1 = __importDefault(require("../services/dashboardServic
 const defaultResponseHelper_1 = require("../helpers/defaultResponseHelper");
 const customError_1 = require("../models/customError");
 class DashboardController {
+    // Salary Expense By PayPeriod
     getSalaryExpenseByMonth(req, res, next) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 const { companyId, year } = req.query;
-                // const { data, labels, max } =
-                // 	await dashboardServices.getSalaryExpenseByPayPeriod(
-                // 		companyId as string,
-                // 		year as string
-                // 	);
-                // return DefaultResponse(res, 200, 'Journal fetched successfully', {
-                // 	data,
-                // 	labels,
-                // 	max,
-                // });
                 const { data, labels, max } = yield dashboardServices_1.default.getSalaryExpenseByPayPeriod(companyId, year);
                 return (0, defaultResponseHelper_1.DefaultResponse)(res, 200, 'Journal fetched successfully', {
                     data,
@@ -42,6 +33,7 @@ class DashboardController {
             }
         });
     }
+    // Payroll Expense By Customer
     getExpensesByCustomer(req, res, next) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
@@ -57,6 +49,7 @@ class DashboardController {
             }
         });
     }
+    // Cost Allocation Summary
     getJournalGraphData(req, res, next) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
@@ -72,6 +65,7 @@ class DashboardController {
             }
         });
     }
+    // Current Fiscal Years Employee hours
     getEmployeeHoursGraphData(req, res, next) {
         var _a;
         return __awaiter(this, void 0, void 0, function* () {

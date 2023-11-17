@@ -29,7 +29,7 @@ function runMigration() {
             }
             try {
                 if (!getMigration) {
-                    logger_1.logger.info('Running Migration ', migrations_1.migrations[i]);
+                    logger_1.logger.info('Running Migration ' + migrations_1.migrations[i]);
                     const createMigration = yield prisma_1.prisma.migrations.create({
                         data: {
                             name: migrations_1.migrations[i]

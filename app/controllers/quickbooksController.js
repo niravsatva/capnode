@@ -71,6 +71,10 @@ class QuickbooksController {
                 const userId = searchParams.get('state');
                 const authToken = yield quickbooksAuthClient_1.default.createAuthToken(url);
                 const qboCompanyInfo = yield quickbooksClient_1.default.getCompanyInfo(authToken.access_token, authToken.realmId, authToken.refresh_token);
+                if (qboCompanyInfo['Country'] !== 'US') {
+                    const error = new customError_1.CustomError(400, 'Only US company can be connected!');
+                    throw error;
+                }
                 let finalCompanyDetails;
                 if (companyId != 'undefined' && companyId !== null) {
                     // checking is user permitted

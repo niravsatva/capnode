@@ -16,6 +16,9 @@ exports.migrationService = void 0;
 const moment_1 = __importDefault(require("moment"));
 const prisma_1 = require("../client/prisma");
 const logger_1 = require("../utils/logger");
+const configurationRepository_1 = __importDefault(require("../repositories/configurationRepository"));
+const repositories_1 = require("../repositories");
+const data_1 = require("../constants/data");
 function addPayRolePermissions() {
     return __awaiter(this, void 0, void 0, function* () {
         const allRoles = yield prisma_1.prisma.role.findMany();
@@ -299,7 +302,67 @@ function addClosingDateToPayPeriod() {
         }
     });
 }
+function updatePublishedJournalPayPeriods() {
+    return __awaiter(this, void 0, void 0, function* () {
+        const publishedJournals = yield prisma_1.prisma.journal.findMany({
+            where: {
+                status: 1
+            }
+        });
+        if (publishedJournals.length) {
+            const payPeriodIds = publishedJournals.map((e) => {
+                return e.payPeriodId;
+            });
+            yield prisma_1.prisma.payPeriod.updateMany({
+                where: {
+                    id: {
+                        in: payPeriodIds
+                    }
+                },
+                data: {
+                    isJournalPublished: true
+                }
+            });
+        }
+    });
+}
+function syncMissingField() {
+    return __awaiter(this, void 0, void 0, function* () {
+        if (process.env.RUN_SYNC_FIELD_MIGRATION === 'true') {
+            const companyId = '4f4155a3-b6c3-4410-8857-6bbf18cd4dd8';
+            yield Promise.all(data_1.sectionPreLive.map((singleSection) => __awaiter(this, void 0, void 0, function* () {
+                const section = yield prisma_1.prisma.configurationSection.create({
+                    data: {
+                        sectionName: singleSection.sectionName,
+                        no: singleSection.no,
+                        company: { connect: { id: companyId } },
+                    },
+                });
+                yield Promise.all(singleSection.fields.map((singleField) => __awaiter(this, void 0, void 0, function* () {
+                    yield prisma_1.prisma.field.create({
+                        data: {
+                            jsonId: singleField.jsonId,
+                            name: singleField.name,
+                            type: singleField.type,
+                            company: { connect: { id: companyId } },
+                            configurationSection: { connect: { id: section.id } },
+                        },
+                    });
+                })));
+            })));
+            const employees = yield repositories_1.employeeRepository.getAllEmployeesByCompanyId(companyId);
+            const sectionWithFields = yield configurationRepository_1.default.getConfigurationField(companyId);
+            const sectionFields = sectionWithFields.reduce((accumulator, section) => {
+                accumulator.push(...section.fields);
+                return accumulator;
+            }, []);
+            yield repositories_1.employeeCostRepository.createInitialValues(employees, sectionFields, companyId);
+        }
+    });
+}
 exports.migrationService = {
+    syncMissingField,
+    updatePublishedJournalPayPeriods,
     addClosingDateToPayPeriod,
     configurationFirstSectionChanges,
     configurationSalarySectionChanges,

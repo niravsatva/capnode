@@ -48,6 +48,7 @@ const uuid_1 = require("uuid");
 const costallocationServices_1 = __importDefault(require("./costallocationServices"));
 const costAllocationPdf_1 = require("../templates/costAllocationPdf");
 const fs = __importStar(require("fs"));
+const enum_1 = require("../enum");
 class JournalService {
     getJournalEntriesByPayPeriod(query, quickBooksDecimal) {
         var _a, _b, _c, _d;
@@ -135,14 +136,19 @@ class JournalService {
             const fieldIds = Object.keys(fieldMapping);
             const costAllocationData = yield costAllocationRepository_1.default.getCostAllocationForJournal(queryCostAllocation);
             const journalEntries = [];
-            let debitTotal = 0;
-            let creditTotal = 0;
+            let finalDebitTotal = 0;
+            let finalCreditTotal = 0;
             costAllocationData.forEach((singleAllocation) => {
                 fieldIds.forEach((field) => {
                     const costAllocation = singleAllocation.costAllocation;
                     let total = 0;
+                    let totalNegative = 0;
                     costAllocation.forEach((employee) => {
                         if (fieldMapping[field]) {
+                            let isNegative = false;
+                            if (employee[field] < 0) {
+                                isNegative = true;
+                            }
                             const singleJournalEntry = {
                                 key: (0, uuid_1.v4)(),
                                 employeeName: employee['employee-name'],
@@ -151,13 +157,19 @@ class JournalService {
                                 classId: employee['classId'],
                                 customer: employee['customer-name'],
                                 customerId: employee['customerId'],
-                                debit: employee[field].toFixed(defaultAmountToFixed),
-                                credit: '',
+                                debit: !isNegative ? employee[field].toFixed(defaultAmountToFixed) : '',
+                                credit: isNegative ? Math.abs(employee[field].toFixed(defaultAmountToFixed)) : '',
                                 accountId: fieldMapping[field].value,
-                                type: 'Debit'
+                                type: isNegative ? 'Credit' : 'Debit'
                             };
-                            total = Number((Number(total.toFixed(defaultAmountToFixed)) + Number(employee[field].toFixed(defaultAmountToFixed))).toFixed(defaultAmountToFixed));
-                            debitTotal = Number((Number(debitTotal.toFixed(defaultAmountToFixed)) + Number(employee[field].toFixed(defaultAmountToFixed))).toFixed(defaultAmountToFixed));
+                            if (isNegative) {
+                                totalNegative = Number((Number(totalNegative.toFixed(defaultAmountToFixed)) +
+                                    Math.abs(Number(employee[field].toFixed(defaultAmountToFixed)))).toFixed(defaultAmountToFixed));
+                            }
+                            if (!isNegative) {
+                                total = Number((Number(total.toFixed(defaultAmountToFixed)) + Number(employee[field].toFixed(defaultAmountToFixed))).toFixed(defaultAmountToFixed));
+                                finalDebitTotal = Number((Number(finalDebitTotal.toFixed(defaultAmountToFixed)) + Number(employee[field].toFixed(defaultAmountToFixed))).toFixed(defaultAmountToFixed));
+                            }
                             journalEntries.push(singleJournalEntry);
                         }
                     });
@@ -169,12 +181,16 @@ class JournalService {
                         classId: field === 'indirect-allocation' ? indirectAllocationCreditValueClass.Id : salaryExpenseCreditClass.Id,
                         customer: creditCustomerName.DisplayName,
                         customerId: creditCustomerName.Id,
-                        debit: '',
-                        credit: total.toFixed(defaultAmountToFixed),
+                        debit: totalNegative ? totalNegative.toFixed(defaultAmountToFixed) : '',
+                        credit: total ? total.toFixed(defaultAmountToFixed) : '',
                         accountId: fieldMapping[field].value,
-                        type: 'Credit'
+                        type: totalNegative ? 'Debit' : 'Credit'
                     };
-                    creditTotal = Number((Number(creditTotal.toFixed(defaultAmountToFixed)) + Number(total.toFixed(defaultAmountToFixed))).toFixed(defaultAmountToFixed));
+                    finalCreditTotal = Number((Number(finalCreditTotal.toFixed(defaultAmountToFixed)) + Number(total.toFixed(defaultAmountToFixed))).toFixed(defaultAmountToFixed));
+                    if (totalNegative) {
+                        finalCreditTotal = Number((Number(finalCreditTotal.toFixed(defaultAmountToFixed)) + Number(totalNegative.toFixed(defaultAmountToFixed))).toFixed(defaultAmountToFixed));
+                        finalDebitTotal = Number((Number(finalDebitTotal.toFixed(defaultAmountToFixed)) + Number(totalNegative.toFixed(defaultAmountToFixed))).toFixed(defaultAmountToFixed));
+                    }
                     journalEntries.push(singleJournalEntry);
                 });
             });
@@ -188,8 +204,8 @@ class JournalService {
                 account: 'Total',
                 class: '',
                 customer: '',
-                debit: debitTotal.toFixed(defaultAmountToFixed),
-                credit: creditTotal.toFixed(defaultAmountToFixed),
+                debit: finalDebitTotal.toFixed(defaultAmountToFixed),
+                credit: finalCreditTotal.toFixed(defaultAmountToFixed),
                 accountId: ''
             });
             return journalEntries;
@@ -246,7 +262,7 @@ class JournalService {
     }
     getAllJournals(timeSheetData) {
         return __awaiter(this, void 0, void 0, function* () {
-            const { companyId, payPeriodId, page, limit, search, status, type, sort, } = timeSheetData;
+            const { companyId, payPeriodId, page, limit, search, status, type, sort, year } = timeSheetData;
             if (!companyId) {
                 throw new customError_1.CustomError(400, 'Company id is required');
             }
@@ -321,6 +337,7 @@ class JournalService {
                 searchCondition: searchCondition,
                 sortCondition: sortCondition,
                 payPeriodFilter: payPeriodFilter,
+                year: year
             };
             const { journals, count } = yield repositories_1.journalRepository.getAllJournals(data);
             return { journals, count };
@@ -408,6 +425,22 @@ class JournalService {
                                 status: 'Published'
                             }
                         });
+                        yield prisma_1.prisma.payPeriod.update({
+                            where: {
+                                id: journalData.payPeriodId
+                            },
+                            data: {
+                                isJournalPublished: true
+                            }
+                        });
+                        yield prisma_1.prisma.syncLogs.create({
+                            data: {
+                                moduleName: enum_1.QBOModules.JOURNAL,
+                                status: enum_1.SyncLogsStatus.SUCCESS,
+                                message: `Journal with Journal No: ${journalData.qboJournalNo}, Date: ${journalData.date} and Amount: $${journalData.amount} has been posted successfully in quickbooks`,
+                                companyId: journalData.companyId,
+                            },
+                        });
                     }
                 }
                 catch (error) {
@@ -427,10 +460,26 @@ class JournalService {
                             status: 'Draft'
                         }
                     });
+                    yield prisma_1.prisma.payPeriod.update({
+                        where: {
+                            id: journalData.payPeriodId
+                        },
+                        data: {
+                            isJournalPublished: false
+                        }
+                    });
                     let customErrorMessage = 'Error while posting journal in Quickbooks';
                     if (error && (error === null || error === void 0 ? void 0 : error.Fault) && ((_a = error.Fault) === null || _a === void 0 ? void 0 : _a.Error) && error.Fault.Error.length) {
                         customErrorMessage = `${(_c = (_b = error === null || error === void 0 ? void 0 : error.Fault) === null || _b === void 0 ? void 0 : _b.Error[0]) === null || _c === void 0 ? void 0 : _c.Message}: ${(_e = (_d = error === null || error === void 0 ? void 0 : error.Fault) === null || _d === void 0 ? void 0 : _d.Error[0]) === null || _e === void 0 ? void 0 : _e.Detail}`;
                     }
+                    yield prisma_1.prisma.syncLogs.create({
+                        data: {
+                            moduleName: enum_1.QBOModules.JOURNAL,
+                            status: enum_1.SyncLogsStatus.FAILURE,
+                            message: customErrorMessage,
+                            companyId: journalData.companyId,
+                        },
+                    });
                     throw new customError_1.CustomError(400, customErrorMessage);
                 }
             }

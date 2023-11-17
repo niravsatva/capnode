@@ -201,6 +201,12 @@ class EmployeeConstController {
                 });
                 if (percentage) {
                     finalDataArr.forEach((singleEmployee) => {
+                        if (singleEmployee['Payroll Expense Pool']) {
+                            delete singleEmployee['Payroll Expense Pool'];
+                        }
+                        if (singleEmployee['Indirect Allocation Pool']) {
+                            delete singleEmployee['Indirect Allocation Pool'];
+                        }
                         delete singleEmployee['Employee Type'];
                         delete singleEmployee['Maximum allocate hours per year'];
                         delete singleEmployee['Maximum Vacation/PTO hours per year'];
@@ -210,11 +216,12 @@ class EmployeeConstController {
                 if (finalDataArr.length > 0) {
                     finalDataArr.forEach((singleData) => {
                         Object.entries(singleData).map((singleField) => {
+                            var _a, _b, _c, _d;
                             if (singleField[0] in totalObject) {
-                                totalObject[singleField[0]] += Number(singleField[1].split(' ')[1].replace(/,/g, ''));
+                                totalObject[singleField[0]] += Number((_b = (_a = singleField[1]) === null || _a === void 0 ? void 0 : _a.split(' ')[1]) === null || _b === void 0 ? void 0 : _b.replace(/,/g, ''));
                             }
                             else {
-                                totalObject[singleField[0]] = Number(singleField[1].split(' ')[1].replace(/,/g, ''));
+                                totalObject[singleField[0]] = Number((_d = (_c = singleField[1]) === null || _c === void 0 ? void 0 : _c.split(' ')[1]) === null || _d === void 0 ? void 0 : _d.replace(/,/g, ''));
                             }
                         });
                         Object.values(singleData);
