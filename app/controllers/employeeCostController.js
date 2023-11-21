@@ -26,18 +26,18 @@ class EmployeeConstController {
     getMonthlyCost(req, res, next) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                const { companyId, date, page = 1, limit = 10, search, type, sort, isPdf, } = req.query;
+                const { companyId, date, page = 1, limit = 10, search, type, sort, isPdf, includeInactive = false, } = req.query;
                 let payPeriodId = req.query.payPeriodId;
-                const _date = new Date();
+                // const _date = new Date();
                 let systemPayPeriodId = false;
                 if (!payPeriodId) {
                     const payPeriodData = yield prisma_1.prisma.payPeriod.findFirst({
                         where: {
                             companyId: companyId,
-                            endDate: {
-                                gte: new Date(_date === null || _date === void 0 ? void 0 : _date.getFullYear(), _date === null || _date === void 0 ? void 0 : _date.getMonth(), 1),
-                                lte: new Date(_date.getFullYear(), _date.getMonth() + 1, 0)
-                            },
+                            // endDate: {
+                            // 	gte: new Date(_date?.getFullYear(), _date?.getMonth(), 1),
+                            // 	lte: new Date(_date.getFullYear(), _date.getMonth() + 1, 0)
+                            // },
                             // OR: [
                             // 	// {
                             // 	// 	startDate: {
@@ -58,8 +58,8 @@ class EmployeeConstController {
                             // ],
                         },
                         orderBy: {
-                            endDate: 'desc'
-                        }
+                            endDate: 'desc',
+                        },
                     });
                     if (payPeriodData && payPeriodData.id) {
                         systemPayPeriodId = true;
@@ -96,10 +96,10 @@ class EmployeeConstController {
                 }
                 let employeesMonthlyCost;
                 if (isPdf === 'true') {
-                    employeesMonthlyCost = yield employeeCostServices_1.default.getMonthlyCost(companyId, date, Number(page), Number(limit), search, type, sort, payPeriodId);
+                    employeesMonthlyCost = yield employeeCostServices_1.default.getMonthlyCost(companyId, date, Number(page), Number(limit), search, type, sort, payPeriodId, includeInactive === 'true' ? true : false);
                 }
                 else {
-                    employeesMonthlyCost = yield employeeCostServices_1.default.getMonthlyCostV2(companyId, date, Number(page), Number(limit), search, type, sort, payPeriodId, systemPayPeriodId);
+                    employeesMonthlyCost = yield employeeCostServices_1.default.getMonthlyCostV2(companyId, date, Number(page), Number(limit), search, type, sort, payPeriodId, systemPayPeriodId, includeInactive === 'true' ? true : false);
                 }
                 return (0, defaultResponseHelper_1.DefaultResponse)(res, 200, 'Configurations fetched successfully', employeesMonthlyCost);
             }
@@ -146,12 +146,12 @@ class EmployeeConstController {
         var _a, _b;
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                const { companyId, date, search, type, sort, isPercentage, payPeriodId } = req.query;
+                const { companyId, date, search, type, sort, isPercentage, payPeriodId, includeInactive = false, } = req.query;
                 const percentage = isPercentage === 'false' ? false : true;
                 if (!companyId) {
                     throw new customError_1.CustomError(400, 'Company id is required');
                 }
-                const employeesMonthlyCost = yield employeeCostServices_1.default.getMonthlyCostExport(companyId, date, search, type, sort, Boolean(percentage), payPeriodId);
+                const employeesMonthlyCost = yield employeeCostServices_1.default.getMonthlyCostExport(companyId, date, search, type, sort, Boolean(percentage), payPeriodId, includeInactive === 'true' ? true : false);
                 const finalDataArr = (_a = employeesMonthlyCost === null || employeesMonthlyCost === void 0 ? void 0 : employeesMonthlyCost.employees) === null || _a === void 0 ? void 0 : _a.map((singleEmployee) => {
                     var _a;
                     const sortedData = (_a = singleEmployee === null || singleEmployee === void 0 ? void 0 : singleEmployee.employeeCostField) === null || _a === void 0 ? void 0 : _a.sort((a, b) => {

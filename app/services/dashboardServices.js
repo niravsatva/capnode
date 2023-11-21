@@ -235,7 +235,7 @@ class DashboardServices {
             return graphData;
         });
     }
-    getEmployeeHoursGraphData(companyId, userId) {
+    getEmployeeHoursGraphData(companyId, userId, year) {
         return __awaiter(this, void 0, void 0, function* () {
             const companyData = yield prisma_1.prisma.companyRole.findFirst({
                 where: {
@@ -252,7 +252,7 @@ class DashboardServices {
 						(ROUND(sum(ta."minute"::numeric) / 60 + sum(ta."hours"::numeric), 2)) as totalHours
 						FROM public."TimeActivities" ta 
 						inner join public."Employee" e on ta."employeeId" = e."id"
-						where ta."activityDate" < current_date and ta."companyId" = '${companyId}'
+						where extract('Year' from ta."activityDate") = '${year}' and ta."companyId" = '${companyId}'
 						group by ta."employeeId", e."fullName"
 						order by e."fullName" asc`;
             const graphData = yield prisma_1.prisma.$queryRawUnsafe(query);

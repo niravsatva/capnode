@@ -85,13 +85,42 @@ class ConfigurationRepository {
                                         configurationSectionId: section.id,
                                     },
                                     data: {
-                                        name: fieldData.label
+                                        name: fieldData.label,
+                                        isActive: fieldData.isActive
                                     }
                                 });
                             }
                         }
                     }
                 }
+                const listOfPeriod = yield payPeriodRepository_1.default.getAll({
+                    companyId,
+                    dateFilter: {},
+                });
+                yield Promise.all(listOfPeriod.map((singlePayPeriod) => __awaiter(this, void 0, void 0, function* () {
+                    const configurationFields = yield this.getConfigurationField(companyId);
+                    const monthlyCost = yield employeeCostRepository_1.default.getMonthlyCost(companyId, '', 0, 10000000, {}, {}, true, singlePayPeriod.id);
+                    monthlyCost.map((singleEmployeeData) => {
+                        configurationFields.map((singleConfigurationSection) => __awaiter(this, void 0, void 0, function* () {
+                            if (singleConfigurationSection.no !== 0) {
+                                let total = 0;
+                                singleEmployeeData.employeeCostField.forEach((singleEmployeeCostField) => {
+                                    if (singleEmployeeCostField.field
+                                        .configurationSectionId ===
+                                        singleConfigurationSection.id &&
+                                        singleEmployeeCostField.field.jsonId !== 't1') {
+                                        total += Number(singleEmployeeCostField.costValue[0].value);
+                                    }
+                                });
+                                const fieldToUpdate = singleEmployeeData.employeeCostField.find((singleEmployeeCostField) => singleEmployeeCostField.field
+                                    .configurationSectionId ===
+                                    singleConfigurationSection.id &&
+                                    singleEmployeeCostField.field.jsonId === 't1');
+                                yield employeeCostRepository_1.default.updateMonthlyCost(fieldToUpdate.costValue[0].id, total.toFixed(2));
+                            }
+                        }));
+                    });
+                })));
                 return updatedConfiguration;
             }
             catch (err) {

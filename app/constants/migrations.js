@@ -15,5 +15,7 @@ exports.migrations = [
     'configurationFirstSectionChanges',
     'addClosingDateToPayPeriod',
     'updatePublishedJournalPayPeriods',
-    'syncMissingField'
+    'syncMissingField',
+    'updateConfigurationJson',
+    'addSyncLogsPermissions',
 ];

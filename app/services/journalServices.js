@@ -93,7 +93,8 @@ class JournalService {
                         where: {
                             jsonId: {
                                 not: 't1'
-                            }
+                            },
+                            isActive: true
                         },
                         orderBy: {
                             jsonId: 'asc'
@@ -407,7 +408,9 @@ class JournalService {
             });
             if (journalData.status === journalInterface_1.EJournalStatus.PUBLISHED) {
                 try {
+                    const start = Date.now();
                     const response = yield this.publishJournalToQBO(journalData, journalEntries);
+                    const duration = Date.now() - start;
                     if (response) {
                         yield prisma_1.prisma.journal.update({
                             where: {
@@ -437,7 +440,8 @@ class JournalService {
                             data: {
                                 moduleName: enum_1.QBOModules.JOURNAL,
                                 status: enum_1.SyncLogsStatus.SUCCESS,
-                                message: `Journal with Journal No: ${journalData.qboJournalNo}, Date: ${journalData.date} and Amount: $${journalData.amount} has been posted successfully in quickbooks`,
+                                message: `Journal with Journal No: ${journalData.qboJournalNo} and Amount: $${journalData.amount} has been posted successfully in 
+                            ${Number(duration) / 1000} seconds.`,
                                 companyId: journalData.companyId,
                             },
                         });

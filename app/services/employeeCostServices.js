@@ -18,7 +18,7 @@ const customError_1 = require("../models/customError");
 const repositories_1 = require("../repositories");
 const payPeriodRepository_1 = __importDefault(require("../repositories/payPeriodRepository"));
 class EmployeeCostService {
-    getMonthlyCost(companyId, date, page, limit, search, type, sort, payPeriodId) {
+    getMonthlyCost(companyId, date, page, limit, search, type, sort, payPeriodId, includeInactive) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 // Offset
@@ -58,7 +58,7 @@ class EmployeeCostService {
                 // }
                 let employeesMonthlyCost = [];
                 if (payPeriodId) {
-                    employeesMonthlyCost = yield repositories_1.employeeCostRepository.getMonthlyCost(companyId, date, offset, limit, searchCondition, sortCondition, isPercentage, payPeriodId);
+                    employeesMonthlyCost = yield repositories_1.employeeCostRepository.getMonthlyCost(companyId, date, offset, limit, searchCondition, sortCondition, isPercentage, payPeriodId, includeInactive);
                 }
                 else {
                     employeesMonthlyCost = yield repositories_1.employeeCostRepository.getEmployees(companyId, offset, limit, searchCondition, sortCondition);
@@ -71,7 +71,7 @@ class EmployeeCostService {
             }
         });
     }
-    getMonthlyCostV2(companyId, date, page, limit, search, type, sort, payPeriodId, systemPayPeriodId) {
+    getMonthlyCostV2(companyId, date, page, limit, search, type, sort, payPeriodId, systemPayPeriodId, includeInactive) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 // Offset
@@ -111,7 +111,7 @@ class EmployeeCostService {
                 // }
                 let employeesMonthlyCost = [];
                 if (payPeriodId) {
-                    employeesMonthlyCost = yield repositories_1.employeeCostRepository.getMonthlyCost(companyId, date, offset, limit, searchCondition, sortCondition, isPercentage, payPeriodId);
+                    employeesMonthlyCost = yield repositories_1.employeeCostRepository.getMonthlyCost(companyId, date, offset, limit, searchCondition, sortCondition, isPercentage, payPeriodId, includeInactive);
                 }
                 else {
                     employeesMonthlyCost = yield repositories_1.employeeCostRepository.getEmployees(companyId, offset, limit, searchCondition, sortCondition);
@@ -139,7 +139,11 @@ class EmployeeCostService {
                     });
                 }
                 const count = yield repositories_1.employeeCostRepository.count(companyId, searchCondition);
-                return { employees: employeeCostMappingData, count, payPeriodId: systemPayPeriodId ? payPeriodId : null };
+                return {
+                    employees: employeeCostMappingData,
+                    count,
+                    payPeriodId: systemPayPeriodId ? payPeriodId : null,
+                };
             }
             catch (error) {
                 throw error;
@@ -197,7 +201,7 @@ class EmployeeCostService {
             return obj;
         });
     }
-    getMonthlyCostExport(companyId, date, search, type, sort, isPercentage, payPeriodId) {
+    getMonthlyCostExport(companyId, date, search, type, sort, isPercentage, payPeriodId, includeInactive) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 const company = yield repositories_1.companyRepository.getDetails(companyId);
@@ -232,7 +236,7 @@ class EmployeeCostService {
                         fullName: sort ? sort : 'asc',
                     },
                 };
-                const employeesMonthlyCost = yield repositories_1.employeeCostRepository.getMonthlyCostExport(companyId, date, searchCondition, sortCondition, isPercentage, payPeriodId);
+                const employeesMonthlyCost = yield repositories_1.employeeCostRepository.getMonthlyCostExport(companyId, date, searchCondition, sortCondition, isPercentage, includeInactive, payPeriodId);
                 const count = yield repositories_1.employeeCostRepository.count(companyId, searchCondition);
                 return { employees: employeesMonthlyCost, count, company, payPeriodData };
             }

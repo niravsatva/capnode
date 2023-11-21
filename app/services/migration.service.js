@@ -27,21 +27,70 @@ function addPayRolePermissions() {
                 const payPeriodPermissions = yield prisma_1.prisma.permission.findFirst({
                     where: {
                         roleId: role.id,
-                        permissionName: 'Pay Period'
-                    }
+                        permissionName: 'Pay Period',
+                    },
                 });
                 if (!payPeriodPermissions) {
                     yield prisma_1.prisma.permission.create({
                         data: {
                             roleId: role.id,
                             permissionName: 'Pay Period',
-                            all: (role.roleName === 'Admin' || role.roleName === 'Company Admin') ? true : false,
-                            view: (role.roleName === 'Admin' || role.roleName === 'Company Admin') ? true : false,
-                            edit: (role.roleName === 'Admin' || role.roleName === 'Company Admin') ? true : false,
-                            delete: (role.roleName === 'Admin' || role.roleName === 'Company Admin') ? true : false,
-                            add: (role.roleName === 'Admin' || role.roleName === 'Company Admin') ? true : false,
+                            all: role.roleName === 'Admin' || role.roleName === 'Company Admin'
+                                ? true
+                                : false,
+                            view: role.roleName === 'Admin' || role.roleName === 'Company Admin'
+                                ? true
+                                : false,
+                            edit: role.roleName === 'Admin' || role.roleName === 'Company Admin'
+                                ? true
+                                : false,
+                            delete: role.roleName === 'Admin' || role.roleName === 'Company Admin'
+                                ? true
+                                : false,
+                            add: role.roleName === 'Admin' || role.roleName === 'Company Admin'
+                                ? true
+                                : false,
                             sortId: 16,
-                        }
+                        },
+                    });
+                }
+            }
+        }
+    });
+}
+function addSyncLogsPermissions() {
+    return __awaiter(this, void 0, void 0, function* () {
+        const allRoles = yield prisma_1.prisma.role.findMany();
+        if (allRoles.length) {
+            for (const role of allRoles) {
+                const payPeriodPermissions = yield prisma_1.prisma.permission.findFirst({
+                    where: {
+                        roleId: role.id,
+                        permissionName: 'Sync Logs',
+                    },
+                });
+                if (!payPeriodPermissions) {
+                    yield prisma_1.prisma.permission.create({
+                        data: {
+                            roleId: role.id,
+                            permissionName: 'Sync Logs',
+                            all: role.roleName === 'Admin' || role.roleName === 'Company Admin'
+                                ? true
+                                : false,
+                            view: role.roleName === 'Admin' || role.roleName === 'Company Admin'
+                                ? true
+                                : false,
+                            edit: role.roleName === 'Admin' || role.roleName === 'Company Admin'
+                                ? true
+                                : false,
+                            delete: role.roleName === 'Admin' || role.roleName === 'Company Admin'
+                                ? true
+                                : false,
+                            add: role.roleName === 'Admin' || role.roleName === 'Company Admin'
+                                ? true
+                                : false,
+                            sortId: 16,
+                        },
                     });
                 }
             }
@@ -57,8 +106,8 @@ function defaultIndirectExpenseRate() {
     return __awaiter(this, void 0, void 0, function* () {
         yield prisma_1.prisma.configuration.updateMany({
             data: {
-                indirectExpenseRate: 0
-            }
+                indirectExpenseRate: 0,
+            },
         });
     });
 }
@@ -66,19 +115,19 @@ function sectionNoChanges() {
     return __awaiter(this, void 0, void 0, function* () {
         yield prisma_1.prisma.configurationSection.updateMany({
             where: {
-                sectionName: 'Fringe expense'
+                sectionName: 'Fringe expense',
             },
             data: {
-                no: 3
-            }
+                no: 3,
+            },
         });
         yield prisma_1.prisma.configurationSection.updateMany({
             where: {
-                sectionName: 'Payroll Taxes Expense'
+                sectionName: 'Payroll Taxes Expense',
             },
             data: {
-                no: 2
-            }
+                no: 2,
+            },
         });
     });
 }
@@ -95,11 +144,11 @@ function configurationSettingChanges() {
                     newSettings['3'] = Object.assign(Object.assign({}, settings['2']), { id: '3' });
                     yield prisma_1.prisma.configuration.update({
                         where: {
-                            id: configuration.id
+                            id: configuration.id,
                         },
                         data: {
-                            settings: newSettings
-                        }
+                            settings: newSettings,
+                        },
                     });
                 }
             }
@@ -110,37 +159,37 @@ function fieldChanges() {
     return __awaiter(this, void 0, void 0, function* () {
         const sectionTwoConfigurationSection = yield prisma_1.prisma.configurationSection.findMany({
             where: {
-                no: 2
+                no: 2,
             },
             select: {
                 fields: {
                     where: {
-                        jsonId: 'f3'
-                    }
+                        jsonId: 'f3',
+                    },
                 },
                 companyId: true,
                 id: true,
                 no: true,
-                sectionName: true
-            }
+                sectionName: true,
+            },
         });
         if (sectionTwoConfigurationSection.length) {
             for (const section of sectionTwoConfigurationSection) {
                 const sectionThree = yield prisma_1.prisma.configurationSection.findFirst({
                     where: {
                         no: 3,
-                        companyId: section.companyId
-                    }
+                        companyId: section.companyId,
+                    },
                 });
                 if (sectionThree) {
                     for (const field of section.fields) {
                         yield prisma_1.prisma.field.update({
                             where: {
-                                id: field.id
+                                id: field.id,
                             },
                             data: {
-                                configurationSectionId: sectionThree === null || sectionThree === void 0 ? void 0 : sectionThree.id
-                            }
+                                configurationSectionId: sectionThree === null || sectionThree === void 0 ? void 0 : sectionThree.id,
+                            },
                         });
                     }
                 }
@@ -168,11 +217,11 @@ function configurationFringeExpenseChanges() {
                     }
                     yield prisma_1.prisma.configuration.update({
                         where: {
-                            id: configuration.id
+                            id: configuration.id,
                         },
                         data: {
-                            settings: newSettings
-                        }
+                            settings: newSettings,
+                        },
                     });
                 }
             }
@@ -194,11 +243,11 @@ function configurationPayRollExpenseChanges() {
                     }
                     yield prisma_1.prisma.configuration.update({
                         where: {
-                            id: configuration.id
+                            id: configuration.id,
                         },
                         data: {
-                            settings: newSettings
-                        }
+                            settings: newSettings,
+                        },
                     });
                 }
             }
@@ -218,11 +267,11 @@ function configurationPayRollExpenseLabelChanges() {
                     }
                     yield prisma_1.prisma.configuration.update({
                         where: {
-                            id: configuration.id
+                            id: configuration.id,
                         },
                         data: {
-                            settings: newSettings
-                        }
+                            settings: newSettings,
+                        },
                     });
                 }
             }
@@ -244,11 +293,11 @@ function configurationSalarySectionChanges() {
                     }
                     yield prisma_1.prisma.configuration.update({
                         where: {
-                            id: configuration.id
+                            id: configuration.id,
                         },
                         data: {
-                            settings: newSettings
-                        }
+                            settings: newSettings,
+                        },
                     });
                 }
             }
@@ -270,11 +319,11 @@ function configurationFirstSectionChanges() {
                     }
                     yield prisma_1.prisma.configuration.update({
                         where: {
-                            id: configuration.id
+                            id: configuration.id,
                         },
                         data: {
-                            settings: newSettings
-                        }
+                            settings: newSettings,
+                        },
                     });
                 }
             }
@@ -285,18 +334,21 @@ function addClosingDateToPayPeriod() {
     return __awaiter(this, void 0, void 0, function* () {
         const allNullClosingDatePayPeriods = yield prisma_1.prisma.payPeriod.findMany({
             where: {
-                closingDate: null
-            }
+                closingDate: null,
+            },
         });
         if (allNullClosingDatePayPeriods && allNullClosingDatePayPeriods.length) {
             for (const payPeriod of allNullClosingDatePayPeriods) {
                 yield prisma_1.prisma.payPeriod.update({
                     where: {
-                        id: payPeriod.id
+                        id: payPeriod.id,
                     },
                     data: {
-                        closingDate: (0, moment_1.default)(payPeriod.endDate).endOf('month').startOf('day').toDate()
-                    }
+                        closingDate: (0, moment_1.default)(payPeriod.endDate)
+                            .endOf('month')
+                            .startOf('day')
+                            .toDate(),
+                    },
                 });
             }
         }
@@ -306,8 +358,8 @@ function updatePublishedJournalPayPeriods() {
     return __awaiter(this, void 0, void 0, function* () {
         const publishedJournals = yield prisma_1.prisma.journal.findMany({
             where: {
-                status: 1
-            }
+                status: 1,
+            },
         });
         if (publishedJournals.length) {
             const payPeriodIds = publishedJournals.map((e) => {
@@ -316,12 +368,12 @@ function updatePublishedJournalPayPeriods() {
             yield prisma_1.prisma.payPeriod.updateMany({
                 where: {
                     id: {
-                        in: payPeriodIds
-                    }
+                        in: payPeriodIds,
+                    },
                 },
                 data: {
-                    isJournalPublished: true
-                }
+                    isJournalPublished: true,
+                },
             });
         }
     });
@@ -360,7 +412,61 @@ function syncMissingField() {
         }
     });
 }
+function updateConfigurationJson() {
+    return __awaiter(this, void 0, void 0, function* () {
+        const allConfigurations = yield prisma_1.prisma.configuration.findMany();
+        if (allConfigurations.length) {
+            for (const configuration of allConfigurations) {
+                const settings = configuration.settings;
+                if (settings['0']) {
+                    const newSettings = Object.assign({}, settings);
+                    if (newSettings['0'].fields) {
+                        if (newSettings['0'].fields['f1']) {
+                            newSettings['0'].fields['f1'].isActive = true;
+                            newSettings['0'].fields['f2'].isActive = true;
+                        }
+                    }
+                    if (newSettings['4'].fields) {
+                        if (newSettings['4'].fields['f1']) {
+                            newSettings['4'].fields['f1'].isActive = true;
+                        }
+                    }
+                    if (newSettings['5'].fields) {
+                        if (newSettings['5'].fields['f1']) {
+                            newSettings['5'].fields['f1'].isActive = true;
+                        }
+                    }
+                    if (newSettings['1'].fields) {
+                        Object.keys(newSettings['1'].fields).forEach((key) => {
+                            newSettings['1'].fields[key].isActive = true;
+                        });
+                    }
+                    if (newSettings['2'].fields) {
+                        Object.keys(newSettings['2'].fields).forEach((key) => {
+                            newSettings['2'].fields[key].isActive = true;
+                        });
+                    }
+                    if (newSettings['3'].fields) {
+                        Object.keys(newSettings['3'].fields).forEach((key) => {
+                            newSettings['3'].fields[key].isActive = true;
+                        });
+                    }
+                    yield prisma_1.prisma.configuration.update({
+                        where: {
+                            id: configuration.id,
+                        },
+                        data: {
+                            settings: newSettings,
+                        },
+                    });
+                }
+            }
+        }
+    });
+}
 exports.migrationService = {
+    addSyncLogsPermissions,
+    updateConfigurationJson,
     syncMissingField,
     updatePublishedJournalPayPeriods,
     addClosingDateToPayPeriod,

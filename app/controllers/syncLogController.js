@@ -18,9 +18,11 @@ class SyncLogController {
     getSyncLogs(req, res, next) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                const { companyId, page = 1, limit = 10 } = req.query;
-                const data = yield syncLogServices_1.default.getSyncLogs(companyId, Number(page), Number(limit));
-                return (0, defaultResponseHelper_1.DefaultResponse)(res, 200, 'Sync logs fetched successfully', data);
+                const { data, count } = yield syncLogServices_1.default.getSyncLogs(req.query);
+                return (0, defaultResponseHelper_1.DefaultResponse)(res, 200, 'Sync logs fetched successfully', {
+                    data,
+                    count,
+                });
             }
             catch (err) {
                 next(err);

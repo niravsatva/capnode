@@ -11,19 +11,14 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 const prisma_1 = require("../client/prisma");
 class SyncLogRepository {
-    getAllLogs(companyId, offset, limit) {
+    getAllLogs(companyId, offset, limit, filterConditions, dateFilter) {
         return __awaiter(this, void 0, void 0, function* () {
+            console.log('Date : ', dateFilter);
             const today = new Date();
             const threeMonthsAgo = new Date();
             threeMonthsAgo.setMonth(today.getMonth() - 3);
             const logs = yield prisma_1.prisma.syncLogs.findMany({
-                where: {
-                    companyId: companyId,
-                    createdAt: {
-                        gte: threeMonthsAgo,
-                        lte: today,
-                    },
-                },
+                where: Object.assign(Object.assign({ companyId: companyId }, filterConditions), dateFilter),
                 skip: offset,
                 take: limit,
                 orderBy: {
@@ -31,13 +26,7 @@ class SyncLogRepository {
                 },
             });
             const count = yield prisma_1.prisma.syncLogs.count({
-                where: {
-                    companyId: companyId,
-                    createdAt: {
-                        gte: threeMonthsAgo,
-                        lte: today,
-                    },
-                },
+                where: Object.assign(Object.assign(Object.assign({}, dateFilter), filterConditions), { companyId: companyId }),
             });
             return { logs, count };
         });

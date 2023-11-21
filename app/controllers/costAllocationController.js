@@ -44,16 +44,16 @@ class CostAllocationController {
                     throw new customError_1.CustomError(403, 'You are not authorized');
                 }
                 let _payPeriodId = payPeriodId;
-                const _date = new Date();
+                // const _date = new Date();
                 let systemPayPeriodId = false;
                 if (!_payPeriodId) {
                     const payPeriodData = yield prisma_1.prisma.payPeriod.findFirst({
                         where: {
                             companyId: companyId,
-                            endDate: {
-                                gte: new Date(_date === null || _date === void 0 ? void 0 : _date.getFullYear(), _date === null || _date === void 0 ? void 0 : _date.getMonth(), 1),
-                                lte: new Date(_date.getFullYear(), _date.getMonth() + 1, 0)
-                            },
+                            // endDate: {
+                            // 	gte: new Date(_date?.getFullYear(), _date?.getMonth(), 1),
+                            // 	lte: new Date(_date.getFullYear(), _date.getMonth() + 1, 0)
+                            // },
                         },
                         orderBy: {
                             endDate: 'desc'

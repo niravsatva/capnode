@@ -17,8 +17,10 @@ const customError_1 = require("../models/customError");
 const repositories_1 = require("../repositories");
 const syncLogRepository_1 = __importDefault(require("../repositories/syncLogRepository"));
 class SyncLogService {
-    getSyncLogs(companyId, page, limit) {
+    getSyncLogs(query) {
         return __awaiter(this, void 0, void 0, function* () {
+            const { companyId, page = 1, limit = 10, filter, fromDate, toDate } = query;
+            console.log('Filter: ', filter);
             if (!companyId) {
                 throw new customError_1.CustomError(400, 'Company id is required');
             }
@@ -27,7 +29,33 @@ class SyncLogService {
                 throw new customError_1.CustomError(400, 'Company not found');
             }
             const offset = (Number(page) - 1) * Number(limit);
-            const { logs, count } = yield syncLogRepository_1.default.getAllLogs(companyId, offset, limit);
+            // Conditions for filtering
+            const filterConditions = filter
+                ? { moduleName: filter }
+                : {};
+            let dateFilter = {};
+            if (fromDate && toDate) {
+                const startDate = (0, moment_1.default)(fromDate).startOf('day').toISOString();
+                const endDate = (0, moment_1.default)(toDate).endOf('day').toISOString();
+                dateFilter = {
+                    createdAt: {
+                        gte: startDate,
+                        lte: endDate,
+                    },
+                };
+            }
+            else {
+                dateFilter = {
+                    createdAt: {
+                        gte: (0, moment_1.default)(new Date())
+                            .add(-3, 'months')
+                            .startOf('day')
+                            .toISOString(),
+                        lte: (0, moment_1.default)(new Date()).endOf('day').toISOString(),
+                    },
+                };
+            }
+            const { logs, count } = yield syncLogRepository_1.default.getAllLogs(companyId, offset, Number(limit), filterConditions, dateFilter);
             const data = logs.map((singleLog) => {
                 return {
                     id: singleLog === null || singleLog === void 0 ? void 0 : singleLog.id,

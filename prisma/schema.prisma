@@ -197,6 +197,7 @@ model Field {
   type                   FieldType            @default(Monthly)
   name                   String // field name - health Insurance
   employeeCostField      EmployeeCostField[]
+  isActive               Boolean              @default(true)
   createdAt              DateTime             @default(now())
   updatedAt              DateTime             @updatedAt
 }
@@ -383,14 +384,14 @@ model Journal {
 }
 
 model SyncLogs {
-  id         String @id @default(uuid())
+  id         String   @id @default(uuid())
   moduleName String
   status     Int
   message    String
-  companyId String
-  company   Company @relation(fields: [companyId], references: [id])
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  companyId  String
+  company    Company  @relation(fields: [companyId], references: [id])
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
 }
 
 enum PayrollMethods {

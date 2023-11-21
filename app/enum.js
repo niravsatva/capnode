@@ -23,8 +23,9 @@ var TimeSheetsStatus;
 var QBOModules;
 (function (QBOModules) {
     QBOModules["EMPLOYEE"] = "Employee";
-    QBOModules["TIME_ACTIVITY"] = "TimeActivity";
+    QBOModules["TIME_ACTIVITY"] = "Time Activity";
     QBOModules["JOURNAL"] = "Journal";
+    QBOModules["CLOSING_DATE"] = "Book Closing Date";
 })(QBOModules || (exports.QBOModules = QBOModules = {}));
 var SyncLogsStatus;
 (function (SyncLogsStatus) {

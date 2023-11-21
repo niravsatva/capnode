@@ -443,7 +443,7 @@ class QuickbooksController {
                 }
                 // Get access token
                 const authResponse = yield quickbooksServices_1.default.getAccessToken(companyId);
-                const closingDateList = yield quickbooksClient_1.default.getClosingDate(authResponse.accessToken, authResponse.tenantID, authResponse.refreshToken);
+                const closingDateList = yield quickbooksClient_1.default.getClosingDate(authResponse.accessToken, authResponse.tenantID, authResponse.refreshToken, companyId);
                 return (0, defaultResponseHelper_1.DefaultResponse)(res, 200, 'Closing dates fetched successfully', closingDateList);
             }
             catch (err) {
@@ -456,7 +456,7 @@ class QuickbooksController {
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 const companyId = req.body.companyId;
-                const { name, value, accountType = 'Expense', currencyValue = 'USD', } = req.body;
+                const { name, value, accountType = 'Expense', currencyValue = 'USD', subAccountType = '', accountNum = '', } = req.body;
                 (0, validationHelper_1.checkValidation)(req);
                 (0, exports.companyValidation)(companyId);
                 const data = {
@@ -465,6 +465,9 @@ class QuickbooksController {
                     accountType: accountType,
                     currencyValue: currencyValue,
                 };
+                if (accountNum && accountNum !== '') {
+                    data['accountNum'] = accountNum;
+                }
                 // Get access token
                 const authResponse = yield quickbooksServices_1.default.getAccessToken(companyId);
                 const closingDateList = yield quickbooksClient_1.default.createChartOfAccount(authResponse.accessToken, authResponse.tenantID, authResponse.refreshToken, data);

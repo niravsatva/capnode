@@ -497,6 +497,9 @@ class CostAllocationServices {
                 },
                 include: {
                     fields: {
+                        where: {
+                            isActive: true
+                        },
                         orderBy: {
                             jsonId: 'asc',
                         },

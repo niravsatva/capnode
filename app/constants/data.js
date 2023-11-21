@@ -18,6 +18,7 @@ exports.DefaultPermissions = [
     { permissionName: 'Payroll Summary', sortId: 14 },
     { permissionName: 'Customer Overview', sortId: 15 },
     { permissionName: 'Pay Period', sortId: 16 },
+    { permissionName: 'Sync Logs', sortId: 17 },
 ];
 exports.DefaultAdminPermissions = [
     {
@@ -164,6 +165,15 @@ exports.DefaultAdminPermissions = [
         delete: true,
         add: true,
     },
+    {
+        permissionName: 'Sync Logs',
+        sortId: 17,
+        all: true,
+        view: true,
+        edit: true,
+        delete: true,
+        add: true,
+    },
 ];
 exports.DefaultConfigurationSettings = {
     '0': {
@@ -178,6 +188,7 @@ exports.DefaultConfigurationSettings = {
                 editable: false,
                 deletable: false,
                 isEditing: false,
+                isActive: true
             },
             f2: {
                 id: 'f2',
@@ -187,6 +198,7 @@ exports.DefaultConfigurationSettings = {
                 editable: false,
                 deletable: false,
                 isEditing: false,
+                isActive: true
             },
         },
         addMore: false,
@@ -208,6 +220,7 @@ exports.DefaultConfigurationSettings = {
                 editable: true,
                 deletable: false,
                 isEditing: false,
+                isActive: true
             },
         },
         addMore: true,
@@ -229,6 +242,7 @@ exports.DefaultConfigurationSettings = {
                 editable: true,
                 deletable: false,
                 isEditing: false,
+                isActive: true
             },
         },
         addMore: true,
@@ -250,6 +264,7 @@ exports.DefaultConfigurationSettings = {
                 editable: true,
                 deletable: false,
                 isEditing: false,
+                isActive: true
             },
         },
         addMore: true,
@@ -271,6 +286,7 @@ exports.DefaultConfigurationSettings = {
                 editable: true,
                 deletable: false,
                 isEditing: false,
+                isActive: true
             },
         },
         addMore: false,
@@ -292,6 +308,7 @@ exports.DefaultConfigurationSettings = {
                 editable: true,
                 deletable: false,
                 isEditing: false,
+                isActive: true
             },
         },
         addMore: false,

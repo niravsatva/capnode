@@ -13,12 +13,20 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const prisma_1 = require("../client/prisma");
 class EmployeeCostRepository {
     // For get the monthly cost value per employee
-    getMonthlyCost(companyId, date, offset, limit, searchCondition, sortCondition, isPercentage, payPeriodId) {
+    getMonthlyCost(companyId, date, offset, limit, searchCondition, sortCondition, isPercentage, payPeriodId, includeInactive) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                // const dateCopy = new Date(date);
-                const employeesCostByMonth = yield prisma_1.prisma.employee.findMany(Object.assign({ where: Object.assign({ companyId: companyId }, searchCondition), include: {
+                const whereQuery = Object.assign({ companyId: companyId, active: true }, searchCondition);
+                if (includeInactive) {
+                    delete whereQuery['active'];
+                }
+                const employeesCostByMonth = yield prisma_1.prisma.employee.findMany(Object.assign({ where: whereQuery, include: {
                         employeeCostField: {
+                            where: {
+                                field: {
+                                    isActive: true
+                                }
+                            },
                             include: {
                                 field: true,
                                 costValue: {
@@ -26,11 +34,6 @@ class EmployeeCostRepository {
                                         payPeriodId: payPeriodId,
                                         isPercentage: true,
                                     },
-                                    // where: {
-                                    // 	month: dateCopy.getMonth() + 1,
-                                    // 	year: dateCopy.getFullYear(),
-                                    // 	isPercentage: isPercentage,
-                                    // },
                                 },
                             },
                         },
@@ -48,8 +51,8 @@ class EmployeeCostRepository {
                 companyId,
                 fullName: {
                     contains: search,
-                    mode: 'insensitive'
-                }
+                    mode: 'insensitive',
+                },
             };
             if (!search) {
                 delete query.fullName;
@@ -58,6 +61,11 @@ class EmployeeCostRepository {
                 where: query,
                 include: {
                     employeeCostField: {
+                        where: {
+                            field: {
+                                isActive: true
+                            }
+                        },
                         include: {
                             field: true,
                             costValue: {
@@ -88,11 +96,15 @@ class EmployeeCostRepository {
             }
         });
     }
-    getMonthlyCostExport(companyId, date, searchCondition, sortCondition, isPercentage, payPeriodId) {
+    getMonthlyCostExport(companyId, date, searchCondition, sortCondition, isPercentage, includeInactive, payPeriodId) {
         return __awaiter(this, void 0, void 0, function* () {
             const isPercentageValue = isPercentage || true;
+            const whereQuery = Object.assign({ companyId: companyId, active: true }, searchCondition);
+            if (includeInactive) {
+                delete whereQuery['active'];
+            }
             try {
-                const employeesCostByMonth = yield prisma_1.prisma.employee.findMany(Object.assign({ where: Object.assign({ companyId: companyId }, searchCondition), include: {
+                const employeesCostByMonth = yield prisma_1.prisma.employee.findMany(Object.assign({ where: whereQuery, include: {
                         employeeCostField: {
                             include: {
                                 field: {
@@ -137,9 +149,9 @@ class EmployeeCostRepository {
                 where: {
                     companyId,
                     id: {
-                        not: payPeriodId
-                    }
-                }
+                        not: payPeriodId,
+                    },
+                },
             });
             if (allPayPeriods && allPayPeriods.length) {
                 lastPayPeriodId = allPayPeriods[allPayPeriods.length - 1].id;
@@ -208,11 +220,11 @@ class EmployeeCostRepository {
                                 where: {
                                     employeeCostField: {
                                         id: singleEmployeeCostFields.id,
-                                        companyId
+                                        companyId,
                                     },
                                     employeeId: singleEmployee.id,
-                                    payPeriodId: lastPayPeriodId
-                                }
+                                    payPeriodId: lastPayPeriodId,
+                                },
                             });
                             if (lastPayPeriodValue) {
                                 value = lastPayPeriodValue.value;
@@ -226,7 +238,7 @@ class EmployeeCostRepository {
                                 },
                                 payPeriod: { connect: { id: payPeriodId } },
                                 isPercentage: true,
-                                value
+                                value,
                             },
                         });
                     }

@@ -51,6 +51,11 @@ class costAllocationRepository {
                         where: Object.assign(Object.assign({ timeSheetId: timeSheetId }, filterConditions), searchCondition),
                     },
                     employeeCostField: {
+                        where: {
+                            field: {
+                                isActive: true
+                            }
+                        },
                         include: {
                             field: true,
                             costValue: {
@@ -268,6 +273,11 @@ class costAllocationRepository {
                         },
                     },
                     employeeCostField: {
+                        where: {
+                            field: {
+                                isActive: true
+                            }
+                        },
                         include: {
                             field: true,
                             costValue: {
@@ -416,6 +426,11 @@ class costAllocationRepository {
                         },
                     },
                     employeeCostField: {
+                        where: {
+                            field: {
+                                isActive: true
+                            }
+                        },
                         include: {
                             field: true,
                             costValue: {

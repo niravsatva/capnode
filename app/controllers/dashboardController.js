@@ -74,7 +74,7 @@ class DashboardController {
                 if (!companyId) {
                     throw new customError_1.CustomError(400, 'Company id is required');
                 }
-                const data = yield dashboardServices_1.default.getEmployeeHoursGraphData(req.query.companyId, (_a = req.user) === null || _a === void 0 ? void 0 : _a.id);
+                const data = yield dashboardServices_1.default.getEmployeeHoursGraphData(req.query.companyId, (_a = req.user) === null || _a === void 0 ? void 0 : _a.id, req.query.year);
                 return (0, defaultResponseHelper_1.DefaultResponse)(res, 200, '', data);
             }
             catch (error) {
