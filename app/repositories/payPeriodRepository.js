@@ -20,7 +20,7 @@ class PayPeriodRepository {
                 skip: offset,
                 take: limit,
                 orderBy: {
-                    startDate: 'asc',
+                    startDate: 'desc',
                 },
             };
             if (!offset) {
@@ -52,7 +52,7 @@ class PayPeriodRepository {
                 data: {
                     startDate: payPeriodData.startDate,
                     endDate: payPeriodData.endDate,
-                    company: { connect: { id: payPeriodData.companyId } }
+                    company: { connect: { id: payPeriodData.companyId } },
                 },
             });
             return payPeriod;

@@ -453,28 +453,44 @@ class QuickbooksController {
     }
     // Create Chart Of Account
     createChartOfAccount(req, res, next) {
+        var _a, _b, _c, _d, _e;
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 const companyId = req.body.companyId;
-                const { name, value, accountType = 'Expense', currencyValue = 'USD', subAccountType = '', accountNum = '', } = req.body;
+                const { accountType = 'Expense', currencyValue = 'USD', accountNum, accountName, detailType = 'Travel', } = req.body;
                 (0, validationHelper_1.checkValidation)(req);
                 (0, exports.companyValidation)(companyId);
                 const data = {
-                    name: name,
-                    value: value,
+                    accountName: accountName,
+                    accountNum: accountNum,
+                    detailType: detailType,
                     accountType: accountType,
                     currencyValue: currencyValue,
                 };
-                if (accountNum && accountNum !== '') {
-                    data['accountNum'] = accountNum;
+                if (!detailType) {
+                    delete data['detailType'];
+                }
+                if (!accountNum) {
+                    delete data['accountNum'];
                 }
                 // Get access token
                 const authResponse = yield quickbooksServices_1.default.getAccessToken(companyId);
                 const closingDateList = yield quickbooksClient_1.default.createChartOfAccount(authResponse.accessToken, authResponse.tenantID, authResponse.refreshToken, data);
                 return (0, defaultResponseHelper_1.DefaultResponse)(res, 200, 'Closing dates fetched successfully', closingDateList);
             }
-            catch (err) {
-                next(err);
+            catch (error) {
+                let customErrorMessage = 'Error while creating new Chart Of Account';
+                if (error &&
+                    (error === null || error === void 0 ? void 0 : error.Fault) &&
+                    ((_a = error.Fault) === null || _a === void 0 ? void 0 : _a.Error) &&
+                    error.Fault.Error.length) {
+                    customErrorMessage = `${(_c = (_b = error === null || error === void 0 ? void 0 : error.Fault) === null || _b === void 0 ? void 0 : _b.Error[0]) === null || _c === void 0 ? void 0 : _c.Message}: ${(_e = (_d = error === null || error === void 0 ? void 0 : error.Fault) === null || _d === void 0 ? void 0 : _d.Error[0]) === null || _e === void 0 ? void 0 : _e.Detail}`;
+                    const newErr = new customError_1.CustomError(400, customErrorMessage);
+                    next(newErr);
+                }
+                else {
+                    next(error);
+                }
             }
         });
     }

@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.currencyValues = exports.supportedAccountTypes = exports.supportedQBOCurrencies = exports.sectionPreLive = exports.sections = exports.DefaultConfigurationSettings = exports.DefaultAdminPermissions = exports.DefaultPermissions = void 0;
+exports.DetailType = exports.currencyValues = exports.supportedAccountTypes = exports.supportedQBOCurrencies = exports.sectionPreLive = exports.sections = exports.DefaultConfigurationSettings = exports.DefaultAdminPermissions = exports.DefaultPermissions = void 0;
 exports.DefaultPermissions = [
     { permissionName: 'Dashboard', sortId: 1 },
     { permissionName: 'Employee Cost', sortId: 2 },
@@ -496,3 +496,39 @@ exports.supportedQBOCurrencies = [
 ];
 exports.supportedAccountTypes = ['Expense'];
 exports.currencyValues = ['USD'];
+exports.DetailType = {
+    Expense: [
+        'AdvertisingPromotional',
+        'BadDebts',
+        'BankCharges',
+        'CharitableContributions',
+        'CommissionsAndFees',
+        'Entertainment',
+        'EntertainmentMeals',
+        'EquipmentRental',
+        'FinanceCosts',
+        'GlobalTaxExpense',
+        'Insurance',
+        'InterestPaid',
+        'LegalProfessionalFees',
+        'OfficeExpenses',
+        'OfficeGeneralAdministrativeExpenses',
+        'OtherBusinessExpenses',
+        'OtherMiscellaneousServiceCost',
+        'PromotionalMeals',
+        'RentOrLeaseOfBuildings',
+        'RepairMaintenance',
+        'ShippingFreightDelivery',
+        'SuppliesMaterials',
+        'Travel',
+        'TravelMeals',
+        'Utilities',
+        'Auto',
+        'CostOfLabor',
+        'DuesSubscriptions',
+        'PayrollExpenses',
+        'TaxesPaid',
+        'UnappliedCashBillPaymentExpense',
+        'Utilities',
+    ],
+};

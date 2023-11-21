@@ -411,20 +411,24 @@ class QuickbooksClient {
     createChartOfAccount(accessToken, realmId, refreshToken, accountData) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                const { name, currencyValue, accountType } = accountData;
+                const { accountName, currencyValue, accountType, accountNum, detailType, } = accountData;
                 const currency = data_1.supportedQBOCurrencies.find((singleCurrency) => singleCurrency.value === currencyValue);
                 const data = {
-                    Name: name,
+                    Name: accountName,
                     AccountType: accountType,
                     CurrencyRef: {
                         value: currency === null || currency === void 0 ? void 0 : currency.value,
                         name: currency === null || currency === void 0 ? void 0 : currency.name,
                     },
                 };
-                if (accountData['accountNum']) {
+                if (accountNum) {
                     data['AcctNum'] = accountData.accountNum;
                 }
-                return new Promise((resolve, reject) => {
+                if (detailType) {
+                    data['SubAccount'] = true;
+                    data['AccountSubType'] = detailType;
+                }
+                const account = yield new Promise((resolve, reject) => {
                     const qbo = new QuickBooks(config_1.default.quickbooksClientId, config_1.default.quickbooksClientSecret, accessToken, true, realmId, config_1.default.quickbooksEnvironment == 'sandbox' ? true : false, true, null, '2.0', refreshToken);
                     qbo.createAccount(data, function (err, response) {
                         return __awaiter(this, void 0, void 0, function* () {
@@ -437,6 +441,7 @@ class QuickbooksClient {
                         });
                     });
                 });
+                return account;
             }
             catch (err) {
                 throw err;

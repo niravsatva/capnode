@@ -10,26 +10,23 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const prisma_1 = require("../client/prisma");
+const utils_1 = require("../utils/utils");
 class JournalRepository {
     getAllJournals(timeSheetData) {
         return __awaiter(this, void 0, void 0, function* () {
             const { companyId, offset, limit, searchCondition, filterConditions, sortCondition, payPeriodFilter, year, } = timeSheetData;
             let startDateOfYear = new Date();
             let endDateOfYear = new Date();
-            if (year && year !== 'undefined') {
+            if ((0, utils_1.hasText)(year)) {
                 startDateOfYear = new Date(`${Number(year)}-01-01T00:00:00.000Z`);
                 endDateOfYear = new Date(`${Number(year) + 1}-01-01T00:00:00.000Z`);
             }
-            const query = Object.assign(Object.assign(Object.assign(Object.assign({ companyId: companyId }, payPeriodFilter), searchCondition), filterConditions), { OR: [
-                    {
-                        date: {
-                            gte: startDateOfYear,
-                            lt: endDateOfYear,
-                        },
-                    },
-                ] });
-            if (!year || year === 'undefined') {
-                delete query['OR'];
+            const query = Object.assign(Object.assign(Object.assign(Object.assign({ companyId: companyId }, payPeriodFilter), searchCondition), filterConditions), { date: {
+                    gte: startDateOfYear,
+                    lt: endDateOfYear,
+                } });
+            if (!(0, utils_1.hasText)(year)) {
+                delete query['date'];
             }
             const journals = yield prisma_1.prisma.journal.findMany(Object.assign(Object.assign({ where: query, skip: offset, take: limit }, sortCondition), { include: {
                     createdBy: {
@@ -42,16 +39,12 @@ class JournalRepository {
                     },
                     payPeriod: true,
                 } }));
-            const countQuery = Object.assign(Object.assign(Object.assign(Object.assign({ companyId: companyId }, payPeriodFilter), searchCondition), filterConditions), { OR: [
-                    {
-                        date: {
-                            gte: startDateOfYear,
-                            lt: endDateOfYear,
-                        },
-                    },
-                ] });
-            if (!year || year === 'undefined') {
-                delete countQuery['OR'];
+            const countQuery = Object.assign(Object.assign(Object.assign(Object.assign({ companyId: companyId }, payPeriodFilter), searchCondition), filterConditions), { date: {
+                    gte: startDateOfYear,
+                    lt: endDateOfYear,
+                } });
+            if (!(0, utils_1.hasText)(year)) {
+                delete countQuery['date'];
             }
             const count = yield prisma_1.prisma.journal.count({
                 where: countQuery,

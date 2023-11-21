@@ -281,7 +281,7 @@ class JournalService {
                 };
             }
             let payPeriodFilter = {};
-            if (payPeriodId) {
+            if ((0, utils_1.hasText)(payPeriodId)) {
                 payPeriodFilter = {
                     payPeriodId: payPeriodId,
                 };

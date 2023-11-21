@@ -264,7 +264,7 @@ exports.createTimeSheetValidator = [
 exports.payPeriodValidator = [
     ...exports.companyIdValidation,
     body('startDate').notEmpty().withMessage('Start date is required'),
-    body('endDate').notEmpty().withMessage('End date is required')
+    body('endDate').notEmpty().withMessage('End date is required'),
 ];
 exports.timeSheetEmailValidators = [
     ...exports.companyIdValidation,
@@ -289,7 +289,7 @@ exports.journalValidator = [
 ];
 exports.chartOfAccountsValidation = [
     ...exports.companyIdValidation,
-    body('name').notEmpty().withMessage('Name is required'),
+    body('accountName').notEmpty().withMessage('Name is required'),
     body('accountType').custom((value) => {
         if (value) {
             if (!data_1.supportedAccountTypes.includes(value)) {
