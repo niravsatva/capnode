@@ -65,6 +65,7 @@ class DashboardServices {
             const payPeriods = yield prisma_1.prisma.payPeriod.findMany({
                 where: {
                     companyId,
+                    isJournalPublished: true,
                     OR: [
                         {
                             startDate: {
@@ -98,6 +99,7 @@ class DashboardServices {
                     companyId,
                     payPeriodId: timeSheet.payPeriodId,
                     timeSheetId: timeSheet.id,
+                    searchCondition: {}
                 };
                 const costAllocation = yield costAllocationRepository_1.default.getExpensesByCustomer(data);
                 response = [...response, ...costAllocation];

@@ -56,8 +56,8 @@ class CostAllocationController {
                             // },
                         },
                         orderBy: {
-                            endDate: 'desc'
-                        }
+                            endDate: 'desc',
+                        },
                     });
                     if (payPeriodData && payPeriodData.id) {
                         systemPayPeriodId = true;
@@ -124,12 +124,12 @@ class CostAllocationController {
                             companyId: companyId,
                             endDate: {
                                 gte: new Date(_date === null || _date === void 0 ? void 0 : _date.getFullYear(), _date === null || _date === void 0 ? void 0 : _date.getMonth(), 1),
-                                lte: new Date(_date.getFullYear(), _date.getMonth() + 1, 0)
+                                lte: new Date(_date.getFullYear(), _date.getMonth() + 1, 0),
                             },
                         },
                         orderBy: {
-                            endDate: 'desc'
-                        }
+                            endDate: 'desc',
+                        },
                     });
                     if (payPeriodData && payPeriodData.id) {
                         _payPeriodId = payPeriodData.id;
@@ -207,6 +207,7 @@ class CostAllocationController {
                     payPeriodId: String(payPeriodId),
                 };
                 const { finalDataArr, counts, filePath, companyName } = yield costallocationServices_1.default.exportCostAllocationPDF(data);
+                console.log('Final Data Arr: ' + finalDataArr);
                 const stream = yield (0, costAllocationPdf_1.generatePdf)(finalDataArr, counts, filePath, payPeriodId, companyName);
                 stream.on('close', () => __awaiter(this, void 0, void 0, function* () {
                     const data = yield fs_1.promises.readFile(filePath);

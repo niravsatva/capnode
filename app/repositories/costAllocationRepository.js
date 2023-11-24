@@ -217,7 +217,7 @@ class costAllocationRepository {
                     });
                     timeActivity.push(costAllocationObj);
                     if (sameCustomerWithSameClass.length - 1 === timeActivityIndex) {
-                        const timeActivitiesTotalColumn = Object.assign(Object.assign({}, allTotalColumnsObj), { id: (0, uuid_1.v4)(), type: 'total', allocation: `${totalAllocationPercentage.toFixed(percentageToFixed)}%`, 'total-hours': this.minToHours(availableTotalMinutes), 'employee-name': 'Total', 'totalHoursInMinutes': availableTotalMinutes });
+                        const timeActivitiesTotalColumn = Object.assign(Object.assign({}, allTotalColumnsObj), { id: (0, uuid_1.v4)(), type: 'total', allocation: `${totalAllocationPercentage.toFixed(percentageToFixed)}%`, 'total-hours': this.minToHours(availableTotalMinutes), 'employee-name': 'Total', 'totalHoursInMinutes': availableTotalMinutes, 'totalRowEmployeeName': costAllocation.fullName });
                         timeActivity.push(timeActivitiesTotalColumn);
                     }
                 });
@@ -233,7 +233,7 @@ class costAllocationRepository {
         if (!response || !response.length) {
             return null;
         }
-        const notIncludeFields = ['employee-name', 'allocation', 'customer-name', 'class-name'];
+        const notIncludeFields = ['employee-name', 'allocation', 'customer-name', 'class-name', 'totalRowEmployeeName'];
         const totalMapping = {};
         response.forEach((row) => {
             Object.keys(row).forEach((key) => {
@@ -251,6 +251,18 @@ class costAllocationRepository {
         totalMapping['employee-name'] = 'Grand Total';
         totalMapping['type'] = 'grandTotal';
         return totalMapping;
+    }
+    getRowWiseTotal(row, includeFields) {
+        if (!row || !Object.keys(row).length) {
+            return null;
+        }
+        let total = 0;
+        Object.keys(row).forEach((key) => {
+            if (includeFields.includes(key)) {
+                total = row[key] + total;
+            }
+        });
+        return total;
     }
     getCostAllocationForJournal(costAllocationData) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -407,23 +419,19 @@ class costAllocationRepository {
     }
     getExpensesByCustomer(costAllocationData) {
         return __awaiter(this, void 0, void 0, function* () {
-            const { companyId, payPeriodId, timeSheetId } = costAllocationData;
+            const { companyId, payPeriodId, timeSheetId, searchCondition } = costAllocationData;
             const costAllocations = yield prisma_1.prisma.employee.findMany({
                 where: {
                     companyId: companyId,
                     timeActivities: {
-                        some: {
-                            timeSheetId
-                        },
+                        some: Object.assign({ timeSheetId }, searchCondition),
                     },
                 },
                 select: {
                     fullName: true,
                     id: true,
                     timeActivities: {
-                        where: {
-                            timeSheetId
-                        },
+                        where: Object.assign({ timeSheetId }, searchCondition),
                     },
                     employeeCostField: {
                         where: {
@@ -483,7 +491,12 @@ class costAllocationRepository {
             const customerTotalMapping = [];
             for (const singleCostAllocation of costAllocations) {
                 const costAllocation = singleCostAllocation;
-                const allTimeActivities = costAllocation.timeActivities;
+                const allTimeActivities = yield prisma_1.prisma.timeActivities.findMany({
+                    where: {
+                        timeSheetId,
+                        employeeId: costAllocation.id,
+                    },
+                });
                 const totalTimeMin = this.totalHoursIntoMin(allTimeActivities);
                 const employeeCostMappingData = [];
                 if (costAllocation.employeeCostField.length) {

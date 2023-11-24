@@ -453,7 +453,7 @@ class QuickbooksController {
     }
     // Create Chart Of Account
     createChartOfAccount(req, res, next) {
-        var _a, _b, _c, _d, _e;
+        var _a, _b, _c, _d, _e, _f, _g;
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 const companyId = req.body.companyId;
@@ -484,7 +484,13 @@ class QuickbooksController {
                     (error === null || error === void 0 ? void 0 : error.Fault) &&
                     ((_a = error.Fault) === null || _a === void 0 ? void 0 : _a.Error) &&
                     error.Fault.Error.length) {
-                    customErrorMessage = `${(_c = (_b = error === null || error === void 0 ? void 0 : error.Fault) === null || _b === void 0 ? void 0 : _b.Error[0]) === null || _c === void 0 ? void 0 : _c.Message}: ${(_e = (_d = error === null || error === void 0 ? void 0 : error.Fault) === null || _d === void 0 ? void 0 : _d.Error[0]) === null || _e === void 0 ? void 0 : _e.Detail}`;
+                    if (((_c = (_b = error === null || error === void 0 ? void 0 : error.Fault) === null || _b === void 0 ? void 0 : _b.Error[0]) === null || _c === void 0 ? void 0 : _c.code) === '6000') {
+                        customErrorMessage =
+                            'Another account is already using this account number. Please use another account number.';
+                    }
+                    else {
+                        customErrorMessage = `${(_e = (_d = error === null || error === void 0 ? void 0 : error.Fault) === null || _d === void 0 ? void 0 : _d.Error[0]) === null || _e === void 0 ? void 0 : _e.Message}: ${(_g = (_f = error === null || error === void 0 ? void 0 : error.Fault) === null || _f === void 0 ? void 0 : _f.Error[0]) === null || _g === void 0 ? void 0 : _g.Detail}`;
+                    }
                     const newErr = new customError_1.CustomError(400, customErrorMessage);
                     next(newErr);
                 }

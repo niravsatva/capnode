@@ -24,8 +24,8 @@ class EmployeeCostRepository {
                         employeeCostField: {
                             where: {
                                 field: {
-                                    isActive: true
-                                }
+                                    isActive: true,
+                                },
                             },
                             include: {
                                 field: true,
@@ -63,8 +63,8 @@ class EmployeeCostRepository {
                     employeeCostField: {
                         where: {
                             field: {
-                                isActive: true
-                            }
+                                isActive: true,
+                            },
                         },
                         include: {
                             field: true,
@@ -128,11 +128,15 @@ class EmployeeCostRepository {
             }
         });
     }
-    count(companyId, searchCondition) {
+    count(companyId, searchCondition, includeInactive) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
+                const whereQuery = Object.assign({ companyId: companyId, active: true }, searchCondition);
+                if (includeInactive) {
+                    delete whereQuery['active'];
+                }
                 const employeeCount = yield prisma_1.prisma.employee.count({
-                    where: Object.assign({ companyId: companyId }, searchCondition),
+                    where: whereQuery,
                 });
                 return employeeCount;
             }

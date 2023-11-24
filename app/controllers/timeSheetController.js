@@ -19,6 +19,11 @@ const timeSheetServices_1 = __importDefault(require("../services/timeSheetServic
 const timeSheetRepository_1 = __importDefault(require("../repositories/timeSheetRepository"));
 const isAuthorizedUser_1 = require("../middlewares/isAuthorizedUser");
 const prisma_1 = require("../client/prisma");
+const fs_1 = __importDefault(require("fs"));
+const archiver_1 = __importDefault(require("archiver"));
+const path_1 = __importDefault(require("path"));
+const fs_2 = require("fs");
+const moment_1 = __importDefault(require("moment"));
 class TimeSheetController {
     // Get all time sheets
     getAllTimeSheets(req, res, next) {
@@ -176,7 +181,7 @@ class TimeSheetController {
     exportTimeSheetPdf(req, res, next) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                const { companyId, timeSheetId, employeeId } = req.body;
+                const { companyId, timeSheetId, employeeId, fileName } = req.body;
                 (0, validationHelper_1.checkValidation)(req);
                 const timeSheetData = {
                     timeSheetId: timeSheetId,
@@ -184,9 +189,55 @@ class TimeSheetController {
                     employeeId: employeeId,
                 };
                 const response = yield timeSheetServices_1.default.exportTimeSheetPdf(timeSheetData);
+                const base64Data = response.data;
+                const buffer = Buffer.from(base64Data, 'base64');
+                const filePath = path_1.default.join(__dirname, '..', 'costAllocationPdfs', fileName + '.pdf');
+                yield fs_2.promises.writeFile(filePath, buffer);
                 return res.status(200).json({
-                    data: response.data,
+                    data: fileName + '.pdf',
                 });
+            }
+            catch (err) {
+                next(err);
+            }
+        });
+    }
+    // Export Time sheet
+    exportTimeSheetZip(req, res, next) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                const fileNames = ['output.pdf'];
+                // Create a zip archive
+                const archive = (0, archiver_1.default)('zip');
+                archive.on('error', (err) => {
+                    res.status(500).send({ error: err.message });
+                });
+                // Set the response headers
+                res.setHeader('Content-Type', 'application/zip');
+                res.setHeader('Content-Disposition', `attachment; filename=TimeSheet_${(0, moment_1.default)(new Date()).format('MMDDYYYYhhmmss')}.zip`);
+                // Pipe the zip archive to the response object
+                archive.pipe(res);
+                // Iterate over the file names and append corresponding files to the archive
+                fileNames.forEach((fileName) => {
+                    const filePath = path_1.default.join(__dirname, '..', 'costAllocationPdfs', fileName);
+                    // Check if the file exists before appending to the archive
+                    if (fs_1.default.existsSync(filePath)) {
+                        archive.file(filePath, { name: fileName });
+                    }
+                    else {
+                        console.warn(`File not found: ${filePath}`);
+                    }
+                });
+                // Finalize the archive
+                archive.finalize();
+                archive.on('finish', () => __awaiter(this, void 0, void 0, function* () {
+                    fileNames.forEach((fileName) => {
+                        const filePath = path_1.default.join(__dirname, '..', 'costAllocationPdfs', fileName);
+                        if (fs_1.default.existsSync(filePath)) {
+                            fs_2.promises.unlink(filePath);
+                        }
+                    });
+                }));
             }
             catch (err) {
                 next(err);

@@ -19,28 +19,26 @@ class GlobalService {
         return __awaiter(this, void 0, void 0, function* () {
             const { bodyHtml, footerHtml, headerHtml } = pdfData;
             const browser = yield puppeteer_1.default.launch({
-                "dumpio": true,
-                "headless": true,
-                "args": [
-                    '--disable-setuid-sandbox',
-                    '--no-sandbox',
-                    '--disable-gpu',
-                ]
+                dumpio: true,
+                headless: true,
+                args: ['--disable-setuid-sandbox', '--no-sandbox', '--disable-gpu'],
             });
             const page = yield browser.newPage();
             const htmlString = bodyHtml;
             yield page.setContent(htmlString);
             // Generate the PDF as a buffer
             const pdfBuffer = yield page.pdf({
-                format: 'Letter',
+                format: 'A4',
                 displayHeaderFooter: true,
                 headerTemplate: headerHtml,
                 footerTemplate: footerHtml,
                 preferCSSPageSize: true,
                 margin: {
                     top: '80px',
-                    bottom: '80px'
-                }
+                    bottom: '80px',
+                    right: '80px',
+                    left: '80px',
+                },
             });
             fs_1.default.writeFileSync('output.pdf', pdfBuffer);
             // Convert the buffer to a base64 string

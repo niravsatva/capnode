@@ -167,7 +167,7 @@ class TimeSheetServices {
                 }
                 const loggedInUser = yield repositories_1.userRepository.getById(userId);
                 const fullName = `${loggedInUser.firstName} ${loggedInUser.lastName}`;
-                yield Promise.all(yield employeeList.map((singleEmployee) => __awaiter(this, void 0, void 0, function* () {
+                yield Promise.all(employeeList.map((singleEmployee) => __awaiter(this, void 0, void 0, function* () {
                     const data = {
                         employeeId: singleEmployee,
                         companyId: companyId,

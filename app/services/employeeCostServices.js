@@ -63,7 +63,7 @@ class EmployeeCostService {
                 else {
                     employeesMonthlyCost = yield repositories_1.employeeCostRepository.getEmployees(companyId, offset, limit, searchCondition, sortCondition);
                 }
-                const count = yield repositories_1.employeeCostRepository.count(companyId, searchCondition);
+                const count = yield repositories_1.employeeCostRepository.count(companyId, searchCondition, includeInactive);
                 return { employees: employeesMonthlyCost, count };
             }
             catch (error) {
@@ -138,7 +138,7 @@ class EmployeeCostService {
                         employeeCostMappingData.push(obj);
                     });
                 }
-                const count = yield repositories_1.employeeCostRepository.count(companyId, searchCondition);
+                const count = yield repositories_1.employeeCostRepository.count(companyId, searchCondition, includeInactive);
                 return {
                     employees: employeeCostMappingData,
                     count,
