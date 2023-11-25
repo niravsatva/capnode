@@ -20,6 +20,7 @@ const tokenHelper_1 = require("../helpers/tokenHelper");
 const customError_1 = require("../models/customError");
 const tokenRepository_1 = __importDefault(require("../repositories/tokenRepository"));
 const userRepository_1 = __importDefault(require("../repositories/userRepository"));
+const repositories_1 = require("../repositories");
 class AuthServices {
     login(email, password, machineId) {
         var _a, _b;
@@ -78,7 +79,7 @@ class AuthServices {
             }
         });
     }
-    register(firstName, lastName, email, customerId) {
+    register(firstName, lastName, email, customerId, subscriptionData) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 const user = yield userRepository_1.default.register(firstName, lastName, email, customerId);
@@ -94,6 +95,18 @@ class AuthServices {
                     forgotPasswordToken: forgotPasswordToken,
                     forgotPasswordTokenExpiresAt: forgotPasswordTokenExpiresAt,
                 });
+                const userSubscription = {
+                    zohoSubscriptionId: subscriptionData.subscription_id,
+                    zohoProductId: subscriptionData.product_id,
+                    zohoSubscriptionPlan: subscriptionData.plan,
+                    createdTime: subscriptionData.created_time,
+                    status: subscriptionData.status,
+                    addons: subscriptionData.addons,
+                    expiresAt: subscriptionData.expires_at,
+                    zohoCustomerId: subscriptionData.customer.customer_id,
+                    userId: user.id,
+                };
+                yield repositories_1.subscriptionRepository.createSubscription(userSubscription);
                 // Change Password url
                 const url = `${config_1.default === null || config_1.default === void 0 ? void 0 : config_1.default.changePasswordReactUrl}?token=${forgotPasswordToken}&first=true`;
                 // const url = `${config?.reactAppBaseUrl}/change-password?token=${forgotPasswordToken}`;
@@ -119,7 +132,7 @@ class AuthServices {
                 const user = yield userRepository_1.default.getByEmail(email);
                 if (!user) {
                     return;
-                    const error = new customError_1.CustomError(404, 'Please check your inbox. If you have account with us you got email with reset instruction.');
+                    const error = new customError_1.CustomError(400, 'Please check your inbox. If you have account with us you got email with reset instruction.');
                     throw error;
                 }
                 // Generate forgot password token

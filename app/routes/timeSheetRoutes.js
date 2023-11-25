@@ -27,5 +27,5 @@ router.post('/email', authMiddleware_1.isAuthenticated, validators_1.timeSheetEm
 // Export time sheet
 router.post('/export', authMiddleware_1.isAuthenticated, validators_1.timeSheetExportValidators, controllers_1.timeSheetController.exportTimeSheetPdf);
 // Export time sheet
-router.post('/export-zip', controllers_1.timeSheetController.exportTimeSheetZip);
+router.post('/export-zip', authMiddleware_1.isAuthenticated, controllers_1.timeSheetController.exportTimeSheetZip);
 exports.default = router;

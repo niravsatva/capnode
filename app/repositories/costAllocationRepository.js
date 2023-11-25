@@ -562,7 +562,8 @@ class costAllocationRepository {
                     });
                     customerTotalMapping.push({
                         name: timeActivities === null || timeActivities === void 0 ? void 0 : timeActivities.customerName,
-                        value: totalOfAllSalary
+                        value: totalOfAllSalary,
+                        id: timeActivities === null || timeActivities === void 0 ? void 0 : timeActivities.customerId,
                     });
                 });
             }

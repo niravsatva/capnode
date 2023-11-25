@@ -173,6 +173,7 @@ class UserRepository {
                                         status: true,
                                         fiscalYear: true,
                                         configuration: true,
+                                        Subscription: true
                                     },
                                 },
                                 role: {

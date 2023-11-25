@@ -17,26 +17,27 @@ model session {
 }
 
 model User {
-  id                           String        @id @default(uuid())
-  email                        String        @unique
+  id                           String         @id @default(uuid())
+  email                        String         @unique
   firstName                    String?
   lastName                     String?
   phone                        String?
   password                     String?
   forgotPasswordToken          String?
   forgotPasswordTokenExpiresAt String?
-  isVerified                   Boolean       @default(false)
+  isVerified                   Boolean        @default(false)
   status                       String?
   profileImg                   String?
   customerId                   String?
   companies                    CompanyRole[]
-  invitedBy                    Invitations[] @relation("invitedBy")
-  invitedTo                    Invitations[] @relation("invitedTo")
+  invitedBy                    Invitations[]  @relation("invitedBy")
+  invitedTo                    Invitations[]  @relation("invitedTo")
   tokens                       Token[]
-  createdAt                    DateTime      @default(now())
-  updatedAt                    DateTime      @updatedAt
+  createdAt                    DateTime       @default(now())
+  updatedAt                    DateTime       @updatedAt
   timeSheets                   TimeSheets[]
   Journal                      Journal[]
+  Subscription                 Subscription[]
 }
 
 model Token {
@@ -80,6 +81,7 @@ model Company {
   payPeriod                  PayPeriod[]
   Journal                    Journal[]
   SyncLogs                   SyncLogs[]
+  Subscription               Subscription[]
 }
 
 model Role {
@@ -392,6 +394,24 @@ model SyncLogs {
   company    Company  @relation(fields: [companyId], references: [id])
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
+}
+
+model Subscription {
+  id                   String   @id @default(uuid())
+  zohoSubscriptionId   String
+  zohoProductId        String
+  zohoSubscriptionPlan Json
+  createdTime          String
+  status               String
+  addons               Json[]
+  expiresAt            String
+  zohoCustomerId       String
+  userId               String
+  user                 User     @relation(fields: [userId], references: [id])
+  companyId            String?
+  company              Company? @relation(fields: [companyId], references: [id])
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
 }
 
 enum PayrollMethods {

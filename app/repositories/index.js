@@ -3,7 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.journalRepository = exports.employeeCostRepository = exports.employeeRepository = exports.globalRepository = exports.companyRoleRepository = exports.permissionRepository = exports.roleRepository = exports.companyRepository = exports.userRepository = void 0;
+exports.subscriptionRepository = exports.journalRepository = exports.employeeCostRepository = exports.employeeRepository = exports.globalRepository = exports.companyRoleRepository = exports.permissionRepository = exports.roleRepository = exports.companyRepository = exports.userRepository = void 0;
 const userRepository_1 = __importDefault(require("./userRepository"));
 exports.userRepository = userRepository_1.default;
 const companyRepository_1 = __importDefault(require("./companyRepository"));
@@ -22,3 +22,5 @@ const employeeCostRepository_1 = __importDefault(require("./employeeCostReposito
 exports.employeeCostRepository = employeeCostRepository_1.default;
 const journalRepository_1 = __importDefault(require("./journalRepository"));
 exports.journalRepository = journalRepository_1.default;
+const subscriptionRepository_1 = __importDefault(require("./subscriptionRepository"));
+exports.subscriptionRepository = subscriptionRepository_1.default;

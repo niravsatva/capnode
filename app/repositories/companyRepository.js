@@ -8,9 +8,13 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 const prisma_1 = require("../client/prisma");
 const logger_1 = require("../utils/logger");
+const subscriptionRepository_1 = __importDefault(require("./subscriptionRepository"));
 class CompanyRepository {
     getAll() {
         return __awaiter(this, void 0, void 0, function* () {
@@ -135,6 +139,10 @@ class CompanyRepository {
                         company: { connect: { id: companyId } },
                     },
                 });
+                const subscriptionData = yield subscriptionRepository_1.default.findSubscriptionByUserId(userId);
+                if (subscriptionData) {
+                    yield subscriptionRepository_1.default.updateSubscription(subscriptionData.id, { companyId });
+                }
                 return company;
             }
             catch (err) {

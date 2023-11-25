@@ -206,7 +206,7 @@ class TimeSheetController {
     exportTimeSheetZip(req, res, next) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                const fileNames = ['output.pdf'];
+                const fileNames = req.body.fileNames;
                 // Create a zip archive
                 const archive = (0, archiver_1.default)('zip');
                 archive.on('error', (err) => {

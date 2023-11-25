@@ -7,5 +7,8 @@ const reportRoutes = (0, express_1.Router)();
 reportRoutes.get('/time-activity-summary', authMiddleware_1.isAuthenticated, controllers_1.reportController.getTimeActivitySummaryReport);
 reportRoutes.get('/customer-expense-summary', authMiddleware_1.isAuthenticated, controllers_1.reportController.getExpensesByCustomerReport);
 reportRoutes.get('/time-activity-summary-pdf', authMiddleware_1.isAuthenticated, controllers_1.reportController.getTimeActivitySummaryReportPdf);
+reportRoutes.get('/time-activity-summary-csv', authMiddleware_1.isAuthenticated, controllers_1.reportController.getTimeActivitySummaryReportCsv);
 reportRoutes.get('/payroll-expense-summary', authMiddleware_1.isAuthenticated, controllers_1.reportController.getAllPublishedPayrollSummary);
+reportRoutes.get('/payroll-expense-summary-pdf', authMiddleware_1.isAuthenticated, controllers_1.reportController.getPayrollSummaryReportPdf);
+reportRoutes.get('/payroll-expense-summary-csv', authMiddleware_1.isAuthenticated, controllers_1.reportController.getPayrollSummaryReportCsv);
 exports.default = reportRoutes;

@@ -501,6 +501,7 @@ class QuickbooksController {
         });
     }
     getCustomerOptions(req, res, next) {
+        var _a, _b;
         return __awaiter(this, void 0, void 0, function* () {
             // Check validation for company id
             (0, validationHelper_1.checkValidation)(req);
@@ -510,7 +511,7 @@ class QuickbooksController {
             if ((authResponse === null || authResponse === void 0 ? void 0 : authResponse.status) == true) {
                 // Get All Customers from Quickbooks
                 const customers = yield quickbooksClient_1.default.getAllCustomers(authResponse === null || authResponse === void 0 ? void 0 : authResponse.accessToken, authResponse === null || authResponse === void 0 ? void 0 : authResponse.tenantID, authResponse === null || authResponse === void 0 ? void 0 : authResponse.refreshToken);
-                const formattedCustomers = customers === null || customers === void 0 ? void 0 : customers.QueryResponse.Customer.map((customer) => {
+                const formattedCustomers = (_b = (_a = customers === null || customers === void 0 ? void 0 : customers.QueryResponse) === null || _a === void 0 ? void 0 : _a.Customer) === null || _b === void 0 ? void 0 : _b.map((customer) => {
                     return {
                         value: customer.Id,
                         Id: customer.Id,

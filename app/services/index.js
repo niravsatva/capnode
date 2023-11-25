@@ -15,6 +15,7 @@ const payPeriodServices_1 = __importDefault(require("./payPeriodServices"));
 const costallocationServices_1 = __importDefault(require("./costallocationServices"));
 const journalServices_1 = __importDefault(require("./journalServices"));
 const reportService_1 = __importDefault(require("./reportService"));
+const subscriptionService_1 = __importDefault(require("./subscriptionService"));
 exports.default = {
     authServices: authServices_1.default,
     userServices: userServices_1.default,
@@ -27,5 +28,6 @@ exports.default = {
     payPeriodServices: payPeriodServices_1.default,
     costallocationServices: costallocationServices_1.default,
     journalServices: journalServices_1.default,
-    reportService: reportService_1.default
+    reportService: reportService_1.default,
+    subscriptionService: subscriptionService_1.default
 };

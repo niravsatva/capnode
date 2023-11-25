@@ -25,6 +25,7 @@ const dashboardRoutes_1 = __importDefault(require("./dashboardRoutes"));
 const syncLogsRoutes_1 = __importDefault(require("./syncLogsRoutes"));
 const developerRoutes_1 = __importDefault(require("./developerRoutes"));
 const reportRoutes_1 = __importDefault(require("./reportRoutes"));
+const subscriptionRoutes_1 = __importDefault(require("./subscriptionRoutes"));
 const requestLogger_1 = require("../middlewares/requestLogger");
 const router = express_1.default.Router();
 router.use(requestLogger_1.requestLogger);
@@ -47,6 +48,7 @@ router.use("/dashboard", dashboardRoutes_1.default);
 router.use('/sync-logs', syncLogsRoutes_1.default);
 router.use('/developer', developerRoutes_1.default);
 router.use('/reports', reportRoutes_1.default);
+router.use('/subscription', subscriptionRoutes_1.default);
 router.use('/test', (req, res) => {
     return res.json({ data: 'Hello world!' });
 });

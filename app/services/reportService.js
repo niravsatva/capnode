@@ -12,6 +12,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+/* eslint-disable @typescript-eslint/no-var-requires */
 const path_1 = __importDefault(require("path"));
 const uuid_1 = require("uuid");
 const prisma_1 = require("../client/prisma");
@@ -20,6 +21,10 @@ const repositories_1 = require("../repositories");
 const costAllocationRepository_1 = __importDefault(require("../repositories/costAllocationRepository"));
 const reportPdf_1 = require("../templates/reportPdf");
 const utils_1 = require("../utils/utils");
+const configurationServices_1 = __importDefault(require("./configurationServices"));
+const moment_1 = __importDefault(require("moment"));
+const payPeriodRepository_1 = __importDefault(require("../repositories/payPeriodRepository"));
+const dataExporter = require('json2csv').Parser;
 class ReportService {
     decimalHoursToHHMM(decimalHours) {
         const hours = Math.floor(decimalHours);
@@ -161,9 +166,14 @@ class ReportService {
                     ORDER BY
                         "fullName" ASC`;
             const data = yield prisma_1.prisma.$queryRawUnsafe(rawQuery);
-            const distinctClassNameQuery = `SELECT DISTINCT "className"
-                                        FROM public."TimeActivities"
-                                        WHERE "className" IS NOT NULL and "companyId" = '${query.companyId}'`;
+            const distinctClassNameQuery = `SELECT 
+																			DISTINCT "className"
+                                    FROM 
+																			public."TimeActivities"
+                                    WHERE 
+																			"className" IS NOT NULL AND 
+																			"companyId" = '${query.companyId}' AND 
+																			"id" IN ('${timeActivityIds.join("', '")}')`;
             const disTinctClassNames = yield prisma_1.prisma.$queryRawUnsafe(distinctClassNameQuery);
             const classNames = disTinctClassNames.map((e) => {
                 return e.className;
@@ -272,10 +282,10 @@ class ReportService {
             const finalMapping = {};
             response.forEach((e) => {
                 if (finalMapping[e.name]) {
-                    finalMapping[e.name] = finalMapping[e.name] + e.value;
+                    finalMapping[e.name].value = finalMapping[e.name].value + e.value;
                 }
                 else {
-                    finalMapping[e.name] = e.value;
+                    finalMapping[e.name] = e;
                 }
             });
             const finalData = [];
@@ -284,7 +294,8 @@ class ReportService {
                 .forEach((key) => {
                 finalData.push({
                     name: key,
-                    expense: finalMapping[key],
+                    expense: finalMapping[key].value,
+                    id: finalMapping[key].id,
                 });
             });
             return finalData;
@@ -297,8 +308,42 @@ class ReportService {
                 throw new customError_1.CustomError(400, 'Company not found');
             }
             const filePath = path_1.default.join(__dirname, '..', 'costAllocationPdfs', `${new Date().getUTCDate()}time-summary-report.pdf`);
-            const htmlContent = yield (0, reportPdf_1.generateReportPdf)(data, filePath, companyDetails.tenantName);
+            const htmlContent = yield (0, reportPdf_1.generateTimeSummaryReportPdf)(data, filePath, companyDetails.tenantName);
             return htmlContent;
+        });
+    }
+    getTimeActivitySummaryReportCsv(data, query) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const companyDetails = yield repositories_1.companyRepository.getDetails(query.companyId);
+            if (!companyDetails) {
+                throw new customError_1.CustomError(400, 'Company not found');
+            }
+            const fileHeader = [
+                'Employee Name',
+                ...data.classNames,
+                'Total Hours',
+            ];
+            const timeActivitySummary = [];
+            data.timeActivitySummary.forEach((timeActivity) => {
+                const obj = {
+                    'Employee Name': timeActivity['name'],
+                };
+                data.classNames.forEach((e) => {
+                    obj[e] = timeActivity[e] ? timeActivity[e] : '';
+                });
+                obj['Grand Total'] = timeActivity['totalHours'];
+                timeActivitySummary.push(obj);
+            });
+            const jsonData = new dataExporter({ fileHeader });
+            // Pay period date range
+            const { startDate, endDate } = yield payPeriodRepository_1.default.getDatesByPayPeriod(query.payPeriodId);
+            let extraData = `Report Name ,Time Summary Report\n`;
+            if (query.payPeriodId) {
+                extraData += `Period ,${(0, moment_1.default)(startDate).format('MM/DD/YYYYY')} - ${(0, moment_1.default)(endDate).format('MM/DD/YYYYY')}\n`;
+            }
+            extraData += `QBO Company's Name ,${companyDetails === null || companyDetails === void 0 ? void 0 : companyDetails.tenantName}\n` + `\n`;
+            const csvData = jsonData.parse(timeActivitySummary);
+            return extraData + csvData;
         });
     }
     getAllPublishedPayrollSummary(costAllocationData) {
@@ -433,8 +478,70 @@ class ReportService {
                 e['total'] = costAllocationRepository_1.default.getRowWiseTotal(e, withOutTotalFields);
             });
             const grandTotalRow = costAllocationRepository_1.default.getGrandTotalRowCostAllocation(finalData);
-            finalData.push(grandTotalRow);
+            if (grandTotalRow) {
+                finalData.push(grandTotalRow);
+            }
             return finalData;
+        });
+    }
+    getPayrollSummaryReportPdf(query) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const companyDetails = yield repositories_1.companyRepository.getDetails(query.companyId);
+            if (!companyDetails) {
+                throw new customError_1.CustomError(400, 'Company not found');
+            }
+            const sections = yield configurationServices_1.default.getFieldsSection(query.companyId);
+            const headers = [];
+            sections.forEach((section) => {
+                if (section.no != 0) {
+                    section.fields.forEach((field) => {
+                        if (field.isActive && field.jsonId.startsWith('f')) {
+                            headers.push({ name: field.name, value: field.id });
+                        }
+                    });
+                }
+            });
+            const data = yield this.getAllPublishedPayrollSummary(query);
+            const filePath = path_1.default.join(__dirname, '..', 'costAllocationPdfs', `${new Date().getUTCDate()}payroll-summary-report.pdf`);
+            const finalData = yield (0, reportPdf_1.generatePayrollSummaryReportPdf)(data, headers, filePath, companyDetails.tenantName);
+            return finalData;
+        });
+    }
+    getPayrollSummaryReportCsv(data, query) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const companyDetails = yield repositories_1.companyRepository.getDetails(query.companyId);
+            if (!companyDetails) {
+                throw new customError_1.CustomError(400, 'Company not found');
+            }
+            const sections = yield configurationServices_1.default.getFieldsSection(query.companyId);
+            const headers = [];
+            sections.forEach((section) => {
+                if (section.no != 0) {
+                    section.fields.forEach((field) => {
+                        if (field.isActive && field.jsonId.startsWith('f')) {
+                            headers.push({ name: field.name, value: field.id });
+                        }
+                    });
+                }
+            });
+            const finalDataArr = data.map((singleData) => {
+                const obj = {};
+                obj['Employee Name'] = singleData['employee-name'];
+                obj['Allocation'] = singleData['allocation'];
+                headers.forEach((header) => {
+                    obj[header.name] = singleData[header.value]
+                        ? `$${Number(singleData[header.value]).toFixed(2)}`
+                        : `$0.00`;
+                });
+                obj['Total'] = `$${Number(singleData['total']).toFixed(2)}`;
+                return obj;
+            });
+            const fileHeader = ['Employee Name', 'Total Hours'];
+            const jsonData = new dataExporter({ fileHeader });
+            let extraData = `Report Name ,Payroll Summary Report\n`;
+            extraData += `QBO Company's Name ,${companyDetails === null || companyDetails === void 0 ? void 0 : companyDetails.tenantName}\n` + `\n`;
+            const csvData = jsonData.parse(finalDataArr);
+            return extraData + csvData;
         });
     }
 }

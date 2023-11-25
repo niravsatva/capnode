@@ -39,6 +39,7 @@ class AuthController {
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 const { data } = req.body;
+                const subscriptionData = data.subscription;
                 const customer = (_a = data === null || data === void 0 ? void 0 : data.subscription) === null || _a === void 0 ? void 0 : _a.customer;
                 const firstName = customer === null || customer === void 0 ? void 0 : customer.first_name;
                 const lastName = customer === null || customer === void 0 ? void 0 : customer.last_name;
@@ -58,10 +59,25 @@ class AuthController {
                 // If email already exists
                 const isExist = yield repositories_1.userRepository.getByEmail(email);
                 if (isExist) {
-                    throw new customError_1.CustomError(400, 'Email already exists');
+                    const userSubscription = {
+                        zohoSubscriptionId: subscriptionData.subscription_id,
+                        zohoProductId: subscriptionData.product_id,
+                        zohoSubscriptionPlan: subscriptionData.plan,
+                        createdTime: subscriptionData.created_time,
+                        status: subscriptionData.status,
+                        addons: subscriptionData.addons,
+                        expiresAt: subscriptionData.expires_at,
+                        zohoCustomerId: subscriptionData.customer.customer_id,
+                        userId: isExist.id,
+                    };
+                    yield repositories_1.subscriptionRepository.createSubscription(userSubscription);
+                    // throw new CustomError(400, 'Email already exists');
                 }
                 // Create new user
-                const user = yield authServices_1.default.register(firstName, lastName, email, customerId);
+                if (!isExist) {
+                    const user = yield authServices_1.default.register(firstName, lastName, email, customerId, data.subscription);
+                    yield repositories_1.companyRoleRepository.create(user === null || user === void 0 ? void 0 : user.id, companyAdminRole === null || companyAdminRole === void 0 ? void 0 : companyAdminRole.id);
+                }
                 // TEMP Until we not create the company
                 // const companyData = {
                 // 	tenantID: Math.random().toString(),
@@ -72,7 +88,6 @@ class AuthController {
                 // TEMP END Until we not create the company
                 // Uncomment code
                 // Create new record in companyRole
-                yield repositories_1.companyRoleRepository.create(user === null || user === void 0 ? void 0 : user.id, companyAdminRole === null || companyAdminRole === void 0 ? void 0 : companyAdminRole.id);
                 return (0, defaultResponseHelper_1.DefaultResponse)(res, 201, 'User registration successful, please check your email for accessing your account');
             }
             catch (err) {

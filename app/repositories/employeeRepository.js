@@ -23,6 +23,9 @@ class EmployeeRepository {
                     where: {
                         companyId: companyId,
                     },
+                    orderBy: {
+                        fullName: 'asc',
+                    },
                 });
                 return employees;
             }
