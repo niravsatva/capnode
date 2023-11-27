@@ -32,6 +32,7 @@ const authServices_1 = __importDefault(require("../services/authServices"));
 const customError_1 = require("../models/customError");
 const tokenHelper_1 = require("../helpers/tokenHelper");
 const logger_1 = require("../utils/logger");
+const prisma_1 = require("../client/prisma");
 class AuthController {
     // Register User
     register(req, res, next) {
@@ -39,6 +40,9 @@ class AuthController {
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 const { data } = req.body;
+                if (!data) {
+                    throw new customError_1.CustomError(400, 'Data can not be empty');
+                }
                 const subscriptionData = data.subscription;
                 const customer = (_a = data === null || data === void 0 ? void 0 : data.subscription) === null || _a === void 0 ? void 0 : _a.customer;
                 const firstName = customer === null || customer === void 0 ? void 0 : customer.first_name;
@@ -70,7 +74,14 @@ class AuthController {
                         zohoCustomerId: subscriptionData.customer.customer_id,
                         userId: isExist.id,
                     };
-                    yield repositories_1.subscriptionRepository.createSubscription(userSubscription);
+                    const companyData = yield prisma_1.prisma.companyRole.findFirst({
+                        where: {
+                            userId: isExist.id
+                        }
+                    });
+                    if (companyData && companyData.companyId) {
+                        yield repositories_1.subscriptionRepository.updateOrCreateSubscriptionByCompanyId(companyData.companyId, userSubscription);
+                    }
                     // throw new CustomError(400, 'Email already exists');
                 }
                 // Create new user

@@ -28,6 +28,27 @@ class SubscriptionRepository {
             });
         });
     }
+    updateOrCreateSubscriptionByCompanyId(companyId, data) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const findSubscription = yield prisma_1.prisma.subscription.findFirst({
+                where: {
+                    companyId
+                }
+            });
+            if (findSubscription) {
+                return prisma_1.prisma.subscription.updateMany({
+                    where: {
+                        companyId: companyId,
+                        userId: data.userId
+                    },
+                    data
+                });
+            }
+            yield prisma_1.prisma.subscription.create({
+                data: Object.assign(Object.assign({}, data), { companyId })
+            });
+        });
+    }
     findSubscriptionByUserId(userId) {
         return __awaiter(this, void 0, void 0, function* () {
             return prisma_1.prisma.subscription.findFirst({
@@ -42,6 +63,15 @@ class SubscriptionRepository {
             return prisma_1.prisma.subscription.findFirst({
                 where: {
                     companyId
+                }
+            });
+        });
+    }
+    getSubscriptionDetailsByZohoSubscriptionId(subscriptionId) {
+        return __awaiter(this, void 0, void 0, function* () {
+            return prisma_1.prisma.subscription.findFirst({
+                where: {
+                    zohoSubscriptionId: subscriptionId
                 }
             });
         });

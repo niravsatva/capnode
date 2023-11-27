@@ -34,5 +34,19 @@ class SubscriptionController {
             }
         });
     }
+    cancelSubscription(req, res, next) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                const { data } = req.body;
+                if (data) {
+                    yield subscriptionService_1.default.cancelSubscription(data.subscription);
+                }
+                return (0, defaultResponseHelper_1.DefaultResponse)(res, 200, 'Subscription canceled successfully', { success: true });
+            }
+            catch (error) {
+                next(error);
+            }
+        });
+    }
 }
 exports.default = new SubscriptionController();
