@@ -301,14 +301,14 @@ class ReportService {
             return finalData;
         });
     }
-    getTimeActivitySummaryReportPdf(data, companyId) {
+    getTimeActivitySummaryReportPdf(data, query) {
         return __awaiter(this, void 0, void 0, function* () {
-            const companyDetails = yield repositories_1.companyRepository.getDetails(companyId);
+            const companyDetails = yield repositories_1.companyRepository.getDetails(query.companyId);
             if (!companyDetails) {
                 throw new customError_1.CustomError(400, 'Company not found');
             }
             const filePath = path_1.default.join(__dirname, '..', 'costAllocationPdfs', `${new Date().getUTCDate()}time-summary-report.pdf`);
-            const htmlContent = yield (0, reportPdf_1.generateTimeSummaryReportPdf)(data, filePath, companyDetails.tenantName);
+            const htmlContent = yield (0, reportPdf_1.generateTimeSummaryReportPdf)(data, filePath, companyDetails.tenantName, query);
             return htmlContent;
         });
     }
@@ -335,10 +335,10 @@ class ReportService {
                 timeActivitySummary.push(obj);
             });
             const jsonData = new dataExporter({ fileHeader });
-            // Pay period date range
-            const { startDate, endDate } = yield payPeriodRepository_1.default.getDatesByPayPeriod(query.payPeriodId);
             let extraData = `Report Name ,Time Summary Report\n`;
             if (query.payPeriodId) {
+                // Pay period date range
+                const { startDate, endDate } = yield payPeriodRepository_1.default.getDatesByPayPeriod(query.payPeriodId);
                 extraData += `Period ,${(0, moment_1.default)(startDate).format('MM/DD/YYYYY')} - ${(0, moment_1.default)(endDate).format('MM/DD/YYYYY')}\n`;
             }
             extraData += `QBO Company's Name ,${companyDetails === null || companyDetails === void 0 ? void 0 : companyDetails.tenantName}\n` + `\n`;

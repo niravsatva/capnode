@@ -50,14 +50,14 @@ class ReportController {
         });
     }
     getTimeActivitySummaryReportPdf(req, res, next) {
-        var _a, _b;
+        var _a;
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 if (!((_a = req.query) === null || _a === void 0 ? void 0 : _a.companyId)) {
                     throw new customError_1.CustomError(400, 'Company Id is required');
                 }
                 const data = yield reportService_1.default.getTimeActivitySummaryReport(req.query);
-                const stream = yield reportService_1.default.getTimeActivitySummaryReportPdf(data, (_b = req.query) === null || _b === void 0 ? void 0 : _b.companyId);
+                const stream = yield reportService_1.default.getTimeActivitySummaryReportPdf(data, req.query);
                 const filePath = path_1.default.join(__dirname, '..', 'costAllocationPdfs', `${new Date().getUTCDate()}time-summary-report.pdf`);
                 stream.on('close', () => __awaiter(this, void 0, void 0, function* () {
                     const data = yield fs_1.promises.readFile(filePath);
