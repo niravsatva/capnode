@@ -16,7 +16,7 @@ exports.s3Client = new client_s3_1.S3Client({
 });
 exports.s3Storage = (0, multer_s3_1.default)({
     s3: exports.s3Client,
-    bucket: 'costallocationspro',
+    bucket: `${process.env.S3_BUCKETNAME}`,
     metadata: (req, file, cb) => {
         cb(null, { fieldname: file.fieldname });
     },

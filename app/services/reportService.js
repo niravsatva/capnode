@@ -336,12 +336,13 @@ class ReportService {
             });
             const jsonData = new dataExporter({ fileHeader });
             let extraData = `Report Name ,Time Summary Report\n`;
+            extraData += `QBO Company's Name ,${companyDetails === null || companyDetails === void 0 ? void 0 : companyDetails.tenantName}\n`;
             if (query.payPeriodId) {
                 // Pay period date range
                 const { startDate, endDate } = yield payPeriodRepository_1.default.getDatesByPayPeriod(query.payPeriodId);
-                extraData += `Period ,${(0, moment_1.default)(startDate).format('MM/DD/YYYYY')} - ${(0, moment_1.default)(endDate).format('MM/DD/YYYYY')}\n`;
+                extraData += `Pay Period ,${(0, moment_1.default)(startDate).format('MM/DD/YYYYY')} - ${(0, moment_1.default)(endDate).format('MM/DD/YYYYY')}\n`;
             }
-            extraData += `QBO Company's Name ,${companyDetails === null || companyDetails === void 0 ? void 0 : companyDetails.tenantName}\n` + `\n`;
+            extraData += `\n`;
             const csvData = jsonData.parse(timeActivitySummary);
             return extraData + csvData;
         });
@@ -523,7 +524,7 @@ class ReportService {
             });
             const data = yield this.getAllPublishedPayrollSummary(query);
             const filePath = path_1.default.join(__dirname, '..', 'costAllocationPdfs', `${new Date().getUTCDate()}payroll-summary-report.pdf`);
-            const finalData = yield (0, reportPdf_1.generatePayrollSummaryReportPdf)(data.content, headers, filePath, companyDetails.tenantName);
+            const finalData = yield (0, reportPdf_1.generatePayrollSummaryReportPdf)(data.content, headers, filePath, companyDetails.tenantName, query);
             return finalData;
         });
     }
@@ -559,7 +560,13 @@ class ReportService {
             const fileHeader = ['Employee Name', 'Total Hours'];
             const jsonData = new dataExporter({ fileHeader });
             let extraData = `Report Name ,Payroll Summary Report\n`;
-            extraData += `QBO Company's Name ,${companyDetails === null || companyDetails === void 0 ? void 0 : companyDetails.tenantName}\n` + `\n`;
+            extraData += `QBO Company's Name ,${companyDetails === null || companyDetails === void 0 ? void 0 : companyDetails.tenantName}\n`;
+            if (query.payPeriodId) {
+                // Pay period date range
+                const { startDate, endDate } = yield payPeriodRepository_1.default.getDatesByPayPeriod(query.payPeriodId);
+                extraData += `Pay Period ,${(0, moment_1.default)(startDate).format('MM/DD/YYYYY')} - ${(0, moment_1.default)(endDate).format('MM/DD/YYYYY')}\n`;
+            }
+            extraData += `\n`;
             const csvData = jsonData.parse(finalDataArr);
             return extraData + csvData;
         });

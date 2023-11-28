@@ -17,6 +17,7 @@ const pdfkit_1 = __importDefault(require("pdfkit"));
 const fs_1 = __importDefault(require("fs"));
 const axios_1 = __importDefault(require("axios"));
 const payPeriodRepository_1 = __importDefault(require("../repositories/payPeriodRepository"));
+const moment_1 = __importDefault(require("moment"));
 function mapJSONDataToArray(jsonData) {
     const headers = ['Name', ...jsonData.classNames, 'Total Hours'];
     const dataArray = [headers];
@@ -43,7 +44,7 @@ const generateTimeSummaryReportPdf = (costAllocationData, filePath, companyName,
     }
     const tableData = mapJSONDataToArray(costAllocationData);
     const doc = new pdfkit_1.default({
-        size: [(costAllocationData.classNames.length + 2) * 180, 3000],
+        size: [(costAllocationData.classNames.length + 2) * 225, 3000],
     });
     // Image
     const image = 'https://costallocationspro.s3.amazonaws.com/cap-logonew.png';
@@ -67,18 +68,18 @@ const generateTimeSummaryReportPdf = (costAllocationData, filePath, companyName,
     doc.text(titleText, imageX, titleY, titleOptions);
     // Company Details
     const companyTitle = `Company Name : ${companyName}`;
-    const companyY = titleY + 50;
+    const companyY = titleY + 40;
     doc.text(companyTitle, imageX, companyY, titleOptions);
     // Pay period
     let payPeriodDetails = '';
     let payPeriodY;
     if (payPeriod.startDate && payPeriod.endDate) {
-        payPeriodDetails = `${payPeriod.startDate} - ${payPeriod.endDate}`;
-        payPeriodY = companyY + 50;
+        payPeriodDetails = `Pay Period : ${(0, moment_1.default)(payPeriod.startDate).format('MM/DD/YYYY')} - ${(0, moment_1.default)(payPeriod.endDate).format('MM/DD/YYYY')}`;
+        payPeriodY = companyY + 40;
         doc.text(payPeriodDetails, imageX, payPeriodY, titleOptions);
     }
     // Table
-    const cellWidth = 150;
+    const cellWidth = 200;
     const cellHeight = 74;
     const borderWidth = 1;
     function drawTable(table, x, y) {
@@ -123,7 +124,9 @@ const generateTimeSummaryReportPdf = (costAllocationData, filePath, companyName,
         }
     }
     const tableX = 50;
-    const tableY = (payPeriod === null || payPeriod === void 0 ? void 0 : payPeriod.startDate) && (payPeriod === null || payPeriod === void 0 ? void 0 : payPeriod.endDate) ? payPeriodY : companyY + 40;
+    const tableY = (payPeriod === null || payPeriod === void 0 ? void 0 : payPeriod.startDate) && (payPeriod === null || payPeriod === void 0 ? void 0 : payPeriod.endDate)
+        ? Number(payPeriodY) + 40
+        : companyY + 40;
     drawTable(tableData, tableX, tableY);
     const stream = fs_1.default.createWriteStream(filePath);
     doc.pipe(stream);
@@ -158,13 +161,17 @@ function mapJSONDataToArrayPayroll(jsonData) {
     }
     return dataArray;
 }
-const generatePayrollSummaryReportPdf = (payrollSummaryData, headers, filePath, companyName) => __awaiter(void 0, void 0, void 0, function* () {
+const generatePayrollSummaryReportPdf = (payrollSummaryData, headers, filePath, companyName, query) => __awaiter(void 0, void 0, void 0, function* () {
+    let payPeriod = {};
+    if (query.payPeriodId) {
+        payPeriod = yield payPeriodRepository_1.default.getDatesByPayPeriod(query.payPeriodId);
+    }
     const tableData = mapJSONDataToArrayPayroll({
         payrollSummaryData: payrollSummaryData,
         headers: headers,
     });
     const doc = new pdfkit_1.default({
-        size: [(headers.length + 2) * 180, 3000],
+        size: [(headers.length + 3) * 200, 3000],
     });
     // Image
     const image = 'https://costallocationspro.s3.amazonaws.com/cap-logonew.png';
@@ -188,10 +195,18 @@ const generatePayrollSummaryReportPdf = (payrollSummaryData, headers, filePath, 
     doc.text(titleText, imageX, titleY, titleOptions);
     // Company Details
     const companyTitle = `Company Name : ${companyName}`;
-    const companyY = titleY + 50;
+    const companyY = titleY + 40;
     doc.text(companyTitle, imageX, companyY, titleOptions);
+    // Pay period
+    let payPeriodDetails = '';
+    let payPeriodY;
+    if (payPeriod.startDate && payPeriod.endDate) {
+        payPeriodDetails = `Pay Period : ${(0, moment_1.default)(payPeriod.startDate).format('MM/DD/YYYY')} - ${(0, moment_1.default)(payPeriod.endDate).format('MM/DD/YYYY')}`;
+        payPeriodY = companyY + 40;
+        doc.text(payPeriodDetails, imageX, payPeriodY, titleOptions);
+    }
     // Table
-    const cellWidth = 150;
+    const cellWidth = 180;
     const cellHeight = 74;
     const borderWidth = 1;
     function drawTable(table, x, y) {
@@ -236,7 +251,9 @@ const generatePayrollSummaryReportPdf = (payrollSummaryData, headers, filePath, 
         }
     }
     const tableX = 50;
-    const tableY = companyY + 40;
+    const tableY = (payPeriod === null || payPeriod === void 0 ? void 0 : payPeriod.startDate) && (payPeriod === null || payPeriod === void 0 ? void 0 : payPeriod.endDate)
+        ? Number(payPeriodY) + 40
+        : companyY + 40;
     drawTable(tableData, tableX, tableY);
     const stream = fs_1.default.createWriteStream(filePath);
     doc.pipe(stream);
