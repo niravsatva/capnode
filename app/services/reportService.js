@@ -367,7 +367,7 @@ class ReportService {
                 }
             }
             if (!payPeriodId) {
-                return { result: [], employeeRowSpanMapping: {} };
+                return { content: [], currentPayPeriodId: null };
             }
             const payPeriodData = yield prisma_1.prisma.payPeriod.findFirst({
                 where: {
@@ -388,7 +388,7 @@ class ReportService {
                 },
             });
             if (!timeSheetData) {
-                return { result: [], employeeRowSpanMapping: {} };
+                return { content: [], currentPayPeriodId: null };
             }
             const offset = (Number(costAllocationData.page) - 1) * Number(costAllocationData.limit);
             const filteredData = [];
