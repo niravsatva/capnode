@@ -48,7 +48,7 @@ class ReportService {
                                 public."Employee" e
                             JOIN
                                 public."TimeActivities" ta ON e.id = ta."employeeId"
-                            WHERE 
+                            WHERE
                                 e."companyId" = '${query.companyId}' AND ta."className" IS NOT NULL`;
             if (query.customerId) {
                 subQuery += ` AND ta."customerId" = '${query.customerId}'`;
@@ -166,13 +166,13 @@ class ReportService {
                     ORDER BY
                         "fullName" ASC`;
             const data = yield prisma_1.prisma.$queryRawUnsafe(rawQuery);
-            const distinctClassNameQuery = `SELECT 
+            const distinctClassNameQuery = `SELECT
 																			DISTINCT "className"
-                                    FROM 
+                                    FROM
 																			public."TimeActivities"
-                                    WHERE 
-																			"className" IS NOT NULL AND 
-																			"companyId" = '${query.companyId}' AND 
+                                    WHERE
+																			"className" IS NOT NULL AND
+																			"companyId" = '${query.companyId}' AND
 																			"id" IN ('${timeActivityIds.join("', '")}')`;
             const disTinctClassNames = yield prisma_1.prisma.$queryRawUnsafe(distinctClassNameQuery);
             const classNames = disTinctClassNames.map((e) => {
@@ -349,9 +349,29 @@ class ReportService {
     getAllPublishedPayrollSummary(costAllocationData) {
         var _a;
         return __awaiter(this, void 0, void 0, function* () {
+            let payPeriodId = costAllocationData.payPeriodId;
+            let isSystemPayPeriod = false;
+            if (!payPeriodId) {
+                const latestPayPeriodId = yield prisma_1.prisma.payPeriod.findFirst({
+                    where: {
+                        companyId: costAllocationData === null || costAllocationData === void 0 ? void 0 : costAllocationData.companyId,
+                        isJournalPublished: true
+                    },
+                    orderBy: {
+                        createdAt: 'desc'
+                    }
+                });
+                if (latestPayPeriodId) {
+                    payPeriodId = latestPayPeriodId.id;
+                    isSystemPayPeriod = true;
+                }
+            }
+            if (!payPeriodId) {
+                return { result: [], employeeRowSpanMapping: {} };
+            }
             const payPeriodData = yield prisma_1.prisma.payPeriod.findFirst({
                 where: {
-                    id: costAllocationData === null || costAllocationData === void 0 ? void 0 : costAllocationData.payPeriodId,
+                    id: payPeriodId,
                     companyId: costAllocationData === null || costAllocationData === void 0 ? void 0 : costAllocationData.companyId,
                     isJournalPublished: true,
                 },
@@ -363,7 +383,7 @@ class ReportService {
             // }
             const timeSheetData = yield prisma_1.prisma.timeSheets.findFirst({
                 where: {
-                    payPeriodId: costAllocationData === null || costAllocationData === void 0 ? void 0 : costAllocationData.payPeriodId,
+                    payPeriodId: payPeriodId,
                     companyId: costAllocationData === null || costAllocationData === void 0 ? void 0 : costAllocationData.companyId,
                 },
             });
@@ -449,7 +469,7 @@ class ReportService {
                 customerId: String(costAllocationData.customerId),
                 employeeId: String(costAllocationData.employeeId),
                 isPercentage: costAllocationData.isPercentage,
-                payPeriodId: costAllocationData.payPeriodId,
+                payPeriodId: payPeriodId,
                 timeSheetId: timeSheetData.id,
             };
             const data = yield costAllocationRepository_1.default.getCostAllocation(costAllocationRepofilter);
@@ -481,7 +501,7 @@ class ReportService {
             if (grandTotalRow) {
                 finalData.push(grandTotalRow);
             }
-            return finalData;
+            return { content: finalData, currentPayPeriodId: isSystemPayPeriod ? payPeriodId : null };
         });
     }
     getPayrollSummaryReportPdf(query) {
@@ -503,7 +523,7 @@ class ReportService {
             });
             const data = yield this.getAllPublishedPayrollSummary(query);
             const filePath = path_1.default.join(__dirname, '..', 'costAllocationPdfs', `${new Date().getUTCDate()}payroll-summary-report.pdf`);
-            const finalData = yield (0, reportPdf_1.generatePayrollSummaryReportPdf)(data, headers, filePath, companyDetails.tenantName);
+            const finalData = yield (0, reportPdf_1.generatePayrollSummaryReportPdf)(data.content, headers, filePath, companyDetails.tenantName);
             return finalData;
         });
     }

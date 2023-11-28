@@ -235,6 +235,7 @@ class UserRepository {
                                         isConnected: true,
                                         status: true,
                                         fiscalYear: true,
+                                        Subscription: true
                                     },
                                 },
                                 role: {

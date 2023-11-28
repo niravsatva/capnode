@@ -23,7 +23,7 @@ const userRepository_1 = __importDefault(require("../repositories/userRepository
 const repositories_1 = require("../repositories");
 class AuthServices {
     login(email, password, machineId) {
-        var _a, _b;
+        var _a, _b, _c;
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 // Check if user exists
@@ -62,6 +62,19 @@ class AuthServices {
                     var _a;
                     return (_a = singleCompany === null || singleCompany === void 0 ? void 0 : singleCompany.role) === null || _a === void 0 ? void 0 : _a.status;
                 });
+                const isValidSubscription = (_c = user === null || user === void 0 ? void 0 : user.companies) === null || _c === void 0 ? void 0 : _c.some((singleCompany) => {
+                    var _a;
+                    const subScription = (_a = singleCompany === null || singleCompany === void 0 ? void 0 : singleCompany.company) === null || _a === void 0 ? void 0 : _a.Subscription;
+                    if (subScription && subScription.length) {
+                        if (!subScription[0].status || subScription[0].status != 'live') {
+                            return false;
+                        }
+                    }
+                    return true;
+                });
+                if (!isValidSubscription) {
+                    throw new customError_1.CustomError(400, 'You do not have any active subscription currently');
+                }
                 if (!isValidForLogin) {
                     throw new customError_1.CustomError(401, 'You are not authorized to access the system please contact your administrator.');
                 }
