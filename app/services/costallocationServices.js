@@ -448,9 +448,23 @@ class CostAllocationServices {
                 ? {
                     OR: [
                         {
-                            fullName: {
-                                mode: 'insensitive',
+                            className: {
                                 contains: costAllocationData.search,
+                                mode: 'insensitive',
+                            },
+                        },
+                        {
+                            customerName: {
+                                contains: costAllocationData.search,
+                                mode: 'insensitive',
+                            },
+                        },
+                        {
+                            employee: {
+                                fullName: {
+                                    contains: costAllocationData.search,
+                                    mode: 'insensitive',
+                                },
                             },
                         },
                     ],

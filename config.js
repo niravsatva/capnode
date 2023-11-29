@@ -43,7 +43,11 @@ function config(Env) {
         employeeSyncLambdaApiKey: Env === null || Env === void 0 ? void 0 : Env.EMPLOYEE_SYNC_API_KEY,
         timeactivitySyncLambdaEndpoint: Env === null || Env === void 0 ? void 0 : Env.TIME_ACTIVITY_SYNC_LAMBDA_ENDPOINT,
         timeactivitySyncLambdaApiKey: Env === null || Env === void 0 ? void 0 : Env.TIME_ACTIVITY_SYNC_API_KEY,
-        routeBasePath: Env === null || Env === void 0 ? void 0 : Env.ROUTE_BASE_PATH
+        routeBasePath: Env === null || Env === void 0 ? void 0 : Env.ROUTE_BASE_PATH,
+        SSO_PASSWORD: Env === null || Env === void 0 ? void 0 : Env.SSO_PASSWORD,
+        SSO_AUDIENCE: Env === null || Env === void 0 ? void 0 : Env.SSO_AUDIENCE,
+        SSO_ISUSER: Env === null || Env === void 0 ? void 0 : Env.SSO_ISUSER,
+        SSO_ACSURL: Env === null || Env === void 0 ? void 0 : Env.SSO_ACSURL,
     };
 }
 exports.default = Object.assign({}, config(process.env));

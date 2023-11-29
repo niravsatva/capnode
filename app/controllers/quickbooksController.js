@@ -87,7 +87,7 @@ class QuickbooksController {
                     }
                     const companyDetails = yield repositories_1.companyRepository.getDetails(companyId);
                     if (!companyDetails) {
-                        const error = new customError_1.CustomError(404, 'Company not found');
+                        const error = new customError_1.CustomError(400, 'Company not found');
                         throw error;
                     }
                     if ((companyDetails === null || companyDetails === void 0 ? void 0 : companyDetails.tenantID) !== authToken.realmId) {

@@ -15,7 +15,9 @@ const generatePdf = (pdfData, singleEmployee, customers) => {
             singleTimeLog === null || singleTimeLog === void 0 ? void 0 : singleTimeLog.SplitTimeActivities.forEach((singleSplitTimeLog) => {
                 htmlData += `<tr>
                     <td>${(0, moment_1.default)(singleSplitTimeLog === null || singleSplitTimeLog === void 0 ? void 0 : singleSplitTimeLog.activityDate).format('MM/DD/YYYY')}</td>
-                      <td>${singleSplitTimeLog === null || singleSplitTimeLog === void 0 ? void 0 : singleSplitTimeLog.className}</td>
+                      <td>${(singleSplitTimeLog === null || singleSplitTimeLog === void 0 ? void 0 : singleSplitTimeLog.className)
+                    ? singleSplitTimeLog === null || singleSplitTimeLog === void 0 ? void 0 : singleSplitTimeLog.className
+                    : '-'}</td>
                       <td>${singleSplitTimeLog === null || singleSplitTimeLog === void 0 ? void 0 : singleSplitTimeLog.customerName}</td>
                       <td>${singleSplitTimeLog === null || singleSplitTimeLog === void 0 ? void 0 : singleSplitTimeLog.hours} : ${singleSplitTimeLog === null || singleSplitTimeLog === void 0 ? void 0 : singleSplitTimeLog.minute}</td>
                     </tr>`;
@@ -24,7 +26,9 @@ const generatePdf = (pdfData, singleEmployee, customers) => {
         else {
             htmlData += `<tr>
                     <td>${(0, moment_1.default)(singleTimeLog === null || singleTimeLog === void 0 ? void 0 : singleTimeLog.activityDate).format('MM/DD/YYYY')}</td>
-                      <td>${singleTimeLog === null || singleTimeLog === void 0 ? void 0 : singleTimeLog.className}</td>
+                      <td>${(singleTimeLog === null || singleTimeLog === void 0 ? void 0 : singleTimeLog.className)
+                ? singleTimeLog === null || singleTimeLog === void 0 ? void 0 : singleTimeLog.className
+                : '-'}</td>
                       <td>${singleTimeLog === null || singleTimeLog === void 0 ? void 0 : singleTimeLog.customerName}</td>
                       <td>${singleTimeLog === null || singleTimeLog === void 0 ? void 0 : singleTimeLog.hours} : ${singleTimeLog === null || singleTimeLog === void 0 ? void 0 : singleTimeLog.minute}</td>
                     </tr>`;

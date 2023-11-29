@@ -14,6 +14,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const prisma_1 = require("../client/prisma");
 const logger_1 = require("../utils/logger");
+const companyRoleRepository_1 = __importDefault(require("./companyRoleRepository"));
 const subscriptionRepository_1 = __importDefault(require("./subscriptionRepository"));
 class CompanyRepository {
     getAll() {
@@ -131,17 +132,41 @@ class CompanyRepository {
                         },
                     },
                 });
-                const company = yield prisma_1.prisma.companyRole.update({
-                    where: {
-                        id: companyRole === null || companyRole === void 0 ? void 0 : companyRole.id,
-                    },
-                    data: {
-                        company: { connect: { id: companyId } },
-                    },
-                });
-                const subscriptionData = yield subscriptionRepository_1.default.findSubscriptionByUserId(userId);
+                let company;
+                if (companyRole) {
+                    company = yield prisma_1.prisma.companyRole.update({
+                        where: {
+                            id: companyRole === null || companyRole === void 0 ? void 0 : companyRole.id,
+                        },
+                        data: {
+                            company: { connect: { id: companyId } },
+                        },
+                    });
+                }
+                else {
+                    company = yield companyRoleRepository_1.default.create(userId, companyAdminRole === null || companyAdminRole === void 0 ? void 0 : companyAdminRole.id, companyId);
+                }
+                const subscriptionData = yield subscriptionRepository_1.default.findSubscriptionByUserIdWithNullCompany(userId);
+                // If found attach the companyId to existing subscription else create new entry for reference only;
                 if (subscriptionData) {
                     yield subscriptionRepository_1.default.updateSubscription(subscriptionData.id, { companyId });
+                }
+                else {
+                    const useSubscriptionData = yield subscriptionRepository_1.default.findSubscriptionByUserId(userId);
+                    if (useSubscriptionData) {
+                        yield subscriptionRepository_1.default.createSubscription({
+                            companyId,
+                            zohoSubscriptionId: useSubscriptionData.zohoSubscriptionId,
+                            zohoProductId: useSubscriptionData.zohoProductId,
+                            zohoSubscriptionPlan: useSubscriptionData.zohoSubscriptionPlan,
+                            createdTime: useSubscriptionData.createdTime,
+                            status: useSubscriptionData.status,
+                            addons: useSubscriptionData.addons,
+                            expiresAt: useSubscriptionData.expiresAt,
+                            zohoCustomerId: useSubscriptionData.zohoCustomerId,
+                            userId: useSubscriptionData.userId,
+                        });
+                    }
                 }
                 return company;
             }

@@ -83,7 +83,7 @@ class TimeSheetServices {
                 });
             }
             orderByArray.push({
-                id: 'desc',
+                submittedOn: 'desc',
             });
             const sortCondition = {
                 orderBy: orderByArray,

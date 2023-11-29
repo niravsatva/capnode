@@ -22,6 +22,8 @@ const axios_1 = __importDefault(require("axios"));
 const moment_1 = __importDefault(require("moment"));
 const fs_1 = __importDefault(require("fs"));
 const logger_1 = require("../utils/logger");
+const utils_1 = require("../utils/utils");
+const prisma_1 = require("../client/prisma");
 const Excel = require('excel4node');
 // import moment from 'moment';
 const dataExporter = require('json2csv').Parser;
@@ -31,9 +33,37 @@ class TimeActivityController {
             try {
                 (0, validationHelper_1.checkValidation)(req);
                 const { page = 1, limit = 10, search = '', classId = '', customerId = '', employeeId = '', type = '', sort = '', isOverHours = false, payPeriodId = '', companyId = '', year = '', closingDate = '' } = req.query;
-                // if (!payPeriodId) {
-                // 	throw new CustomError(400, 'Pay Period Id is required');
-                // }
+                let _payPeriodId = payPeriodId;
+                let systemPayPeriodId = false;
+                if (!(0, utils_1.hasText)(_payPeriodId)) {
+                    const payPeriodData = yield prisma_1.prisma.payPeriod.findFirst({
+                        where: {
+                            companyId: companyId,
+                            // endDate: {
+                            // 	gte: new Date(_date?.getFullYear(), _date?.getMonth(), 1),
+                            // 	lte: new Date(_date.getFullYear(), _date.getMonth() + 1, 0)
+                            // },
+                        },
+                        orderBy: {
+                            endDate: 'desc',
+                        },
+                    });
+                    if (payPeriodData && payPeriodData.id) {
+                        systemPayPeriodId = true;
+                        _payPeriodId = payPeriodData.id;
+                    }
+                }
+                if ((0, utils_1.hasText)(_payPeriodId)) {
+                    const validatePayPeriod = yield prisma_1.prisma.payPeriod.findFirst({
+                        where: {
+                            companyId: companyId,
+                            id: _payPeriodId,
+                        },
+                    });
+                    if (!validatePayPeriod) {
+                        throw new customError_1.CustomError(400, 'Invalid PayPeriod');
+                    }
+                }
                 if (!companyId) {
                     throw new customError_1.CustomError(400, 'Company id is required');
                 }
@@ -65,13 +95,14 @@ class TimeActivityController {
                         : isOverHours === 'true'
                             ? true
                             : '',
-                    payPeriodId: String(payPeriodId),
+                    payPeriodId: String(_payPeriodId),
                     year: String(year),
                     closingDate
                 });
                 return (0, defaultResponseHelper_1.DefaultResponse)(res, 200, 'Time Activities fetched successfully', {
                     timeActivities: timeActivitiesWithHours,
                     timeActivitiesCount: timeActivitiesCount,
+                    currentDatePayPeriod: systemPayPeriodId ? _payPeriodId : null,
                 });
             }
             catch (err) {

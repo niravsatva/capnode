@@ -22,6 +22,7 @@ class EmployeeRepository {
                 const employees = yield prisma_1.prisma.employee.findMany({
                     where: {
                         companyId: companyId,
+                        active: true,
                     },
                     orderBy: {
                         fullName: 'asc',
