@@ -443,7 +443,7 @@ class QuickbooksController {
                 }
                 // Get access token
                 const authResponse = yield quickbooksServices_1.default.getAccessToken(companyId);
-                const closingDateList = yield quickbooksClient_1.default.getClosingDate(authResponse.accessToken, authResponse.tenantID, authResponse.refreshToken, companyId);
+                const closingDateList = yield quickbooksClient_1.default.getClosingDate(authResponse.accessToken, authResponse.tenantID, authResponse.refreshToken, companyId, req.query);
                 return (0, defaultResponseHelper_1.DefaultResponse)(res, 200, 'Closing dates fetched successfully', closingDateList);
             }
             catch (err) {

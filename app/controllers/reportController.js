@@ -142,7 +142,7 @@ class ReportController {
                     throw new customError_1.CustomError(400, 'Company Id is required');
                 }
                 const data = yield reportService_1.default.getAllPublishedPayrollSummary(req.query);
-                const csvData = yield reportService_1.default.getPayrollSummaryReportCsv(data, req.query);
+                const csvData = yield reportService_1.default.getPayrollSummaryReportCsv(data.content, req.query);
                 res.setHeader('Content-Type', 'text/csv');
                 const fileName = (0, moment_1.default)(new Date()).format('MMDDYYYYhhmmss');
                 res.setHeader('Content-Disposition', `attachment; filename=PayrollSummaryReport_${fileName}.csv`);

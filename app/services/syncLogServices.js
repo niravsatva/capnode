@@ -59,8 +59,8 @@ class SyncLogService {
             const data = logs.map((singleLog) => {
                 return {
                     id: singleLog === null || singleLog === void 0 ? void 0 : singleLog.id,
-                    date: (0, moment_1.default)(singleLog.createdAt).format('MM/DD/YYYY'),
-                    time: (0, moment_1.default)(singleLog.createdAt).format('hh:mm A'),
+                    date: singleLog.createdAt,
+                    time: singleLog.createdAt,
                     module: singleLog === null || singleLog === void 0 ? void 0 : singleLog.moduleName,
                     status: singleLog === null || singleLog === void 0 ? void 0 : singleLog.status,
                     message: singleLog === null || singleLog === void 0 ? void 0 : singleLog.message,

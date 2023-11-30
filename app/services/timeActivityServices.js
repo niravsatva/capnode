@@ -22,6 +22,7 @@ const timeActivityRepository_1 = __importDefault(require("../repositories/timeAc
 const quickbooksServices_1 = __importDefault(require("./quickbooksServices"));
 const payPeriodRepository_1 = __importDefault(require("../repositories/payPeriodRepository"));
 const dayjs_1 = __importDefault(require("dayjs"));
+const logger_1 = require("../utils/logger");
 class TimeActivityService {
     // Get all time activities
     getAllTimeActivitiesServices(timeActivityData) {
@@ -400,7 +401,7 @@ class TimeActivityService {
         });
     }
     syncTimeActivityByLastSync(companyId) {
-        var _a, _b, _c, _d;
+        var _a, _b, _c, _d, _e, _f, _g, _h, _j;
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 // Check if company exists or not
@@ -434,13 +435,13 @@ class TimeActivityService {
                 // Get employees by last sync from Quickbooks
                 const newTimeActivities = yield (quickbooksClient_1.default === null || quickbooksClient_1.default === void 0 ? void 0 : quickbooksClient_1.default.getTimeActivitiesByLastSync(authResponse === null || authResponse === void 0 ? void 0 : authResponse.accessToken, authResponse === null || authResponse === void 0 ? void 0 : authResponse.tenantID, authResponse === null || authResponse === void 0 ? void 0 : authResponse.refreshToken, companyDetails === null || companyDetails === void 0 ? void 0 : companyDetails.timeActivitiesLastSyncDate, companyId));
                 // If new records found
-                let timeActivityArr = [];
+                const timeActivityArr = [];
                 if (newTimeActivities &&
                     ((_b = (_a = newTimeActivities === null || newTimeActivities === void 0 ? void 0 : newTimeActivities.QueryResponse) === null || _a === void 0 ? void 0 : _a.TimeActivity) === null || _b === void 0 ? void 0 : _b.length) > 0) {
                     // Filtered vendors, fetching employees only
                     const filteredEmployees = (_d = (_c = newTimeActivities === null || newTimeActivities === void 0 ? void 0 : newTimeActivities.QueryResponse) === null || _c === void 0 ? void 0 : _c.TimeActivity) === null || _d === void 0 ? void 0 : _d.filter((timeActivity) => timeActivity === null || timeActivity === void 0 ? void 0 : timeActivity.EmployeeRef);
-                    timeActivityArr = yield Promise.all(filteredEmployees === null || filteredEmployees === void 0 ? void 0 : filteredEmployees.map((timeActivity) => __awaiter(this, void 0, void 0, function* () {
-                        var _e, _f, _g, _h, _j, _k, _l;
+                    for (let i = 0; i < filteredEmployees.length; i++) {
+                        const timeActivity = filteredEmployees[i];
                         let hours = '0';
                         let minutes = '0';
                         if ((timeActivity === null || timeActivity === void 0 ? void 0 : timeActivity.Hours) !== null &&
@@ -457,25 +458,20 @@ class TimeActivityService {
                         else {
                             const start = new Date(timeActivity === null || timeActivity === void 0 ? void 0 : timeActivity.StartTime);
                             const end = new Date(timeActivity === null || timeActivity === void 0 ? void 0 : timeActivity.EndTime);
-                            const breakHours = timeActivity === null || timeActivity === void 0 ? void 0 : timeActivity.BreakHours; // Example break hours
-                            const breakMinutes = timeActivity === null || timeActivity === void 0 ? void 0 : timeActivity.BreakMinutes; // Example break minutes
-                            // Calculate the total time duration in milliseconds
+                            const breakHours = (timeActivity === null || timeActivity === void 0 ? void 0 : timeActivity.BreakHours) || 0;
+                            const breakMinutes = (timeActivity === null || timeActivity === void 0 ? void 0 : timeActivity.BreakMinutes) || 0;
                             let totalTimeInMillis = end - start;
-                            // If the start date is greater than end date
                             if (start > end) {
                                 const nextDay = new Date(start);
                                 nextDay.setDate(nextDay.getDate() + 1);
                                 totalTimeInMillis += nextDay - start;
                             }
-                            // Calculate the break time in milliseconds
                             const breakTimeInMillis = (breakHours * 60 + breakMinutes) * 60 * 1000;
-                            // Calculate the effective work duration
                             const effectiveTimeInMillis = totalTimeInMillis - breakTimeInMillis;
-                            // Calculate hours and minutes from milliseconds
                             const effectiveHours = Math.floor(effectiveTimeInMillis / (60 * 60 * 1000));
                             const effectiveMinutes = Math.floor((effectiveTimeInMillis % (60 * 60 * 1000)) / (60 * 1000));
-                            hours = effectiveHours;
-                            minutes = effectiveMinutes;
+                            hours = effectiveHours.toString().padStart(2, '0');
+                            minutes = effectiveMinutes.toString().padStart(2, '0');
                         }
                         const timeActivityData = {
                             timeActivityId: timeActivity === null || timeActivity === void 0 ? void 0 : timeActivity.Id,
@@ -483,16 +479,85 @@ class TimeActivityService {
                             className: ((_f = timeActivity === null || timeActivity === void 0 ? void 0 : timeActivity.ClassRef) === null || _f === void 0 ? void 0 : _f.name) || null,
                             customerId: ((_g = timeActivity === null || timeActivity === void 0 ? void 0 : timeActivity.CustomerRef) === null || _g === void 0 ? void 0 : _g.value) || null,
                             customerName: ((_h = timeActivity === null || timeActivity === void 0 ? void 0 : timeActivity.CustomerRef) === null || _h === void 0 ? void 0 : _h.name) || null,
-                            hours: ((_j = hours === null || hours === void 0 ? void 0 : hours.toString()) === null || _j === void 0 ? void 0 : _j.padStart(2, '0')) || '00',
-                            minute: ((_k = minutes === null || minutes === void 0 ? void 0 : minutes.toString()) === null || _k === void 0 ? void 0 : _k.padStart(2, '0')) || '00',
-                            // hours: timeActivity?.Hours?.toString() || '0',
-                            // minute: timeActivity?.Minutes?.toString() || '0',
+                            hours: String(hours),
+                            minute: String(minutes),
                             activityDate: timeActivity === null || timeActivity === void 0 ? void 0 : timeActivity.TxnDate,
-                            employeeId: (_l = timeActivity === null || timeActivity === void 0 ? void 0 : timeActivity.EmployeeRef) === null || _l === void 0 ? void 0 : _l.value,
+                            employeeId: (_j = timeActivity === null || timeActivity === void 0 ? void 0 : timeActivity.EmployeeRef) === null || _j === void 0 ? void 0 : _j.value,
                         };
-                        // Update or create timeActivity in db
-                        return yield timeActivityRepository_1.default.updateOrCreateTimeActivity(timeActivity === null || timeActivity === void 0 ? void 0 : timeActivity.Id, companyId, timeActivityData);
-                    })));
+                        try {
+                            // Update or create timeActivity in db
+                            const result = yield timeActivityRepository_1.default.updateOrCreateTimeActivity(timeActivity === null || timeActivity === void 0 ? void 0 : timeActivity.Id, companyId, timeActivityData);
+                            timeActivityArr.push(result);
+                        }
+                        catch (err) {
+                            logger_1.logger.error(`Time activity syncing error : ${err}`);
+                        }
+                    }
+                    // timeActivityArr = await Promise.all(
+                    // 	filteredEmployees?.map(async (timeActivity: any) => {
+                    // 		let hours: any = '0';
+                    // 		let minutes: any = '0';
+                    // 		if (
+                    // 			timeActivity?.Hours !== null &&
+                    // 			timeActivity?.Hours !== undefined &&
+                    // 			timeActivity?.Minutes !== null &&
+                    // 			timeActivity?.Minutes !== undefined
+                    // 		) {
+                    // 			hours = timeActivity?.Hours;
+                    // 			minutes = timeActivity?.Minutes;
+                    // 		} else if (timeActivity?.Hours == 0 && timeActivity?.Minutes == 0) {
+                    // 			hours = timeActivity?.Hours;
+                    // 			minutes = timeActivity?.Minutes;
+                    // 		} else {
+                    // 			const start: any = new Date(timeActivity?.StartTime);
+                    // 			const end: any = new Date(timeActivity?.EndTime);
+                    // 			const breakHours = timeActivity?.BreakHours; // Example break hours
+                    // 			const breakMinutes = timeActivity?.BreakMinutes; // Example break minutes
+                    // 			// Calculate the total time duration in milliseconds
+                    // 			let totalTimeInMillis: any = end - start;
+                    // 			// If the start date is greater than end date
+                    // 			if (start > end) {
+                    // 				const nextDay: any = new Date(start);
+                    // 				nextDay.setDate(nextDay.getDate() + 1);
+                    // 				totalTimeInMillis += nextDay - start;
+                    // 			}
+                    // 			// Calculate the break time in milliseconds
+                    // 			const breakTimeInMillis =
+                    // 				(breakHours * 60 + breakMinutes) * 60 * 1000;
+                    // 			// Calculate the effective work duration
+                    // 			const effectiveTimeInMillis =
+                    // 				totalTimeInMillis - breakTimeInMillis;
+                    // 			// Calculate hours and minutes from milliseconds
+                    // 			const effectiveHours = Math.floor(
+                    // 				effectiveTimeInMillis / (60 * 60 * 1000)
+                    // 			);
+                    // 			const effectiveMinutes = Math.floor(
+                    // 				(effectiveTimeInMillis % (60 * 60 * 1000)) / (60 * 1000)
+                    // 			);
+                    // 			hours = effectiveHours;
+                    // 			minutes = effectiveMinutes;
+                    // 		}
+                    // 		const timeActivityData: any = {
+                    // 			timeActivityId: timeActivity?.Id,
+                    // 			classId: timeActivity?.ClassRef?.value || null,
+                    // 			className: timeActivity?.ClassRef?.name || null,
+                    // 			customerId: timeActivity?.CustomerRef?.value || null,
+                    // 			customerName: timeActivity?.CustomerRef?.name || null,
+                    // 			hours: hours?.toString()?.padStart(2, '0') || '00',
+                    // 			minute: minutes?.toString()?.padStart(2, '0') || '00',
+                    // 			// hours: timeActivity?.Hours?.toString() || '0',
+                    // 			// minute: timeActivity?.Minutes?.toString() || '0',
+                    // 			activityDate: timeActivity?.TxnDate,
+                    // 			employeeId: timeActivity?.EmployeeRef?.value,
+                    // 		};
+                    // 		// Update or create timeActivity in db
+                    // 		return await timeActivityRepository.updateOrCreateTimeActivity(
+                    // 			timeActivity?.Id,
+                    // 			companyId,
+                    // 			timeActivityData
+                    // 		);
+                    // 	})
+                    // );
                 }
                 // Update time activity last sync date
                 yield prisma_1.prisma.company.update({

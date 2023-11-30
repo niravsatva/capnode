@@ -285,7 +285,7 @@ class QuickbooksClient {
         });
     }
     // Get closing date
-    getClosingDate(accessToken, realmId, refreshToken, companyId) {
+    getClosingDate(accessToken, realmId, refreshToken, companyId, query) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 const date = yield new Promise((resolve, reject) => {
@@ -303,16 +303,18 @@ class QuickbooksClient {
                         });
                     });
                 });
-                const start = Date.now();
-                const duration = Date.now() - start;
-                yield prisma_1.prisma.syncLogs.create({
-                    data: {
-                        moduleName: enum_1.QBOModules.CLOSING_DATE,
-                        status: enum_1.SyncLogsStatus.SUCCESS,
-                        message: `New book closing date ${date} synced successfully in ${Number(duration) / 1000} seconds.`,
-                        companyId: companyId,
-                    },
-                });
+                if (query.syncLogs) {
+                    const start = Date.now();
+                    const duration = Date.now() - start;
+                    yield prisma_1.prisma.syncLogs.create({
+                        data: {
+                            moduleName: enum_1.QBOModules.CLOSING_DATE,
+                            status: enum_1.SyncLogsStatus.SUCCESS,
+                            message: `New book closing date ${date} synced successfully in ${Number(duration) / 1000} seconds.`,
+                            companyId: companyId,
+                        },
+                    });
+                }
                 return date;
             }
             catch (err) {

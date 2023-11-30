@@ -57,6 +57,7 @@ class ZohoController {
                 }
                 // Generate SAML response using the SAML request and user's email
                 const samlResponse = yield CommonMethods.GenerateSamlResponse(req.body.sAMLRequest, email);
+                console.log('samlResponse: ', samlResponse);
                 // Check if the SAML response is null or empty, and return an error response if true
                 if (!samlResponse) {
                     return new customError_1.CustomError(400, 'SAML response is invalid.');
@@ -85,13 +86,18 @@ class CommonMethods {
         return __awaiter(this, void 0, void 0, function* () {
             // Decode the SAML request
             const sAMLRequestDecoded = CommonMethods.DecodeSAMLRequest(sAMLRequest);
+            console.log('sAMLRequestDecoded: ', sAMLRequestDecoded);
             // Load the decoded SAML request into an XML document
             const sAMLRequestDoc = yield (0, utils_1.parseXml)(sAMLRequestDecoded);
+            console.log('sAMLRequestDoc: ', sAMLRequestDoc);
             // Get the root element of the SAML request and extract the "ID" attribute
             const sAMLRequestRoot = sAMLRequestDoc.documentElement;
+            console.log('sAMLRequestRoot: ', sAMLRequestRoot);
             const id = sAMLRequestRoot.getAttribute('ID') || '';
+            console.log('ID: ', id);
             // Define the path to the signing certificate (PFX file)
-            const pfxpath = path.join(__dirname, 'costallocationpro.pfx');
+            const pfxpath = path.join(__dirname, '..', 'costallocationpro.pfx');
+            console.log('pfxpath: ', pfxpath);
             // Check if the PFX file exists, and throw an exception if not
             if (!fs.existsSync(pfxpath)) {
                 throw new customError_1.CustomError(400, 'Signing Certificate is missing!');
@@ -118,8 +124,10 @@ class CommonMethods {
             };
             // Create the SAML response using the factory service
             const samlResponse = SamlResponseFactoryService.CreateSamlResponse(samlResponseFactoryArgs, user);
+            console.log('samlResponse: ', samlResponse);
             // Convert the SAML response to a Base64-encoded string
             const encodedSamlResponse = Buffer.from(samlResponse).toString('base64');
+            console.log('encodedSamlResponse: ', encodedSamlResponse);
             // Return the Base64-encoded SAML response
             return encodedSamlResponse;
         });
@@ -130,8 +138,10 @@ class CommonMethods {
             const samlBytes = Buffer.from(samlRequest, 'base64');
             // Inflate the DEFLATE-compressed SAML request
             const decodedSaml = zlib.inflateSync(samlBytes).toString('utf-8');
+            console.log('decodedSaml: ', decodedSaml);
             // Convert the decoded SAML string to an XML document
             const samlXml = yield (0, utils_1.parseXml)(decodedSaml);
+            console.log('samlXml: ', samlXml);
             // Return the outer XML representation of the SAML document
             return samlXml.toString();
         });
