@@ -35,13 +35,17 @@ class ConfigurationController {
             try {
                 // Check validation for company
                 (0, validationHelper_1.checkValidation)(req);
-                const companyId = req.body.companyId;
+                const companyId = req.query.companyId;
+                const payPeriodId = req.query.payPeriodId;
+                if (!payPeriodId) {
+                    throw new customError_1.CustomError(400, 'PayPeriod Required');
+                }
                 // Check If company exists
                 const companyDetails = yield repositories_1.companyRepository.getDetails(companyId);
                 if (!companyDetails) {
                     throw new customError_1.CustomError(404, 'Company not found');
                 }
-                const configurationDetails = yield configurationRepository_1.default.getCompanyConfiguration(companyId);
+                const configurationDetails = yield configurationRepository_1.default.getCompanyConfiguration(companyId, payPeriodId);
                 return (0, defaultResponseHelper_1.DefaultResponse)(res, 200, 'Configurations fetched successfully', configurationDetails);
             }
             catch (err) {
@@ -55,6 +59,7 @@ class ConfigurationController {
                 // Check validation for company
                 (0, validationHelper_1.checkValidation)(req);
                 const companyId = req.body.companyId;
+                const payPeriodId = req.body.payPeriodId;
                 const { settings, indirectExpenseRate, payrollMethod, decimalToFixedAmount, decimalToFixedPercentage } = req.body;
                 // Check If company exists
                 const companyDetails = yield repositories_1.companyRepository.getDetails(companyId);
@@ -66,10 +71,11 @@ class ConfigurationController {
                     indirectExpenseRate: indirectExpenseRate,
                     payrollMethod: payrollMethod,
                     decimalToFixedAmount,
-                    decimalToFixedPercentage
+                    decimalToFixedPercentage,
+                    payPeriodId
                 };
                 // Update configuration
-                const updatedConfiguration = yield configurationRepository_1.default.updateConfiguration(companyId, data);
+                const updatedConfiguration = yield configurationRepository_1.default.updateConfiguration(companyId, payPeriodId, data);
                 return (0, defaultResponseHelper_1.DefaultResponse)(res, 200, 'Configurations updated successfully', updatedConfiguration);
             }
             catch (err) {
@@ -80,8 +86,8 @@ class ConfigurationController {
     getFieldsSection(req, res, next) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                const { companyId } = req.query;
-                const sections = yield configurationServices_1.default.getFieldsSection(companyId);
+                const { companyId, payPeriodId } = req.query;
+                const sections = yield configurationServices_1.default.getFieldsSection(companyId, payPeriodId);
                 return (0, defaultResponseHelper_1.DefaultResponse)(res, 200, 'Section fields fetched successfully', sections);
             }
             catch (error) {
@@ -105,14 +111,14 @@ class ConfigurationController {
     deleteField(req, res, next) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                const { fieldId, companyId } = req.body;
+                const { fieldId, companyId, payPeriodId } = req.body;
                 // Check If company exists
                 const companyDetails = yield repositories_1.companyRepository.getDetails(companyId);
                 if (!companyDetails) {
                     throw new customError_1.CustomError(404, 'Company not found');
                 }
                 (0, validationHelper_1.checkValidation)(req);
-                const deletedField = yield configurationServices_1.default.deleteField(fieldId, companyId);
+                const deletedField = yield configurationServices_1.default.deleteField(fieldId, companyId, payPeriodId);
                 return (0, defaultResponseHelper_1.DefaultResponse)(res, 200, 'Field deleted successfully', deletedField);
             }
             catch (error) {

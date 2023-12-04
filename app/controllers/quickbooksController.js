@@ -117,7 +117,6 @@ class QuickbooksController {
                     // 		},
                     // 	}
                     // );
-                    // console.log('Sync data update: ', syncData);
                 }
                 else {
                     // For first time company integration
@@ -210,14 +209,30 @@ class QuickbooksController {
                                 .format(),
                         },
                     });
-                    const fields = yield configurationRepository_1.default.initialFieldSectionCreate(finalCompanyDetails === null || finalCompanyDetails === void 0 ? void 0 : finalCompanyDetails.id);
-                    const employees = yield repositories_1.employeeRepository.getAllEmployeesByCompanyId(finalCompanyDetails === null || finalCompanyDetails === void 0 ? void 0 : finalCompanyDetails.id);
-                    const sectionWithFields = yield configurationRepository_1.default.getConfigurationField(finalCompanyDetails === null || finalCompanyDetails === void 0 ? void 0 : finalCompanyDetails.id);
-                    const sectionFields = sectionWithFields.reduce((accumulator, section) => {
-                        accumulator.push(...section.fields);
-                        return accumulator;
-                    }, []);
-                    const values = yield repositories_1.employeeCostRepository.createInitialValues(employees, sectionFields, finalCompanyDetails === null || finalCompanyDetails === void 0 ? void 0 : finalCompanyDetails.id);
+                    //NOTE: Now we will create all default entries when first pay period will be create.
+                    // const fields = await configurationRepository.initialFieldSectionCreate(
+                    // 	finalCompanyDetails?.id
+                    // );
+                    // const employees = await employeeRepository.getAllEmployeesByCompanyId(
+                    // 	finalCompanyDetails?.id
+                    // );
+                    // const sectionWithFields =
+                    // 	await configurationRepository.getConfigurationField(
+                    // 		finalCompanyDetails?.id,
+                    // 		''
+                    // 	);
+                    // const sectionFields = sectionWithFields.reduce(
+                    // 	(accumulator: any, section) => {
+                    // 		accumulator.push(...section.fields);
+                    // 		return accumulator;
+                    // 	},
+                    // 	[]
+                    // );
+                    // const values = await employeeCostRepository.createInitialValues(
+                    // 	employees,
+                    // 	sectionFields,
+                    // 	finalCompanyDetails?.id
+                    // );
                     // await employeeServices.syncEmployeesByLastSync(companyId);
                 }
                 return (0, defaultResponseHelper_1.DefaultResponse)(res, 200, 'Company connected successfully', finalCompanyDetails);

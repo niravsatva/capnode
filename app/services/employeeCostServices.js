@@ -171,6 +171,7 @@ class EmployeeCostService {
                 where: {
                     companyId,
                     jsonId: 't1',
+                    payPeriodId
                 },
             });
             const totalFields = [];

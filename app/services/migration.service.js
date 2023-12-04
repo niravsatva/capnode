@@ -12,7 +12,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.migrationService = void 0;
+exports.migrationService = exports.migrateConfiguration = void 0;
 const moment_1 = __importDefault(require("moment"));
 const prisma_1 = require("../client/prisma");
 const logger_1 = require("../utils/logger");
@@ -403,7 +403,7 @@ function syncMissingField() {
                 })));
             })));
             const employees = yield repositories_1.employeeRepository.getAllEmployeesByCompanyId(companyId);
-            const sectionWithFields = yield configurationRepository_1.default.getConfigurationField(companyId);
+            const sectionWithFields = yield configurationRepository_1.default.getConfigurationField(companyId, '');
             const sectionFields = sectionWithFields.reduce((accumulator, section) => {
                 accumulator.push(...section.fields);
                 return accumulator;
@@ -464,7 +464,157 @@ function updateConfigurationJson() {
         }
     });
 }
+function migrateConfiguration() {
+    return __awaiter(this, void 0, void 0, function* () {
+        const companies = yield prisma_1.prisma.company.findMany({
+            include: {
+                configuration: true
+            }
+        });
+        if (companies.length) {
+            for (const company of companies) {
+                const payPeriods = yield prisma_1.prisma.payPeriod.findMany({
+                    where: {
+                        companyId: company.id
+                    },
+                    orderBy: {
+                        createdAt: 'asc'
+                    }
+                });
+                if (payPeriods && payPeriods.length) {
+                    const configuration = yield prisma_1.prisma.configuration.findFirst({
+                        where: {
+                            companyId: company.id
+                        }
+                    });
+                    const configurationSection = yield prisma_1.prisma.configurationSection.findMany({
+                        where: {
+                            companyId: company.id
+                        }
+                    });
+                    const fields = yield prisma_1.prisma.field.findMany({
+                        where: {
+                            companyId: company.id
+                        }
+                    });
+                    const employeeCostFields = yield prisma_1.prisma.employeeCostField.findMany({
+                        where: {
+                            companyId: company.id
+                        }
+                    });
+                    for (let i = 0; i < payPeriods.length - 1; i++) {
+                        const payPeriod = payPeriods[i];
+                        if (configuration) {
+                            yield prisma_1.prisma.configuration.create({
+                                data: {
+                                    companyId: company.id,
+                                    payPeriodId: payPeriod.id,
+                                    settings: configuration.settings,
+                                    indirectExpenseRate: configuration.indirectExpenseRate,
+                                    payrollMethod: configuration.payrollMethod,
+                                    decimalToFixedPercentage: configuration.decimalToFixedPercentage,
+                                    decimalToFixedAmount: configuration.decimalToFixedAmount
+                                }
+                            });
+                            for (const oldSection of configurationSection) {
+                                const newSection = yield prisma_1.prisma.configurationSection.create({
+                                    data: {
+                                        companyId: company.id,
+                                        payPeriodId: payPeriod.id,
+                                        sectionName: oldSection.sectionName,
+                                        no: oldSection.no,
+                                    }
+                                });
+                                const oldFieldData = fields.filter((e) => e.configurationSectionId === oldSection.id && e.companyId === company.id);
+                                if (oldFieldData.length) {
+                                    for (const oldField of oldFieldData) {
+                                        const newField = yield prisma_1.prisma.field.create({
+                                            data: {
+                                                companyId: company.id,
+                                                payPeriodId: payPeriod.id,
+                                                configurationSectionId: newSection.id,
+                                                jsonId: oldField.jsonId,
+                                                type: oldField.type,
+                                                name: oldField.name,
+                                                isActive: oldField.isActive
+                                            }
+                                        });
+                                        const oldEmployeeCostFields = employeeCostFields.filter((e) => e.fieldId === oldField.id);
+                                        for (const oldEmployeeCostField of oldEmployeeCostFields) {
+                                            const newEmployeeCostField = yield prisma_1.prisma.employeeCostField.create({
+                                                data: {
+                                                    companyId: company.id,
+                                                    payPeriodId: payPeriod.id,
+                                                    fieldId: newField.id,
+                                                    employeeId: oldEmployeeCostField.employeeId
+                                                }
+                                            });
+                                            yield prisma_1.prisma.employeeCostValue.updateMany({
+                                                where: {
+                                                    payPeriodId: payPeriod.id,
+                                                    employeeFieldId: oldEmployeeCostField.id
+                                                },
+                                                data: {
+                                                    employeeFieldId: newEmployeeCostField.id
+                                                }
+                                            });
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    const latestPayPeriod = payPeriods[payPeriods.length - 1];
+                    if (latestPayPeriod) {
+                        if (configuration) {
+                            yield prisma_1.prisma.configuration.update({
+                                where: {
+                                    id: configuration === null || configuration === void 0 ? void 0 : configuration.id,
+                                },
+                                data: {
+                                    payPeriodId: latestPayPeriod.id
+                                }
+                            });
+                            for (const section of configurationSection) {
+                                yield prisma_1.prisma.configurationSection.update({
+                                    where: {
+                                        id: section.id
+                                    },
+                                    data: {
+                                        payPeriodId: latestPayPeriod.id
+                                    }
+                                });
+                            }
+                            for (const field of fields) {
+                                yield prisma_1.prisma.field.update({
+                                    where: {
+                                        id: field.id
+                                    },
+                                    data: {
+                                        payPeriodId: latestPayPeriod.id
+                                    }
+                                });
+                            }
+                            for (const employeeCostField of employeeCostFields) {
+                                yield prisma_1.prisma.employeeCostField.update({
+                                    where: {
+                                        id: employeeCostField.id
+                                    },
+                                    data: {
+                                        payPeriodId: latestPayPeriod.id
+                                    }
+                                });
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    });
+}
+exports.migrateConfiguration = migrateConfiguration;
 exports.migrationService = {
+    migrateConfiguration,
     addSyncLogsPermissions,
     updateConfigurationJson,
     syncMissingField,

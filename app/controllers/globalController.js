@@ -44,7 +44,6 @@ class GlobalController {
                 };
                 const pdf = yield globalServices_1.default.generatePdf(data);
                 return res.end(pdf);
-                // console.log('PDF: ', pdf);
             }
             catch (err) {
                 logger_1.logger.error('Error while making pdf ', err);

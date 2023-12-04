@@ -53,8 +53,10 @@ class costAllocationRepository {
                     employeeCostField: {
                         where: {
                             field: {
+                                payPeriodId,
                                 isActive: true
-                            }
+                            },
+                            payPeriodId
                         },
                         include: {
                             field: true,
@@ -81,6 +83,7 @@ class costAllocationRepository {
                     no: {
                         gt: 0,
                     },
+                    payPeriodId
                 },
             });
             const sectionIds = companySection.map((e) => {
@@ -93,6 +96,7 @@ class costAllocationRepository {
                     configurationSectionId: {
                         in: sectionIds,
                     },
+                    payPeriodId
                 },
             });
             const totalFields = companyFields.map((e) => {
@@ -111,6 +115,7 @@ class costAllocationRepository {
             const companyConfiguration = yield prisma_1.prisma.configuration.findFirst({
                 where: {
                     companyId,
+                    payPeriodId
                 },
             });
             let percentageToFixed = 4;
@@ -287,8 +292,10 @@ class costAllocationRepository {
                     employeeCostField: {
                         where: {
                             field: {
+                                payPeriodId,
                                 isActive: true
-                            }
+                            },
+                            payPeriodId
                         },
                         include: {
                             field: true,
@@ -312,6 +319,7 @@ class costAllocationRepository {
                     no: {
                         gt: 0,
                     },
+                    payPeriodId
                 },
             });
             const sectionIds = companySection.map((e) => {
@@ -324,6 +332,7 @@ class costAllocationRepository {
                     configurationSectionId: {
                         in: sectionIds,
                     },
+                    payPeriodId
                 },
             });
             const salarySection = companySection.find((e) => e.no === 1);
@@ -335,6 +344,7 @@ class costAllocationRepository {
             const companyConfiguration = yield prisma_1.prisma.configuration.findFirst({
                 where: {
                     companyId,
+                    payPeriodId
                 },
             });
             for (const singleCostAllocation of costAllocations) {
@@ -436,8 +446,10 @@ class costAllocationRepository {
                     employeeCostField: {
                         where: {
                             field: {
+                                payPeriodId,
                                 isActive: true
-                            }
+                            },
+                            payPeriodId
                         },
                         include: {
                             field: true,
@@ -460,6 +472,7 @@ class costAllocationRepository {
                     no: {
                         gt: 0,
                     },
+                    payPeriodId
                 },
             });
             const sectionIds = companySection.map((e) => {
@@ -472,6 +485,7 @@ class costAllocationRepository {
                     configurationSectionId: {
                         in: sectionIds,
                     },
+                    payPeriodId
                 },
             });
             const salarySection = companySection.find((e) => e.no === 1);
@@ -486,6 +500,7 @@ class costAllocationRepository {
             const companyConfiguration = yield prisma_1.prisma.configuration.findFirst({
                 where: {
                     companyId,
+                    payPeriodId
                 },
             });
             const customerTotalMapping = [];

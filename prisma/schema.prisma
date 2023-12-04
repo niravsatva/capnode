@@ -69,7 +69,7 @@ model Company {
   createdAt                  DateTime               @default(now())
   updatedAt                  DateTime               @updatedAt
   Invitations                Invitations[]
-  configuration              Configuration?
+  configuration              Configuration[]
   Employee                   Employee[]
   timeActivities             TimeActivities[]
   ConfigurationSection       ConfigurationSection[]
@@ -152,9 +152,13 @@ model Configuration {
   company                  Company?        @relation(fields: [companyId], references: [id])
   decimalToFixedPercentage Int?            @default(4)
   decimalToFixedAmount     Int?            @default(2)
-  companyId                String          @unique
+  companyId                String
   createdAt                DateTime        @default(now())
   updatedAt                DateTime        @updatedAt
+  payPeriodId              String?
+  payPeriod                PayPeriod?      @relation(fields: [payPeriodId], references: [id])
+
+  @@unique([companyId, payPeriodId])
 }
 
 model Employee {
@@ -178,14 +182,16 @@ model Employee {
 
 // Add 4 sections - 3 for fields and 1 for yearly data 
 model ConfigurationSection {
-  id          String   @id @default(uuid())
+  id          String     @id @default(uuid())
   companyId   String
-  company     Company  @relation(fields: [companyId], references: [id])
+  company     Company    @relation(fields: [companyId], references: [id])
   sectionName String // section name - Fringe Expense
   fields      Field[]
   no          Int
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+  payPeriodId String?
+  payPeriod   PayPeriod? @relation(fields: [payPeriodId], references: [id])
 }
 
 // section 1 field 1
@@ -199,6 +205,8 @@ model Field {
   type                   FieldType            @default(Monthly)
   name                   String // field name - health Insurance
   employeeCostField      EmployeeCostField[]
+  payPeriodId            String?
+  payPeriod              PayPeriod?           @relation(fields: [payPeriodId], references: [id])
   isActive               Boolean              @default(true)
   createdAt              DateTime             @default(now())
   updatedAt              DateTime             @updatedAt
@@ -206,16 +214,18 @@ model Field {
 
 // Employee 1 - Fringe 
 model EmployeeCostField {
-  id         String              @id @default(uuid())
-  employee   Employee?           @relation(fields: [employeeId], references: [id])
-  companyId  String
-  company    Company             @relation(fields: [companyId], references: [id])
-  employeeId String?
-  field      Field?              @relation(fields: [fieldId], references: [id], onDelete: Cascade)
-  fieldId    String?
-  costValue  EmployeeCostValue[]
-  createdAt  DateTime            @default(now())
-  updatedAt  DateTime            @updatedAt
+  id          String              @id @default(uuid())
+  employee    Employee?           @relation(fields: [employeeId], references: [id])
+  companyId   String
+  company     Company             @relation(fields: [companyId], references: [id])
+  employeeId  String?
+  field       Field?              @relation(fields: [fieldId], references: [id], onDelete: Cascade)
+  fieldId     String?
+  costValue   EmployeeCostValue[]
+  payPeriodId String?
+  payPeriod   PayPeriod?          @relation(fields: [payPeriodId], references: [id])
+  createdAt   DateTime            @default(now())
+  updatedAt   DateTime            @updatedAt
 }
 
 // Employee 1 - March Fringe Expense
@@ -253,20 +263,24 @@ model EmployeeCostValue {
 // }
 
 model PayPeriod {
-  id                 String              @id @default(uuid())
-  startDate          DateTime
-  endDate            DateTime
-  status             Int                 @default(1)
-  companyId          String
-  closingDate        DateTime?
-  company            Company             @relation(fields: [companyId], references: [id])
-  employeeCostValue  EmployeeCostValue[]
-  isJournalPublished Boolean             @default(false)
-  createdAt          DateTime            @default(now())
-  updatedAt          DateTime            @updatedAt
-  timeActivities     TimeActivities[]
-  TimeSheets         TimeSheets?
-  Journal            Journal?
+  id                   String                 @id @default(uuid())
+  startDate            DateTime
+  endDate              DateTime
+  status               Int                    @default(1)
+  companyId            String
+  closingDate          DateTime?
+  company              Company                @relation(fields: [companyId], references: [id])
+  employeeCostValue    EmployeeCostValue[]
+  isJournalPublished   Boolean                @default(false)
+  createdAt            DateTime               @default(now())
+  updatedAt            DateTime               @updatedAt
+  timeActivities       TimeActivities[]
+  TimeSheets           TimeSheets?
+  Journal              Journal?
+  ConfigurationSection ConfigurationSection[]
+  Field                Field[]
+  EmployeeCostField    EmployeeCostField[]
+  Configuration        Configuration[]
 }
 
 model TimeActivities {

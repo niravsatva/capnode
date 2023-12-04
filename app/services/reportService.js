@@ -167,13 +167,13 @@ class ReportService {
                         "fullName" ASC`;
             const data = yield prisma_1.prisma.$queryRawUnsafe(rawQuery);
             const distinctClassNameQuery = `SELECT
-																			DISTINCT "className"
-                                    FROM
-																			public."TimeActivities"
-                                    WHERE
-																			"className" IS NOT NULL AND
-																			"companyId" = '${query.companyId}' AND
-																			"id" IN ('${timeActivityIds.join("', '")}')`;
+											DISTINCT "className"
+                                    	FROM
+											public."TimeActivities"
+                                    	WHERE
+											"className" IS NOT NULL AND
+											"companyId" = '${query.companyId}' AND
+											"id" IN ('${timeActivityIds.join("', '")}')`;
             const disTinctClassNames = yield prisma_1.prisma.$queryRawUnsafe(distinctClassNameQuery);
             const classNames = disTinctClassNames.map((e) => {
                 return e.className;
@@ -481,6 +481,7 @@ class ReportService {
                     no: {
                         gt: 0,
                     },
+                    payPeriodId
                 },
                 include: {
                     fields: true,
@@ -511,7 +512,7 @@ class ReportService {
             if (!companyDetails) {
                 throw new customError_1.CustomError(400, 'Company not found');
             }
-            const sections = yield configurationServices_1.default.getFieldsSection(query.companyId);
+            const sections = yield configurationServices_1.default.getFieldsSection(query.companyId, query.payPeriodId);
             const headers = [];
             sections.forEach((section) => {
                 if (section.no != 0) {
@@ -534,7 +535,7 @@ class ReportService {
             if (!companyDetails) {
                 throw new customError_1.CustomError(400, 'Company not found');
             }
-            const sections = yield configurationServices_1.default.getFieldsSection(query.companyId);
+            const sections = yield configurationServices_1.default.getFieldsSection(query.companyId, query.payPeriodId);
             const headers = [];
             sections.forEach((section) => {
                 if (section.no != 0) {

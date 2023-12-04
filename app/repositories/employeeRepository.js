@@ -73,7 +73,7 @@ class EmployeeRepository {
                     });
                     // This is new code for creating fields for employees after syncing
                     if (listOfFields && (listOfFields === null || listOfFields === void 0 ? void 0 : listOfFields.length) > 0) {
-                        yield Promise.all(yield listOfFields.map((singleField) => __awaiter(this, void 0, void 0, function* () {
+                        yield Promise.all(listOfFields.map((singleField) => __awaiter(this, void 0, void 0, function* () {
                             yield prisma_1.prisma.employeeCostField.create({
                                 data: {
                                     employee: { connect: { id: updatedEmployees.id } },

@@ -12,6 +12,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+/* eslint-disable camelcase */
 const prisma_1 = require("../client/prisma");
 const data_1 = require("../constants/data");
 const employeeCostRepository_1 = __importDefault(require("./employeeCostRepository"));
@@ -26,7 +27,7 @@ class ConfigurationRepository {
                         settings: data_1.DefaultConfigurationSettings,
                         indirectExpenseRate: 0,
                         payrollMethod: 'Percentage',
-                        company: { connect: { id: companyId } },
+                        companyId: companyId
                     },
                 });
                 return configuration;
@@ -37,12 +38,13 @@ class ConfigurationRepository {
         });
     }
     // Get company configurations
-    getCompanyConfiguration(companyId) {
+    getCompanyConfiguration(companyId, payPeriodId) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 const configuration = yield prisma_1.prisma.configuration.findFirst({
                     where: {
                         companyId: companyId,
+                        payPeriodId: payPeriodId
                     },
                 });
                 return configuration;
@@ -53,19 +55,23 @@ class ConfigurationRepository {
         });
     }
     // Update configuration settings
-    updateConfiguration(companyId, data) {
+    updateConfiguration(companyId, payPeriodId, data) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 const updatedConfiguration = yield prisma_1.prisma.configuration.update({
                     where: {
-                        companyId: companyId,
+                        companyId_payPeriodId: {
+                            companyId: companyId,
+                            payPeriodId: payPeriodId
+                        }
                     },
                     data: data,
                 });
                 const settings = data.settings;
                 const configurationSectionData = yield prisma_1.prisma.configurationSection.findMany({
                     where: {
-                        companyId
+                        companyId,
+                        payPeriodId
                     },
                     select: {
                         id: true,
@@ -81,6 +87,7 @@ class ConfigurationRepository {
                                 yield prisma_1.prisma.field.updateMany({
                                     where: {
                                         companyId,
+                                        payPeriodId,
                                         jsonId: fieldKey,
                                         configurationSectionId: section.id,
                                     },
@@ -93,34 +100,35 @@ class ConfigurationRepository {
                         }
                     }
                 }
-                const listOfPeriod = yield payPeriodRepository_1.default.getAll({
-                    companyId,
-                    dateFilter: {},
-                });
-                yield Promise.all(listOfPeriod.map((singlePayPeriod) => __awaiter(this, void 0, void 0, function* () {
-                    const configurationFields = yield this.getConfigurationField(companyId);
-                    const monthlyCost = yield employeeCostRepository_1.default.getMonthlyCost(companyId, '', 0, 10000000, {}, {}, true, singlePayPeriod.id);
-                    monthlyCost.map((singleEmployeeData) => {
-                        configurationFields.map((singleConfigurationSection) => __awaiter(this, void 0, void 0, function* () {
-                            if (singleConfigurationSection.no !== 0) {
-                                let total = 0;
-                                singleEmployeeData.employeeCostField.forEach((singleEmployeeCostField) => {
-                                    if (singleEmployeeCostField.field
-                                        .configurationSectionId ===
-                                        singleConfigurationSection.id &&
-                                        singleEmployeeCostField.field.jsonId !== 't1') {
-                                        total += Number(singleEmployeeCostField.costValue[0].value);
-                                    }
-                                });
-                                const fieldToUpdate = singleEmployeeData.employeeCostField.find((singleEmployeeCostField) => singleEmployeeCostField.field
+                // const listOfPeriod = await payPeriodRepository.getAll({
+                // 	companyId,
+                // 	dateFilter: {},
+                // });
+                const configurationFields = yield this.getConfigurationField(companyId, payPeriodId);
+                const monthlyCost = yield employeeCostRepository_1.default.getMonthlyCost(companyId, '', 0, 10000000, {}, {}, true, payPeriodId);
+                yield Promise.all(monthlyCost.map((singleEmployeeData) => {
+                    configurationFields.map((singleConfigurationSection) => __awaiter(this, void 0, void 0, function* () {
+                        if (singleConfigurationSection.no !== 0) {
+                            let total = 0;
+                            singleEmployeeData.employeeCostField.forEach((singleEmployeeCostField) => {
+                                if (singleEmployeeCostField.field
                                     .configurationSectionId ===
                                     singleConfigurationSection.id &&
-                                    singleEmployeeCostField.field.jsonId === 't1');
-                                yield employeeCostRepository_1.default.updateMonthlyCost(fieldToUpdate.costValue[0].id, total.toFixed(2));
-                            }
-                        }));
-                    });
-                })));
+                                    singleEmployeeCostField.field.jsonId !== 't1') {
+                                    total += Number(singleEmployeeCostField.costValue[0].value);
+                                }
+                            });
+                            const fieldToUpdate = singleEmployeeData.employeeCostField.find((singleEmployeeCostField) => singleEmployeeCostField.field
+                                .configurationSectionId ===
+                                singleConfigurationSection.id &&
+                                singleEmployeeCostField.field.jsonId === 't1');
+                            yield employeeCostRepository_1.default.updateMonthlyCost(fieldToUpdate.costValue[0].id, total.toFixed(2));
+                        }
+                    }));
+                })
+                // listOfPeriod.map(async (singlePayPeriod: any) => {
+                // })
+                );
                 return updatedConfiguration;
             }
             catch (err) {
@@ -128,12 +136,13 @@ class ConfigurationRepository {
             }
         });
     }
-    getConfigurationField(companyId) {
+    getConfigurationField(companyId, payPeriodId) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 const configurationSection = yield prisma_1.prisma.configurationSection.findMany({
                     where: {
                         companyId,
+                        payPeriodId,
                     },
                     orderBy: {
                         no: 'asc',
@@ -166,7 +175,7 @@ class ConfigurationRepository {
             }
         });
     }
-    deleteConfigurationField(fieldId, companyId) {
+    deleteConfigurationField(fieldId, companyId, payPeriodId) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 const deletedField = yield prisma_1.prisma.field.delete({
@@ -181,7 +190,7 @@ class ConfigurationRepository {
                 });
                 yield Promise.all(percentAndHourArray.map(() => __awaiter(this, void 0, void 0, function* () {
                     yield Promise.all(listOfPeriod.map((singlePayPeriod) => __awaiter(this, void 0, void 0, function* () {
-                        const configurationFields = yield this.getConfigurationField(companyId);
+                        const configurationFields = yield this.getConfigurationField(companyId, payPeriodId);
                         const monthlyCost = yield employeeCostRepository_1.default.getMonthlyCost(companyId, '', 0, 10000000, {}, {}, true, singlePayPeriod.id);
                         monthlyCost.map((singleEmployeeData) => {
                             configurationFields.map((singleConfigurationSection) => __awaiter(this, void 0, void 0, function* () {

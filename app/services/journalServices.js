@@ -69,7 +69,8 @@ class JournalService {
             let defaultAmountToFixed = 2;
             const companyConfiguration = yield prisma_1.prisma.configuration.findFirst({
                 where: {
-                    companyId: query.companyId
+                    companyId: query.companyId,
+                    payPeriodId: query.payPeriodId
                 }
             });
             if (companyConfiguration === null || companyConfiguration === void 0 ? void 0 : companyConfiguration.decimalToFixedAmount) {
@@ -84,7 +85,8 @@ class JournalService {
                     companyId: query.companyId,
                     no: {
                         gt: 0
-                    }
+                    },
+                    payPeriodId: query.payPeriodId
                 },
                 select: {
                     id: true,
@@ -94,7 +96,8 @@ class JournalService {
                             jsonId: {
                                 not: 't1'
                             },
-                            isActive: true
+                            isActive: true,
+                            payPeriodId: query.payPeriodId
                         },
                         orderBy: {
                             jsonId: 'asc'

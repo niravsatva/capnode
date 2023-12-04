@@ -112,7 +112,7 @@ class EmployeeServices {
         });
     }
     // Will be called on sync now button
-    syncEmployeesByLastSync(companyId) {
+    syncEmployeesByLastSync(companyId, payPeriodId) {
         var _a, _b, _c, _d;
         return __awaiter(this, void 0, void 0, function* () {
             try {
@@ -149,7 +149,7 @@ class EmployeeServices {
                 // If new records found
                 let employeeArr = [];
                 if (((_b = (_a = newEmployees === null || newEmployees === void 0 ? void 0 : newEmployees.QueryResponse) === null || _a === void 0 ? void 0 : _a.Employee) === null || _b === void 0 ? void 0 : _b.length) > 0) {
-                    const sectionWithFields = yield configurationRepository_1.default.getConfigurationField(companyId);
+                    const sectionWithFields = yield configurationRepository_1.default.getConfigurationField(companyId, payPeriodId);
                     const sectionFields = sectionWithFields.reduce((accumulator, section) => {
                         accumulator.push(...section.fields);
                         return accumulator;

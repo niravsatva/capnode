@@ -13,7 +13,6 @@ const prisma_1 = require("../client/prisma");
 class SyncLogRepository {
     getAllLogs(companyId, offset, limit, filterConditions, dateFilter) {
         return __awaiter(this, void 0, void 0, function* () {
-            console.log('Date : ', dateFilter);
             const today = new Date();
             const threeMonthsAgo = new Date();
             threeMonthsAgo.setMonth(today.getMonth() - 3);

@@ -19,10 +19,10 @@ const payPeriodServices_1 = __importDefault(require("./payPeriodServices"));
 // import employeeServices from './employeeServices';
 class ConfigurationService {
     // For get sections with fields
-    getFieldsSection(companyId) {
+    getFieldsSection(companyId, payPeriodId) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                const sections = yield configurationRepository_1.default.getConfigurationField(companyId);
+                const sections = yield configurationRepository_1.default.getConfigurationField(companyId, payPeriodId);
                 return sections;
             }
             catch (error) {
@@ -59,11 +59,11 @@ class ConfigurationService {
         });
     }
     // For delete field
-    deleteField(fieldId, companyId) {
+    deleteField(fieldId, companyId, payPeriodId) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 // const deletedField =
-                yield configurationRepository_1.default.deleteConfigurationField(fieldId, companyId);
+                yield configurationRepository_1.default.deleteConfigurationField(fieldId, companyId, payPeriodId);
                 // Get all employee list
                 const employees = yield repositories_1.employeeRepository.getAllEmployeesByCompanyId(companyId);
                 // return deletedField;

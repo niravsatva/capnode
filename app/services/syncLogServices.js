@@ -20,7 +20,6 @@ class SyncLogService {
     getSyncLogs(query) {
         return __awaiter(this, void 0, void 0, function* () {
             const { companyId, page = 1, limit = 10, filter, fromDate, toDate } = query;
-            console.log('Filter: ', filter);
             if (!companyId) {
                 throw new customError_1.CustomError(400, 'Company id is required');
             }

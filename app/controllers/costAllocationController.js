@@ -207,7 +207,6 @@ class CostAllocationController {
                     payPeriodId: String(payPeriodId),
                 };
                 const { finalDataArr, counts, filePath, companyName } = yield costallocationServices_1.default.exportCostAllocationPDF(data);
-                console.log('Final Data Arr: ' + finalDataArr);
                 const stream = yield (0, costAllocationPdf_1.generatePdf)(finalDataArr, counts, filePath, payPeriodId, companyName);
                 stream.on('close', () => __awaiter(this, void 0, void 0, function* () {
                     const data = yield fs_1.promises.readFile(filePath);

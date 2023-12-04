@@ -339,12 +339,17 @@ class CostAllocationServices {
                     no: {
                         gt: 0,
                     },
+                    payPeriodId
                 },
                 include: {
                     fields: {
                         orderBy: {
                             jsonId: 'asc',
                         },
+                        where: {
+                            isActive: true,
+                            payPeriodId
+                        }
                     },
                 },
                 orderBy: {
@@ -508,11 +513,13 @@ class CostAllocationServices {
                     no: {
                         gt: 0,
                     },
+                    payPeriodId
                 },
                 include: {
                     fields: {
                         where: {
                             isActive: true,
+                            payPeriodId
                         },
                         orderBy: {
                             jsonId: 'asc',

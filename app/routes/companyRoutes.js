@@ -8,7 +8,7 @@ const controllers_1 = require("../controllers");
 const validators_1 = require("../helpers/validators");
 const authMiddleware_1 = require("../middlewares/authMiddleware");
 const router = express_1.default.Router();
-router.get('/configuration', validators_1.companyGetConfigurationValidation, controllers_1.configurationController.getCompanyConfiguration);
+router.get('/configuration', controllers_1.configurationController.getCompanyConfiguration);
 router.get('/', controllers_1.companyController.getUserWiseCompanies);
 router.get('/users', authMiddleware_1.isAuthenticated, controllers_1.companyController.getUsers);
 router.get('/:id', controllers_1.companyController.getCompanyDetails);
