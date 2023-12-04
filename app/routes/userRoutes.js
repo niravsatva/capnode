@@ -17,6 +17,8 @@ router.post('/', controllers_1.userController.createUser);
 router.put('/', validators_1.updateUserByAdminValidation, controllers_1.userController.updateUser);
 // Invite New User
 router.post('/invite-user', validators_1.inviteUserValidationRules, controllers_1.userController.inviteUser);
+// Reinvite New User
+router.post('/reinvite-user', validators_1.reinviteUserValidationRules, controllers_1.userController.reinviteUser);
 // Delete User From Particular Company
 router.delete('/', validators_1.deleteUserFromCompanyRules, controllers_1.userController.deleteUser);
 // Integrate user with company (Temporary Api)

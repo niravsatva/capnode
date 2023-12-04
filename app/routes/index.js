@@ -28,6 +28,8 @@ const reportRoutes_1 = __importDefault(require("./reportRoutes"));
 const subscriptionRoutes_1 = __importDefault(require("./subscriptionRoutes"));
 const zohoRoutes_1 = __importDefault(require("./zohoRoutes"));
 const requestLogger_1 = require("../middlewares/requestLogger");
+const swagger_ui_express_1 = __importDefault(require("swagger-ui-express"));
+const swagger_1 = __importDefault(require("../config/swagger"));
 const router = express_1.default.Router();
 router.use(requestLogger_1.requestLogger);
 router.use('/auth', authRoutes_1.default);
@@ -51,9 +53,24 @@ router.use('/developer', developerRoutes_1.default);
 router.use('/reports', reportRoutes_1.default);
 router.use('/subscription', subscriptionRoutes_1.default);
 router.use('/zoho', zohoRoutes_1.default);
+/**
+ * @swagger
+ * /test:
+ *   get:
+ *     summary: Test api
+ *     description: Testing api
+ *     parameters:
+ *       - in: body
+ *         name: user
+ *         description: The user to login
+ *     responses:
+ *       200:
+ *         description: Success
+ */
 router.use('/test', (req, res) => {
     return res.json({ data: 'Hello world!' });
 });
+router.use('/api-docs', swagger_ui_express_1.default.serve, swagger_ui_express_1.default.setup(swagger_1.default));
 router.use(errorHandler_1.notFound);
 router.use(errorHandler_1.customError);
 exports.default = router;

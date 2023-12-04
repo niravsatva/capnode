@@ -1,7 +1,7 @@
 "use strict";
 // import { TimeSheetsStatus } from '../enum';
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.chartOfAccountsValidation = exports.journalValidator = exports.timeSheetExportValidators = exports.timeSheetEmailValidators = exports.payPeriodValidator = exports.createTimeSheetValidator = exports.deleteAllSplitTimeActivity = exports.deleteSplitTimeActivity = exports.createSplitTimeActivity = exports.employeeCostUpdateValidation = exports.employeeCostCreateValidation = exports.deleteConfigurationFieldValidation = exports.updateConfigurationFieldValidation = exports.addConfigurationFieldValidation = exports.deleteTimeActivityValidation = exports.createTimeActivityValidation = exports.updateTimeActivityValidation = exports.timeActivityValidation = exports.employeeValidation = exports.companyConfigurationValidation = exports.companyGetConfigurationValidation = exports.quickbooksTimeActivityValidation = exports.quickbooksAccountsValidation = exports.quickbooksCustomersValidation = exports.quickbooksClassValidation = exports.quickbooksEmployeeValidation = exports.updateUserByAdminValidation = exports.permissionRoleValidationRules = exports.deleteRoleValidationRules = exports.updateRoleValidationRules = exports.createRoleValidationRules = exports.companyIdValidationRules = exports.updateProfileValidationRules = exports.deleteUserFromCompanyRules = exports.inviteUserValidationRules = exports.changePasswordValidationRules = exports.forgotPasswordValidationRules = exports.loginValidationRules = exports.companyIdValidation = void 0;
+exports.chartOfAccountsValidation = exports.journalValidator = exports.timeSheetExportValidators = exports.timeSheetEmailValidators = exports.payPeriodValidator = exports.createTimeSheetValidator = exports.deleteAllSplitTimeActivity = exports.deleteSplitTimeActivity = exports.createSplitTimeActivity = exports.employeeCostUpdateValidation = exports.employeeCostCreateValidation = exports.deleteConfigurationFieldValidation = exports.updateConfigurationFieldValidation = exports.addConfigurationFieldValidation = exports.deleteTimeActivityValidation = exports.createTimeActivityValidation = exports.updateTimeActivityValidation = exports.timeActivityValidation = exports.employeeValidation = exports.companyConfigurationValidation = exports.companyGetConfigurationValidation = exports.quickbooksTimeActivityValidation = exports.quickbooksAccountsValidation = exports.quickbooksCustomersValidation = exports.quickbooksClassValidation = exports.quickbooksEmployeeValidation = exports.updateUserByAdminValidation = exports.permissionRoleValidationRules = exports.deleteRoleValidationRules = exports.updateRoleValidationRules = exports.createRoleValidationRules = exports.companyIdValidationRules = exports.updateProfileValidationRules = exports.deleteUserFromCompanyRules = exports.reinviteUserValidationRules = exports.inviteUserValidationRules = exports.changePasswordValidationRules = exports.forgotPasswordValidationRules = exports.loginValidationRules = exports.companyIdValidation = void 0;
 const data_1 = require("../constants/data");
 /* eslint-disable @typescript-eslint/no-var-requires */
 const { body } = require('express-validator');
@@ -53,6 +53,25 @@ exports.inviteUserValidationRules = [
         .isUUID()
         .withMessage('Invalid role'),
     body('company')
+        .notEmpty()
+        .withMessage('Company id is required')
+        .isUUID()
+        .withMessage('Invalid company'),
+];
+// Reinvite User validation rules
+exports.reinviteUserValidationRules = [
+    body('userId')
+        .notEmpty()
+        .withMessage('User id is required')
+        .isUUID()
+        .withMessage('Invalid role'),
+    body('email').isEmail().withMessage('Invalid email address'),
+    body('role')
+        .notEmpty()
+        .withMessage('Role id is required')
+        .isUUID()
+        .withMessage('Invalid role'),
+    body('companyId')
         .notEmpty()
         .withMessage('Company id is required')
         .isUUID()

@@ -30,7 +30,17 @@ class UserRepository {
                     },
                     include: {
                         role: true,
-                        user: true,
+                        user: {
+                            select: {
+                                id: true,
+                                email: true,
+                                firstName: true,
+                                lastName: true,
+                                phone: true,
+                                isVerified: true,
+                                status: true,
+                            },
+                        },
                     },
                     skip: offset,
                     take: limit,
@@ -147,6 +157,7 @@ class UserRepository {
                         phone: true,
                         status: true,
                         profileImg: true,
+                        isVerified: true,
                         companies: {
                             where: {
                                 NOT: {
@@ -173,7 +184,7 @@ class UserRepository {
                                         status: true,
                                         fiscalYear: true,
                                         configuration: true,
-                                        Subscription: true
+                                        Subscription: true,
                                     },
                                 },
                                 role: {
@@ -235,7 +246,7 @@ class UserRepository {
                                         isConnected: true,
                                         status: true,
                                         fiscalYear: true,
-                                        Subscription: true
+                                        Subscription: true,
                                     },
                                 },
                                 role: {

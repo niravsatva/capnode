@@ -294,6 +294,68 @@ class UserServices {
             }
         });
     }
+    // Reinvite User
+    reinviteUser(invitedBy, invitedByEmail, email, companyId, userId, role) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const adminUser = yield repositories_1.userRepository.getById(invitedBy);
+            const finalName = adminUser.firstName + ' ' + adminUser.lastName;
+            // Find user by id
+            const user = yield repositories_1.userRepository.getById(userId);
+            if (user && !user.isVerified) {
+                // Reset Password Token Generate
+                const resetPasswordToken = yield (0, tokenHelper_1.generateForgotPasswordToken)({
+                    email: email,
+                    role: role,
+                });
+                // Expires in 1 hour
+                const resetPasswordTokenExpiresAt = (Date.now() + (config_1.default === null || config_1.default === void 0 ? void 0 : config_1.default.registerUrlExpireTime)).toString();
+                // Update user's verification token
+                const updatedUser = yield repositories_1.userRepository.update(user.id, {
+                    forgotPasswordToken: resetPasswordToken,
+                    forgotPasswordTokenExpiresAt: resetPasswordTokenExpiresAt,
+                });
+                const companyName = yield repositories_1.companyRepository.getDetails(companyId);
+                // Verify token url
+                const url = `${config_1.default === null || config_1.default === void 0 ? void 0 : config_1.default.reactAppBaseUrl}/reset-password?token=${resetPasswordToken}&first=true`;
+                const emailContent = (0, emailTemplateHelper_1.getInvitationEmailUserTemplate)({
+                    firstName: updatedUser.firstName,
+                    lastName: updatedUser.lastName,
+                    companyName: companyName === null || companyName === void 0 ? void 0 : companyName.tenantName,
+                    url,
+                });
+                // Send mail to generate new password
+                const mailOptions = {
+                    from: config_1.default.smtpEmail,
+                    to: email,
+                    subject: 'Invitation to join CostAllocation Pro company',
+                    html: emailContent,
+                    // text: `Please use the following token to reset your password: ${forgotPasswordToken}`,
+                };
+                // Mail send to admin
+                const adminEmailContent = (0, emailTemplateHelper_1.getInvitationAdminMailTemplate)({
+                    finalName,
+                    firstName: updatedUser === null || updatedUser === void 0 ? void 0 : updatedUser.firstName,
+                    lastName: updatedUser === null || updatedUser === void 0 ? void 0 : updatedUser.lastName,
+                    companyName: companyName === null || companyName === void 0 ? void 0 : companyName.tenantName,
+                    url: config_1.default === null || config_1.default === void 0 ? void 0 : config_1.default.reactAppBaseUrl,
+                });
+                // Send mail to Admin
+                const adminMailOptions = {
+                    from: config_1.default.smtpEmail,
+                    to: invitedByEmail,
+                    subject: 'Invitation to join CostAllocation Pro portal',
+                    html: adminEmailContent,
+                    // text: `Please use the following token to reset your password: ${forgotPasswordToken}`,
+                };
+                yield (0, emailHelper_1.default)(mailOptions);
+                yield (0, emailHelper_1.default)(adminMailOptions);
+                return;
+            }
+            else {
+                throw new customError_1.CustomError(400, 'User has already invited in this company');
+            }
+        });
+    }
     // Delete User
     deleteUser(userId, companyId) {
         return __awaiter(this, void 0, void 0, function* () {

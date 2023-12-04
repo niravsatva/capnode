@@ -202,6 +202,29 @@ class UserController {
             }
         });
     }
+    // Reinvite User
+    reinviteUser(req, res, next) {
+        var _a, _b;
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                (0, validationHelper_1.checkValidation)(req);
+                const { userId, companyId, email, role } = req.body;
+                // Checking is the user is permitted
+                const isPermitted = yield (0, isAuthorizedUser_1.checkPermission)(req, companyId, {
+                    permissionName: 'Users',
+                    permission: ['add'],
+                });
+                if (!isPermitted) {
+                    throw new customError_1.CustomError(403, 'You are not authorized');
+                }
+                const user = yield userServices_1.default.reinviteUser((_a = req === null || req === void 0 ? void 0 : req.user) === null || _a === void 0 ? void 0 : _a.id, (_b = req === null || req === void 0 ? void 0 : req.user) === null || _b === void 0 ? void 0 : _b.email, email, companyId, userId, role);
+                return (0, defaultResponseHelper_1.DefaultResponse)(res, 200, 'User reinvited successfully', user);
+            }
+            catch (err) {
+                next(err);
+            }
+        });
+    }
     // Integrate User
     integrate(req, res, next) {
         return __awaiter(this, void 0, void 0, function* () {

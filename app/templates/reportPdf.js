@@ -87,10 +87,10 @@ const generateTimeSummaryReportPdf = (costAllocationData, filePath, companyName,
             const row = table[i];
             for (let j = 0; j < row.length; j++) {
                 if (i === 0) {
-                    doc.fillColor('#485949');
+                    doc.fillColor('#333');
                 }
                 else {
-                    doc.fillColor('#F3EDE7');
+                    doc.fillColor('#FFFFFF');
                 }
                 doc.fontSize(16);
                 // Fill the cell background
@@ -214,10 +214,10 @@ const generatePayrollSummaryReportPdf = (payrollSummaryData, headers, filePath, 
             const row = table[i];
             for (let j = 0; j < row.length; j++) {
                 if (i === 0) {
-                    doc.fillColor('#485949');
+                    doc.fillColor('#333');
                 }
                 else {
-                    doc.fillColor('#F3EDE7');
+                    doc.fillColor('#FFFFFF');
                 }
                 doc.fontSize(16);
                 // Fill the cell background

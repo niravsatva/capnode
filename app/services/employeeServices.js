@@ -24,49 +24,12 @@ class EmployeeServices {
     getEmployees(employeeData) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                // page, limit, search, filter, type, sort,
                 const { companyId } = employeeData;
                 // Check if company exists or not
                 const companyDetails = yield repositories_1.companyRepository.getDetails(companyId);
                 if (!companyDetails) {
                     throw new customError_1.CustomError(404, 'Company not found');
                 }
-                // Offset
-                // const offset = (Number(page) - 1) * Number(limit);
-                // // Conditions for filtering
-                // const filterConditions: Record<string, any> = filter
-                // 	? { status: filter == 'true' ? true : false }
-                // 	: {};
-                // // Conditions for search
-                // const searchCondition = search
-                // 	? {
-                // 			OR: [
-                // 				{
-                // 					firstName: {
-                // 						mode: 'insensitive',
-                // 						contains: search as string,
-                // 					},
-                // 				},
-                // 				{
-                // 					lastName: {
-                // 						mode: 'insensitive',
-                // 						contains: search as string,
-                // 					},
-                // 				},
-                // 				{
-                // 					email: { contains: search as string, mode: 'insensitive' },
-                // 				},
-                // 			],
-                // 	  }
-                // 	: {};
-                // // Conditions for sort
-                // const sortCondition = sort
-                // 	? {
-                // 			orderBy: {
-                // 				[sort as string]: type ?? 'asc',
-                // 			},
-                // 	  }
-                // 	: {};
                 // Get all employees by company id
                 const employees = yield repositories_1.employeeRepository.getAllEmployeesByCompanyId(companyId);
                 return employees;
@@ -113,7 +76,7 @@ class EmployeeServices {
     }
     // Will be called on sync now button
     syncEmployeesByLastSync(companyId, payPeriodId) {
-        var _a, _b, _c, _d;
+        var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k;
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 // Check if company exists or not
@@ -147,26 +110,46 @@ class EmployeeServices {
                 // Get employees by last sync from Quickbooks
                 const newEmployees = yield (quickbooksClient_1.default === null || quickbooksClient_1.default === void 0 ? void 0 : quickbooksClient_1.default.getEmployeesByLastSync(authResponse === null || authResponse === void 0 ? void 0 : authResponse.accessToken, authResponse === null || authResponse === void 0 ? void 0 : authResponse.tenantID, authResponse === null || authResponse === void 0 ? void 0 : authResponse.refreshToken, companyDetails === null || companyDetails === void 0 ? void 0 : companyDetails.employeeLastSyncDate, companyId));
                 // If new records found
-                let employeeArr = [];
+                const employeeArr = [];
                 if (((_b = (_a = newEmployees === null || newEmployees === void 0 ? void 0 : newEmployees.QueryResponse) === null || _a === void 0 ? void 0 : _a.Employee) === null || _b === void 0 ? void 0 : _b.length) > 0) {
                     const sectionWithFields = yield configurationRepository_1.default.getConfigurationField(companyId, payPeriodId);
                     const sectionFields = sectionWithFields.reduce((accumulator, section) => {
                         accumulator.push(...section.fields);
                         return accumulator;
                     }, []);
-                    employeeArr = yield Promise.all((_d = (_c = newEmployees === null || newEmployees === void 0 ? void 0 : newEmployees.QueryResponse) === null || _c === void 0 ? void 0 : _c.Employee) === null || _d === void 0 ? void 0 : _d.map((employee) => __awaiter(this, void 0, void 0, function* () {
-                        var _e, _f, _g, _h, _j;
+                    for (let i = 0; i < ((_d = (_c = newEmployees === null || newEmployees === void 0 ? void 0 : newEmployees.QueryResponse) === null || _c === void 0 ? void 0 : _c.Employee) === null || _d === void 0 ? void 0 : _d.length); i++) {
+                        const employee = (_e = newEmployees === null || newEmployees === void 0 ? void 0 : newEmployees.QueryResponse) === null || _e === void 0 ? void 0 : _e.Employee[i];
                         const employeeData = {
                             employeeId: employee === null || employee === void 0 ? void 0 : employee.Id,
-                            fullName: (_e = employee === null || employee === void 0 ? void 0 : employee.DisplayName) === null || _e === void 0 ? void 0 : _e.replace(' (deleted)', ''),
-                            email: (_g = (_f = employee === null || employee === void 0 ? void 0 : employee.PrimaryEmailAddr) === null || _f === void 0 ? void 0 : _f.Address) !== null && _g !== void 0 ? _g : '',
-                            phone: (_j = (_h = employee === null || employee === void 0 ? void 0 : employee.PrimaryPhone) === null || _h === void 0 ? void 0 : _h.FreeFormNumber) !== null && _j !== void 0 ? _j : '',
+                            fullName: (_f = employee === null || employee === void 0 ? void 0 : employee.DisplayName) === null || _f === void 0 ? void 0 : _f.replace(' (deleted)', ''),
+                            email: (_h = (_g = employee === null || employee === void 0 ? void 0 : employee.PrimaryEmailAddr) === null || _g === void 0 ? void 0 : _g.Address) !== null && _h !== void 0 ? _h : '',
+                            phone: (_k = (_j = employee === null || employee === void 0 ? void 0 : employee.PrimaryPhone) === null || _j === void 0 ? void 0 : _j.FreeFormNumber) !== null && _k !== void 0 ? _k : '',
                             active: employee === null || employee === void 0 ? void 0 : employee.Active,
                             companyId: companyId,
                         };
                         // Update or create employee in db
-                        return yield repositories_1.employeeRepository.updateOrCreateEmployee(employee === null || employee === void 0 ? void 0 : employee.Id, companyId, employeeData, sectionFields);
-                    })));
+                        const result = yield repositories_1.employeeRepository.updateOrCreateEmployee(employee === null || employee === void 0 ? void 0 : employee.Id, companyId, employeeData, sectionFields);
+                        employeeArr.push(result);
+                    }
+                    // employeeArr = await Promise.all(
+                    // 	newEmployees?.QueryResponse?.Employee?.map(async (employee: any) => {
+                    // 		const employeeData: any = {
+                    // 			employeeId: employee?.Id,
+                    // 			fullName: employee?.DisplayName?.replace(' (deleted)', ''),
+                    // 			email: employee?.PrimaryEmailAddr?.Address ?? '',
+                    // 			phone: employee?.PrimaryPhone?.FreeFormNumber ?? '',
+                    // 			active: employee?.Active,
+                    // 			companyId: companyId,
+                    // 		};
+                    // 		// Update or create employee in db
+                    // 		return await employeeRepository.updateOrCreateEmployee(
+                    // 			employee?.Id,
+                    // 			companyId,
+                    // 			employeeData,
+                    // 			sectionFields
+                    // 		);
+                    // 	})
+                    // );
                 }
                 // Update employee last sync date
                 yield prisma_1.prisma.company.update({
