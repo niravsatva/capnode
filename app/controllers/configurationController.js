@@ -98,9 +98,9 @@ class ConfigurationController {
     createField(req, res, next) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                const _a = req.body, { companyId, sectionId } = _a, data = __rest(_a, ["companyId", "sectionId"]);
+                const _a = req.body, { companyId, sectionId, payPeriodId } = _a, data = __rest(_a, ["companyId", "sectionId", "payPeriodId"]);
                 (0, validationHelper_1.checkValidation)(req);
-                const createdField = yield configurationServices_1.default.createField(companyId, sectionId, data);
+                const createdField = yield configurationServices_1.default.createField(companyId, sectionId, payPeriodId, data);
                 return (0, defaultResponseHelper_1.DefaultResponse)(res, 200, 'Field created successfully', createdField);
             }
             catch (error) {

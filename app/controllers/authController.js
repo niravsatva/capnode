@@ -76,7 +76,8 @@ class AuthController {
                     };
                     const companyData = yield prisma_1.prisma.companyRole.findFirst({
                         where: {
-                            userId: isExist.id
+                            userId: isExist.id,
+                            roleId: companyAdminRole.id
                         }
                     });
                     if (companyData && companyData.companyId) {

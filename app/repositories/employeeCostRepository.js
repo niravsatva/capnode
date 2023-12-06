@@ -324,6 +324,32 @@ class EmployeeCostRepository {
             }
         });
     }
+    createNewEmployeeCostAndField(listOfEmployees, fieldId, companyId, payPeriodId) {
+        return __awaiter(this, void 0, void 0, function* () {
+            if (!listOfEmployees.length) {
+                return;
+            }
+            for (const employee of listOfEmployees) {
+                const employeeCostField = yield prisma_1.prisma.employeeCostField.create({
+                    data: {
+                        companyId,
+                        payPeriodId: payPeriodId,
+                        fieldId: fieldId,
+                        employeeId: employee.id
+                    }
+                });
+                yield prisma_1.prisma.employeeCostValue.create({
+                    data: {
+                        employeeId: employee.id,
+                        employeeFieldId: employeeCostField.id,
+                        payPeriodId: payPeriodId,
+                        isPercentage: true,
+                        value: '0.00',
+                    },
+                });
+            }
+        });
+    }
     // delete EmployeeCost when new field delete
     deleteNewEmployeeCost(listOfEmployee, fieldId, companyId) {
         return __awaiter(this, void 0, void 0, function* () {

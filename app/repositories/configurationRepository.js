@@ -162,11 +162,11 @@ class ConfigurationRepository {
             }
         });
     }
-    createField(companyId, sectionId, data) {
+    createField(companyId, sectionId, payPeriodId, data) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 const createdField = yield prisma_1.prisma.field.create({
-                    data: Object.assign({ company: { connect: { id: companyId } }, configurationSection: { connect: { id: sectionId } } }, data),
+                    data: Object.assign({ company: { connect: { id: companyId } }, configurationSection: { connect: { id: sectionId } }, payPeriod: { connect: { id: payPeriodId } } }, data),
                 });
                 return createdField;
             }

@@ -30,6 +30,7 @@ const zohoRoutes_1 = __importDefault(require("./zohoRoutes"));
 const requestLogger_1 = require("../middlewares/requestLogger");
 const swagger_ui_express_1 = __importDefault(require("swagger-ui-express"));
 const swagger_1 = __importDefault(require("../config/swagger"));
+const customRuleRoutes_1 = __importDefault(require("../routes/customRuleRoutes"));
 const router = express_1.default.Router();
 router.use(requestLogger_1.requestLogger);
 router.use('/auth', authRoutes_1.default);
@@ -53,6 +54,7 @@ router.use('/developer', developerRoutes_1.default);
 router.use('/reports', reportRoutes_1.default);
 router.use('/subscription', subscriptionRoutes_1.default);
 router.use('/zoho', zohoRoutes_1.default);
+router.use('/custom-rule', customRuleRoutes_1.default);
 /**
  * @swagger
  * /test:

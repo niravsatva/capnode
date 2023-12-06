@@ -28,8 +28,11 @@ const prisma_1 = require("../client/prisma");
 const moment_1 = __importDefault(require("moment"));
 const utils_1 = require("../utils/utils");
 const logger_1 = require("../utils/logger");
+const client_lambda_1 = require("@aws-sdk/client-lambda");
+const aws_1 = require("../config/aws");
 // import axios from 'axios';
 // import timeActivityServices from '../services/timeActivityServices';
+const client = new client_lambda_1.LambdaClient(aws_1.awsConfig);
 const companyValidation = (companyId) => __awaiter(void 0, void 0, void 0, function* () {
     if (!companyId) {
         throw new customError_1.CustomError(400, 'Company id is required');
@@ -179,8 +182,22 @@ class QuickbooksController {
                         companyId: finalCompanyDetails === null || finalCompanyDetails === void 0 ? void 0 : finalCompanyDetails.id,
                     });
                     // Do not remove API for employee sync
+                    // Lambda event
+                    // const input: any = {
+                    // 	// InvocationRequest
+                    // 	FunctionName: 'cost-allocation-pro-dev-timeLogsDump',
+                    // 	InvocationType: 'Event',
+                    // 	Payload: JSON.stringify({
+                    // 		accessToken: authToken.access_token,
+                    // 		refreshToken: authToken.refresh_token,
+                    // 		tenantID: authToken.realmId,
+                    // 		companyId: finalCompanyDetails?.id,
+                    // 	}),
+                    // };
+                    // const command = new InvokeCommand(input);
+                    // await client.send(command);
                     // Do not remove API for timeativity sync
-                    const syncTimeActivities = yield timeActivityServices_1.default.lambdaSyncFunction({
+                    timeActivityServices_1.default.lambdaSyncFunction({
                         accessToken: authToken === null || authToken === void 0 ? void 0 : authToken.access_token,
                         refreshToken: authToken === null || authToken === void 0 ? void 0 : authToken.refresh_token,
                         tenantId: authToken === null || authToken === void 0 ? void 0 : authToken.realmId,
@@ -199,16 +216,16 @@ class QuickbooksController {
                         },
                     });
                     // Update employee last sync date
-                    yield prisma_1.prisma.company.update({
-                        where: {
-                            id: finalCompanyDetails === null || finalCompanyDetails === void 0 ? void 0 : finalCompanyDetails.id,
-                        },
-                        data: {
-                            timeActivitiesLastSyncDate: (0, moment_1.default)(new Date())
-                                .tz('America/Los_Angeles')
-                                .format(),
-                        },
-                    });
+                    // await prisma.company.update({
+                    // 	where: {
+                    // 		id: finalCompanyDetails?.id,
+                    // 	},
+                    // 	data: {
+                    // 		timeActivitiesLastSyncDate: moment(new Date())
+                    // 			.tz('America/Los_Angeles')
+                    // 			.format(),
+                    // 	},
+                    // });
                     //NOTE: Now we will create all default entries when first pay period will be create.
                     // const fields = await configurationRepository.initialFieldSectionCreate(
                     // 	finalCompanyDetails?.id

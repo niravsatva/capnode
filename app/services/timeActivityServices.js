@@ -304,7 +304,7 @@ class TimeActivityService {
         });
     }
     lambdaSyncFunction(timeActivityData) {
-        var _a, _b, _c, _d;
+        var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m;
         return __awaiter(this, void 0, void 0, function* () {
             const { accessToken, tenantId, refreshToken, companyId, timeActivityLastSyncDate, } = timeActivityData;
             if (timeActivityLastSyncDate) {
@@ -320,8 +320,9 @@ class TimeActivityService {
                     ((_b = (_a = timeActivities === null || timeActivities === void 0 ? void 0 : timeActivities.QueryResponse) === null || _a === void 0 ? void 0 : _a.TimeActivity) === null || _b === void 0 ? void 0 : _b.length) > 0) {
                     // Filtered vendors, fetching employees only
                     const filteredEmployees = (_d = (_c = timeActivities === null || timeActivities === void 0 ? void 0 : timeActivities.QueryResponse) === null || _c === void 0 ? void 0 : _c.TimeActivity) === null || _d === void 0 ? void 0 : _d.filter((timeActivity) => timeActivity === null || timeActivity === void 0 ? void 0 : timeActivity.EmployeeRef);
-                    yield Promise.all(filteredEmployees === null || filteredEmployees === void 0 ? void 0 : filteredEmployees.map((timeActivity) => __awaiter(this, void 0, void 0, function* () {
-                        var _e, _f, _g, _h, _j, _k, _l, _m;
+                    const timeActivityArr = [];
+                    for (let i = 0; i < filteredEmployees.length; i++) {
+                        const timeActivity = filteredEmployees[i];
                         let hours = 0;
                         let minutes = 0;
                         if ((timeActivity === null || timeActivity === void 0 ? void 0 : timeActivity.Hours) !== null &&
@@ -374,9 +375,15 @@ class TimeActivityService {
                             employeeId: (_m = timeActivity === null || timeActivity === void 0 ? void 0 : timeActivity.EmployeeRef) === null || _m === void 0 ? void 0 : _m.value,
                             companyId: companyId,
                         };
-                        // Dump time activity in the database for the first time
-                        return yield timeActivityRepository_1.default.createTimeActivitySync(data, companyId);
-                    })));
+                        try {
+                            // Update or create timeActivity in db
+                            const result = yield timeActivityRepository_1.default.createTimeActivitySync(data, companyId);
+                            timeActivityArr.push(result);
+                        }
+                        catch (err) {
+                            logger_1.logger.error(`Time activity syncing error : ${err}`);
+                        }
+                    }
                     yield prisma_1.prisma.company.update({
                         where: {
                             id: companyId,

@@ -15,7 +15,6 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const customError_1 = require("../models/customError");
 const repositories_1 = require("../repositories");
 const configurationRepository_1 = __importDefault(require("../repositories/configurationRepository"));
-const payPeriodServices_1 = __importDefault(require("./payPeriodServices"));
 // import employeeServices from './employeeServices';
 class ConfigurationService {
     // For get sections with fields
@@ -31,7 +30,7 @@ class ConfigurationService {
         });
     }
     // For create field with section
-    createField(companyId, sectionId, data) {
+    createField(companyId, sectionId, payPeriodId, data) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 const company = yield repositories_1.companyRepository.getDetails(companyId);
@@ -39,7 +38,7 @@ class ConfigurationService {
                     const error = new customError_1.CustomError(404, 'Company not found');
                     throw error;
                 }
-                const createdField = yield configurationRepository_1.default.createField(companyId, sectionId, data);
+                const createdField = yield configurationRepository_1.default.createField(companyId, sectionId, payPeriodId, data);
                 // Get all employees by companyId
                 const employeeList = yield repositories_1.employeeRepository.getAllEmployeesByCompanyId(companyId);
                 // Employee Cost Field
@@ -47,10 +46,10 @@ class ConfigurationService {
                 // 	companyId
                 // );
                 // Get list of all pay periods
-                const listOfPayPeriods = yield payPeriodServices_1.default.getAllPayPeriods({
-                    companyId: companyId,
-                });
-                yield repositories_1.employeeCostRepository.createNewEmployeeCost(employeeList, createdField === null || createdField === void 0 ? void 0 : createdField.id, companyId, listOfPayPeriods);
+                // const listOfPayPeriods = await payPeriodServices.getAllPayPeriods({
+                // 	companyId: companyId,
+                // });
+                yield repositories_1.employeeCostRepository.createNewEmployeeCostAndField(employeeList, createdField === null || createdField === void 0 ? void 0 : createdField.id, companyId, payPeriodId);
                 return createdField;
             }
             catch (error) {

@@ -82,6 +82,7 @@ model Company {
   Journal                    Journal[]
   SyncLogs                   SyncLogs[]
   Subscription               Subscription[]
+  CustomRules                CustomRules[]
 }
 
 model Role {
@@ -428,6 +429,22 @@ model Subscription {
   updatedAt            DateTime @updatedAt
 }
 
+model CustomRules {
+  id             String         @unique @default(uuid())
+  companyId      String
+  company        Company        @relation(fields: [companyId], references: [id])
+  name           String
+  isActive       Boolean        @default(true)
+  description    String?
+  triggerProcess TriggerProcess @default(split)
+  criteria       Json
+  actions        Json[]
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+  createdBy      String?
+  updatedBy      String?
+}
+
 enum PayrollMethods {
   Hours
   Percentage
@@ -448,4 +465,11 @@ enum InvitationStatus {
   Pending
   Accepted
   Rejected
+}
+
+enum TriggerProcess {
+  add
+  edit
+  split
+  delete
 }

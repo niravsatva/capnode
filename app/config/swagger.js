@@ -19,7 +19,6 @@ const swaggerDefinition = {
         },
     ],
 };
-console.log('PATH: ', path_1.default.join(__dirname, '..', 'routes', 'index.ts'));
 const swaggerOptions = {
     swaggerDefinition,
     apis: [
