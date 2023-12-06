@@ -39,17 +39,14 @@ class CustomRuleService {
             let filterCondition = {};
             if (query.status) {
                 filterCondition = {
-                    status: query.status === 'Active'
+                    isActive: query.status === 'Active'
                 };
             }
-            const offset = (Number(query.page || 1) - 1) * Number(query.limit || 10);
             const content = yield prisma_1.prisma.customRules.findMany({
                 where: Object.assign(Object.assign({ companyId: query.companyId }, filterCondition), searchCondition),
                 orderBy: {
-                    createdAt: 'desc'
+                    priority: 'asc'
                 },
-                skip: offset,
-                take: Number(query.limit || 10)
             });
             const count = yield prisma_1.prisma.customRules.count({
                 where: Object.assign(Object.assign({ companyId: query.companyId }, filterCondition), searchCondition)
@@ -73,8 +70,13 @@ class CustomRuleService {
                     data
                 });
             }
+            const allRules = yield prisma_1.prisma.customRules.findMany({
+                where: {
+                    companyId: data.companyId
+                }
+            });
             return prisma_1.prisma.customRules.create({
-                data
+                data: Object.assign(Object.assign({}, data), { priority: allRules.length + 1 })
             });
         });
     }
@@ -100,6 +102,24 @@ class CustomRuleService {
                     companyId
                 }
             });
+        });
+    }
+    updatePriority(data, companyId) {
+        return __awaiter(this, void 0, void 0, function* () {
+            if (!data.length) {
+                return;
+            }
+            yield Promise.all(data.map((rule) => __awaiter(this, void 0, void 0, function* () {
+                yield prisma_1.prisma.customRules.updateMany({
+                    where: {
+                        id: rule.id,
+                        companyId
+                    },
+                    data: {
+                        priority: Number(rule.priority)
+                    }
+                });
+            })));
         });
     }
 }

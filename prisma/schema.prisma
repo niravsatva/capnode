@@ -433,6 +433,7 @@ model CustomRules {
   id             String         @unique @default(uuid())
   companyId      String
   company        Company        @relation(fields: [companyId], references: [id])
+  priority       Int            @default(1)
   name           String
   isActive       Boolean        @default(true)
   description    String?

@@ -12,5 +12,6 @@ router.get('/', authMiddleware_1.isAuthenticated, customRuleController_1.default
 router.get('/:id', authMiddleware_1.isAuthenticated, customRuleController_1.default.getCustomRuleById);
 router.post('/', authMiddleware_1.isAuthenticated, validators_1.customRuleValidation, customRuleController_1.default.createCustomRules);
 router.put('/:id', authMiddleware_1.isAuthenticated, customRuleController_1.default.updateCustomRules);
+router.put('/update/priority', authMiddleware_1.isAuthenticated, customRuleController_1.default.updatePriority);
 router.delete('/:id', authMiddleware_1.isAuthenticated, customRuleController_1.default.deleteCustomRuleById);
 exports.default = router;

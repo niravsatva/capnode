@@ -94,5 +94,20 @@ class CustomRuleController {
             }
         });
     }
+    updatePriority(req, res, next) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                const companyId = req.query.companyId;
+                if (!companyId) {
+                    throw new customError_1.CustomError(400, 'CompanyId is required');
+                }
+                const data = yield customRuleService_1.default.updatePriority(req.body, companyId);
+                return (0, defaultResponseHelper_1.DefaultResponse)(res, 200, 'Updated rule priority successfully', data);
+            }
+            catch (error) {
+                next(error);
+            }
+        });
+    }
 }
 exports.default = new CustomRuleController();

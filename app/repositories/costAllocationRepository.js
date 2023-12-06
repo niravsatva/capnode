@@ -160,9 +160,9 @@ class costAllocationRepository {
                     if (findSameTimeLog) {
                         findSameTimeLog.hours =
                             parseInt(timeActivities === null || timeActivities === void 0 ? void 0 : timeActivities.hours) + parseInt(findSameTimeLog === null || findSameTimeLog === void 0 ? void 0 : findSameTimeLog.hours);
-                        findSameTimeLog.minutes =
+                        findSameTimeLog.minute =
                             parseInt(timeActivities === null || timeActivities === void 0 ? void 0 : timeActivities.minute) +
-                                parseInt(findSameTimeLog.minutes);
+                                parseInt(findSameTimeLog.minute);
                     }
                     else {
                         sameCustomerWithSameClass.push(timeActivities);
@@ -187,7 +187,7 @@ class costAllocationRepository {
                     if (timeActivityIndex === 0) {
                         costAllocationObj['employee-name'] = costAllocation.fullName;
                     }
-                    costAllocationObj['total-hours'] = `${timeActivities.hours}:${timeActivities.minute}`;
+                    costAllocationObj['total-hours'] = this.minToHours(currActivitiesTime);
                     costAllocationObj['customer-name'] = timeActivities === null || timeActivities === void 0 ? void 0 : timeActivities.customerName;
                     costAllocationObj['class-name'] = timeActivities === null || timeActivities === void 0 ? void 0 : timeActivities.className;
                     costAllocationObj['allocation'] = `${allocation.toFixed(percentageToFixed)}%`;
@@ -382,9 +382,9 @@ class costAllocationRepository {
                     if (findSameTimeLog) {
                         findSameTimeLog.hours =
                             parseInt(timeActivities === null || timeActivities === void 0 ? void 0 : timeActivities.hours) + parseInt(findSameTimeLog === null || findSameTimeLog === void 0 ? void 0 : findSameTimeLog.hours);
-                        findSameTimeLog.minutes =
+                        findSameTimeLog.minute =
                             parseInt(timeActivities === null || timeActivities === void 0 ? void 0 : timeActivities.minute) +
-                                parseInt(findSameTimeLog.minutes);
+                                parseInt(findSameTimeLog.minute);
                     }
                     else {
                         sameCustomerWithSameClass.push(timeActivities);
@@ -542,9 +542,9 @@ class costAllocationRepository {
                     if (findSameTimeLog) {
                         findSameTimeLog.hours =
                             parseInt(timeActivities === null || timeActivities === void 0 ? void 0 : timeActivities.hours) + parseInt(findSameTimeLog === null || findSameTimeLog === void 0 ? void 0 : findSameTimeLog.hours);
-                        findSameTimeLog.minutes =
+                        findSameTimeLog.minute =
                             parseInt(timeActivities === null || timeActivities === void 0 ? void 0 : timeActivities.minute) +
-                                parseInt(findSameTimeLog.minutes);
+                                parseInt(findSameTimeLog.minute);
                     }
                     else {
                         sameCustomer.push(timeActivities);
