@@ -28,12 +28,20 @@ function mapJSONDataToArray(jsonData) {
     return dataArray;
 }
 const generatePdf = (costAllocationData, counts, filePath, payPeriodId, companyName) => __awaiter(void 0, void 0, void 0, function* () {
-    const classArr = [
-        ...new Set(costAllocationData.map((item) => item['Class Name'])),
-    ];
-    const customerArr = [
-        ...new Set(costAllocationData.map((item) => item['Customer Name'])),
-    ];
+    const classArr = [];
+    const customerArr = [];
+    costAllocationData.forEach((e) => {
+        if (e['Class Name']) {
+            if (!classArr.includes(e['Class Name'])) {
+                classArr.push(e['Class Name']);
+            }
+        }
+        if (e['Customer Name']) {
+            if (!customerArr.includes(e['Customer Name'])) {
+                customerArr.push(e['Customer Name']);
+            }
+        }
+    });
     let classLength = 0;
     let customerLength = 0;
     classArr.forEach((item) => {
@@ -46,9 +54,12 @@ const generatePdf = (costAllocationData, counts, filePath, payPeriodId, companyN
             customerLength = item.length;
         }
     });
-    let finalWidth = classLength * 5;
+    let finalWidth = classLength * 10;
     if (customerLength > classLength) {
-        finalWidth = customerLength * 5;
+        finalWidth = customerLength * 10;
+    }
+    if (finalWidth < 150) {
+        finalWidth = 150;
     }
     const { salaryExpenseAccounts, fringeExpense, payrollTaxesExpense } = counts;
     const tableData = mapJSONDataToArray(costAllocationData);
@@ -56,7 +67,7 @@ const generatePdf = (costAllocationData, counts, filePath, payPeriodId, companyN
     const payrollTaxesExpenseCounts = salaryExpenseAccountsCounts + payrollTaxesExpense;
     const fringeExpenseCounts = payrollTaxesExpenseCounts + fringeExpense;
     const doc = new pdfkit_1.default({
-        size: [tableData[0].length * finalWidth + 100, tableData.length * 80 + 200],
+        size: [tableData[0].length * finalWidth + 100, tableData.length * 100 + 200],
     });
     // doc.pipe(stream);
     // Image
