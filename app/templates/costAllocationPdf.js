@@ -28,12 +28,36 @@ function mapJSONDataToArray(jsonData) {
     return dataArray;
 }
 const generatePdf = (costAllocationData, counts, filePath, payPeriodId, companyName) => __awaiter(void 0, void 0, void 0, function* () {
+    const classArr = [
+        ...new Set(costAllocationData.map((item) => item['Class Name'])),
+    ];
+    const customerArr = [
+        ...new Set(costAllocationData.map((item) => item['Customer Name'])),
+    ];
+    let classLength = 0;
+    let customerLength = 0;
+    classArr.forEach((item) => {
+        if (item && item.length && item.length > classLength) {
+            classLength = item.length;
+        }
+    });
+    customerArr.forEach((item) => {
+        if (item && item.length && item.length > customerLength) {
+            customerLength = item.length;
+        }
+    });
+    let finalWidth = classLength * 5;
+    if (customerLength > classLength) {
+        finalWidth = customerLength * 5;
+    }
     const { salaryExpenseAccounts, fringeExpense, payrollTaxesExpense } = counts;
     const tableData = mapJSONDataToArray(costAllocationData);
     const salaryExpenseAccountsCounts = 5 + salaryExpenseAccounts;
     const payrollTaxesExpenseCounts = salaryExpenseAccountsCounts + payrollTaxesExpense;
     const fringeExpenseCounts = payrollTaxesExpenseCounts + fringeExpense;
-    const doc = new pdfkit_1.default({ size: [tableData[0].length * 180, 3000] });
+    const doc = new pdfkit_1.default({
+        size: [tableData[0].length * finalWidth + 100, tableData.length * 80 + 200],
+    });
     // doc.pipe(stream);
     // Image
     const image = 'https://costallocationspro.s3.amazonaws.com/cap-logonew.png';
@@ -50,7 +74,7 @@ const generatePdf = (costAllocationData, counts, filePath, payPeriodId, companyN
     const titleText = 'Report Name : Cost Allocations';
     const titleOptions = {
         width: 500,
-        fontSize: 32,
+        fontSize: 40,
         color: 'black',
     };
     const titleY = imageY + 60;
@@ -66,7 +90,8 @@ const generatePdf = (costAllocationData, counts, filePath, payPeriodId, companyN
     const companyY = dateY + 40;
     doc.text(companyTitle, imageX, companyY, titleOptions);
     // Table
-    const cellWidth = 150;
+    const cellWidth = finalWidth;
+    // const cellWidth = 150;
     const cellHeight = 74;
     const borderWidth = 1;
     function drawTable(table, x, y) {

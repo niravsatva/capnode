@@ -35,6 +35,10 @@ class TimeActivityRepository {
                                 hours: true,
                                 minute: true,
                                 activityDate: true,
+                                isAutoSplit: true,
+                                isClassReadOnly: true,
+                                isCustomerReadOnly: true,
+                                customRuleId: true
                             },
                         },
                         timeSheet: {

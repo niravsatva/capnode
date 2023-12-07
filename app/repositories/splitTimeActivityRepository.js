@@ -31,6 +31,10 @@ class SplitTimeActivityRepository {
                         timeActivity: { connect: { id: parentActivityId } },
                         employee: { connect: { id: employeeId } },
                         activityDate: new Date(singleActivity === null || singleActivity === void 0 ? void 0 : singleActivity.activityDate),
+                        isAutoSplit: singleActivity === null || singleActivity === void 0 ? void 0 : singleActivity.isAutoSplit,
+                        isClassReadOnly: singleActivity === null || singleActivity === void 0 ? void 0 : singleActivity.isClassReadOnly,
+                        isCustomerReadOnly: singleActivity === null || singleActivity === void 0 ? void 0 : singleActivity.isCustomerReadOnly,
+                        customRuleId: singleActivity === null || singleActivity === void 0 ? void 0 : singleActivity.customRuleId
                     },
                 });
             })));

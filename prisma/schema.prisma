@@ -308,20 +308,24 @@ model TimeActivities {
 }
 
 model SplitTimeActivities {
-  id             String          @id @default(uuid())
-  classId        String
-  className      String
-  customerId     String
-  customerName   String
-  hours          String
-  minute         String
-  employeeId     String
-  employee       Employee        @relation(fields: [employeeId], references: [id])
-  timeActivityId String
-  timeActivity   TimeActivities? @relation(fields: [timeActivityId], references: [id], onDelete: Cascade)
-  activityDate   DateTime
-  createdAt      DateTime        @default(now())
-  updatedAt      DateTime        @updatedAt
+  id                 String          @id @default(uuid())
+  classId            String
+  className          String
+  customerId         String
+  customerName       String
+  hours              String
+  minute             String
+  employeeId         String
+  employee           Employee        @relation(fields: [employeeId], references: [id])
+  timeActivityId     String
+  timeActivity       TimeActivities? @relation(fields: [timeActivityId], references: [id], onDelete: Cascade)
+  activityDate       DateTime
+  isAutoSplit        Boolean         @default(false)
+  isClassReadOnly    Boolean         @default(false)
+  isCustomerReadOnly Boolean         @default(false)
+  customRuleId       String?
+  createdAt          DateTime        @default(now())
+  updatedAt          DateTime        @updatedAt
 }
 
 model TimeSheets {
