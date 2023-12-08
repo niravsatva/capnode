@@ -38,7 +38,7 @@ class TimeActivityRepository {
                                 isAutoSplit: true,
                                 isClassReadOnly: true,
                                 isCustomerReadOnly: true,
-                                customRuleId: true
+                                customRuleId: true,
                             },
                             orderBy: {
                                 hours: 'desc'
@@ -46,9 +46,9 @@ class TimeActivityRepository {
                         },
                         timeSheet: {
                             include: {
-                                payPeriod: true
-                            }
-                        }
+                                payPeriod: true,
+                            },
+                        },
                     }, skip: offset, take: limit }, sortCondition);
                 if (!offset) {
                     delete query['skip'];
@@ -269,14 +269,16 @@ class TimeActivityRepository {
                     if (!data.classId) {
                         delete data.classId;
                     }
-                    const updated = yield prisma_1.prisma.timeActivities.updateMany({
-                        where: {
-                            timeActivityId: timeActivityId,
-                            companyId: companyId,
-                        },
-                        data: data,
-                    });
-                    updatedTimeActivities = updated[0];
+                    if (employee.active) {
+                        const updated = yield prisma_1.prisma.timeActivities.updateMany({
+                            where: {
+                                timeActivityId: timeActivityId,
+                                companyId: companyId,
+                            },
+                            data: data,
+                        });
+                        updatedTimeActivities = updated[0];
+                    }
                 }
                 else {
                     const employee = yield prisma_1.prisma.employee.findFirst({
@@ -306,9 +308,11 @@ class TimeActivityRepository {
                     if (!data.className) {
                         delete data.className;
                     }
-                    updatedTimeActivities = yield prisma_1.prisma.timeActivities.create({
-                        data,
-                    });
+                    if (employee.active) {
+                        updatedTimeActivities = yield prisma_1.prisma.timeActivities.create({
+                            data,
+                        });
+                    }
                 }
                 return updatedTimeActivities;
             }
@@ -395,18 +399,20 @@ class TimeActivityRepository {
                 if (!(employee === null || employee === void 0 ? void 0 : employee.id)) {
                     delete data.employee;
                 }
-                const createdTimeActivity = yield prisma_1.prisma.timeActivities.create({
-                    data: data,
-                    include: {
-                        employee: {
-                            select: {
-                                id: true,
-                                fullName: true,
+                if (employee === null || employee === void 0 ? void 0 : employee.active) {
+                    const createdTimeActivity = yield prisma_1.prisma.timeActivities.create({
+                        data: data,
+                        include: {
+                            employee: {
+                                select: {
+                                    id: true,
+                                    fullName: true,
+                                },
                             },
                         },
-                    },
-                });
-                return createdTimeActivity;
+                    });
+                    return createdTimeActivity;
+                }
             }
             catch (err) {
                 throw err;
