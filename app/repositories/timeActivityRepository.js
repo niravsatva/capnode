@@ -40,6 +40,9 @@ class TimeActivityRepository {
                                 isCustomerReadOnly: true,
                                 customRuleId: true
                             },
+                            orderBy: {
+                                hours: 'desc'
+                            }
                         },
                         timeSheet: {
                             include: {
