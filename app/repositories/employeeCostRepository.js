@@ -47,7 +47,7 @@ class EmployeeCostRepository {
             }
         });
     }
-    getMonthlyCostTotal(companyId, payPeriodId, search) {
+    getMonthlyCostTotal(companyId, payPeriodId, search, includeInactive) {
         return __awaiter(this, void 0, void 0, function* () {
             const query = {
                 companyId,
@@ -55,9 +55,13 @@ class EmployeeCostRepository {
                     contains: search,
                     mode: 'insensitive',
                 },
+                active: true,
             };
             if (!search) {
                 delete query.fullName;
+            }
+            if (includeInactive) {
+                delete query['active'];
             }
             const employeesCostByMonth = yield prisma_1.prisma.employee.findMany({
                 where: query,

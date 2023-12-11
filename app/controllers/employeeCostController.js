@@ -272,7 +272,7 @@ class EmployeeConstController {
     employeeCostTotal(req, res, next) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                const { companyId, payPeriodId, search } = req.query;
+                const { companyId, payPeriodId, search, includeInactive } = req.query;
                 if (!companyId) {
                     throw new customError_1.CustomError(400, 'Company id is required');
                 }
@@ -290,7 +290,7 @@ class EmployeeConstController {
                         throw new customError_1.CustomError(400, 'Invalid PayPeriod');
                     }
                 }
-                const data = yield employeeCostServices_1.default.getMonthlyCostTotal(companyId, payPeriodId, search);
+                const data = yield employeeCostServices_1.default.getMonthlyCostTotal(companyId, payPeriodId, search, includeInactive === 'true');
                 // const data = await employeeCostServices.getMonthlyCostTotal(
                 // 	'acad9ecb-797a-4d43-b354-1a4ebb4bf1c1',
                 // 	'3309e3e3-bc0e-45c0-8804-4c15afea65d3'

@@ -49,7 +49,7 @@ class EmployeeController {
                 // Check validation for company id
                 (0, validationHelper_1.checkValidation)(req);
                 const companyId = req.body.companyId;
-                const payPeriodId = req.body.payPeriodId;
+                // const payPeriodId = req.body.payPeriodId;
                 // Check If company exists
                 const companyDetails = yield repositories_1.companyRepository.getDetails(companyId);
                 if (!companyDetails) {
@@ -60,7 +60,7 @@ class EmployeeController {
                     throw new customError_1.CustomError(400, 'Company is not connected');
                 }
                 // Get new employees
-                yield employeeServices_1.default.syncEmployeesByLastSync(companyId, payPeriodId);
+                yield employeeServices_1.default.syncEmployeesByLastSync(companyId);
                 return (0, defaultResponseHelper_1.DefaultResponse)(res, 200, 'Employees synced successfully');
             }
             catch (err) {

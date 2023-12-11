@@ -104,25 +104,25 @@ class UserServices {
                 // Find User
                 const user = yield repositories_1.userRepository.getById(userId);
                 if (!user) {
-                    const error = new customError_1.CustomError(404, 'User not found');
+                    const error = new customError_1.CustomError(400, 'User not found');
                     throw error;
                 }
                 // Find Company
                 const company = yield repositories_1.companyRepository.getDetails(companyId);
                 if (!company) {
-                    const error = new customError_1.CustomError(404, 'Company not found');
+                    const error = new customError_1.CustomError(400, 'Company not found');
                     throw error;
                 }
                 // Check if user exist in the company
                 const userExist = yield companyRoleRepository_1.default.userExistInCompany(companyId, userId);
                 if (!userExist) {
-                    const error = new customError_1.CustomError(404, 'User does not exist in this company');
+                    const error = new customError_1.CustomError(400, 'User does not exist in this company');
                     throw error;
                 }
                 if (isChangeStatus && roleId) {
                     const roleExist = yield repositories_1.roleRepository.getDetails(roleId);
                     if (!roleExist) {
-                        const error = new customError_1.CustomError(404, 'Role does not exist');
+                        const error = new customError_1.CustomError(400, 'Role does not exist');
                         throw error;
                     }
                     // Update User Role

@@ -8,13 +8,10 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 Object.defineProperty(exports, "__esModule", { value: true });
 const prisma_1 = require("../client/prisma");
-const employeeCostRepository_1 = __importDefault(require("./employeeCostRepository"));
-const payPeriodRepository_1 = __importDefault(require("./payPeriodRepository"));
+// import employeeCostRepository from './employeeCostRepository';
+// import payPeriodRepository from './payPeriodRepository';
 class EmployeeRepository {
     getAllEmployeesByCompanyId(companyId) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -72,42 +69,69 @@ class EmployeeRepository {
                         },
                     });
                     // This is new code for creating fields for employees after syncing
-                    if (listOfFields && (listOfFields === null || listOfFields === void 0 ? void 0 : listOfFields.length) > 0) {
-                        yield Promise.all(listOfFields.map((singleField) => __awaiter(this, void 0, void 0, function* () {
-                            yield prisma_1.prisma.employeeCostField.create({
+                    // if (listOfFields && listOfFields?.length > 0) {
+                    // 	await Promise.all(
+                    // 		listOfFields.map(async (singleField: any) => {
+                    // 			await prisma.employeeCostField.create({
+                    // 				data: {
+                    // 					employee: { connect: { id: updatedEmployees.id } },
+                    // 					field: { connect: { id: singleField.id } },
+                    // 					company: { connect: { id: companyId } },
+                    // 				},
+                    // 			});
+                    // 		})
+                    // 	);
+                    // 	// Fetch all pay periods
+                    // 	const payPeriods = await payPeriodRepository.getAll({
+                    // 		companyId: companyId,
+                    // 	});
+                    // 	// Create initial values
+                    // 	if (payPeriods.length > 0) {
+                    // 		payPeriods.map(async (singlePayPeriod: any) => {
+                    // 			await employeeCostRepository.createMonthlyCost(
+                    // 				[updatedEmployees],
+                    // 				companyId,
+                    // 				singlePayPeriod.id
+                    // 			);
+                    // 		});
+                    // 	}
+                    // 	// OLD REQUIREMENT CODE NEED TO UPDATE WITH NEW
+                    // 	// const monthList = await prisma.monthYearTable.findMany({
+                    // 	// 	where: {
+                    // 	// 		companyId: companyId,
+                    // 	// 	},
+                    // 	// });
+                    // 	// // Create initial values
+                    // 	// monthList?.map(async (singleRecord: any) => {
+                    // 	// 	await employeeCostRepository.createMonthlyCost(
+                    // 	// 		[updatedEmployees],
+                    // 	// 		companyId,
+                    // 	// 		new Date(
+                    // 	// 			`${singleRecord?.month}/1/${singleRecord?.year}`
+                    // 	// 		).toString()
+                    // 	// 	);
+                    // 	// });
+                    // }
+                    if (listOfFields && listOfFields.length) {
+                        for (const singleField of listOfFields) {
+                            const employeeCostField = yield prisma_1.prisma.employeeCostField.create({
                                 data: {
-                                    employee: { connect: { id: updatedEmployees.id } },
-                                    field: { connect: { id: singleField.id } },
-                                    company: { connect: { id: companyId } },
+                                    companyId,
+                                    payPeriodId: singleField.payPeriodId,
+                                    fieldId: singleField.id,
+                                    employeeId: updatedEmployees.id
+                                }
+                            });
+                            yield prisma_1.prisma.employeeCostValue.create({
+                                data: {
+                                    employeeId: updatedEmployees.id,
+                                    employeeFieldId: employeeCostField.id,
+                                    payPeriodId: singleField.payPeriodId,
+                                    isPercentage: true,
+                                    value: '0.00',
                                 },
                             });
-                        })));
-                        // Fetch all pay periods
-                        const payPeriods = yield payPeriodRepository_1.default.getAll({
-                            companyId: companyId,
-                        });
-                        // Create initial values
-                        if (payPeriods.length > 0) {
-                            payPeriods.map((singlePayPeriod) => __awaiter(this, void 0, void 0, function* () {
-                                yield employeeCostRepository_1.default.createMonthlyCost([updatedEmployees], companyId, singlePayPeriod.id);
-                            }));
                         }
-                        // OLD REQUIREMENT CODE NEED TO UPDATE WITH NEW
-                        // const monthList = await prisma.monthYearTable.findMany({
-                        // 	where: {
-                        // 		companyId: companyId,
-                        // 	},
-                        // });
-                        // // Create initial values
-                        // monthList?.map(async (singleRecord: any) => {
-                        // 	await employeeCostRepository.createMonthlyCost(
-                        // 		[updatedEmployees],
-                        // 		companyId,
-                        // 		new Date(
-                        // 			`${singleRecord?.month}/1/${singleRecord?.year}`
-                        // 		).toString()
-                        // 	);
-                        // });
                     }
                 }
                 return updatedEmployees;

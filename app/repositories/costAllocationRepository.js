@@ -43,7 +43,7 @@ class costAllocationRepository {
         var _a;
         return __awaiter(this, void 0, void 0, function* () {
             const { companyId, offset, limit, searchCondition, empFilterConditions, filterConditions, sortCondition, payPeriodId, timeSheetId, } = costAllocationData;
-            const query = Object.assign({ where: Object.assign(Object.assign({ companyId: companyId }, empFilterConditions), { timeActivities: {
+            const query = Object.assign({ where: Object.assign(Object.assign({ companyId: companyId, active: true }, empFilterConditions), { timeActivities: {
                         some: Object.assign(Object.assign({ timeSheetId: timeSheetId }, filterConditions), searchCondition),
                     } }), select: {
                     fullName: true,
@@ -359,6 +359,7 @@ class costAllocationRepository {
             const query = {
                 where: {
                     companyId: companyId,
+                    active: true,
                     timeActivities: {
                         some: {
                             timeSheetId: timeSheetId,
@@ -554,6 +555,7 @@ class costAllocationRepository {
             const _costAllocations = yield prisma_1.prisma.employee.findMany({
                 where: {
                     companyId: companyId,
+                    active: true,
                     timeActivities: {
                         some: Object.assign({ timeSheetId }, searchCondition),
                     },

@@ -150,7 +150,7 @@ class EmployeeCostService {
             }
         });
     }
-    getMonthlyCostTotal(companyId, payPeriodId, search) {
+    getMonthlyCostTotal(companyId, payPeriodId, search, includeInactive) {
         return __awaiter(this, void 0, void 0, function* () {
             const company = yield repositories_1.companyRepository.getDetails(companyId);
             if (!company) {
@@ -162,7 +162,7 @@ class EmployeeCostService {
                 const error = new customError_1.CustomError(404, 'Pay period not found');
                 throw error;
             }
-            const employeesMonthlyCost = yield repositories_1.employeeCostRepository.getMonthlyCostTotal(companyId, payPeriodId, search);
+            const employeesMonthlyCost = yield repositories_1.employeeCostRepository.getMonthlyCostTotal(companyId, payPeriodId, search, includeInactive);
             const obj = {
                 employeeName: 'Total',
                 status: true,

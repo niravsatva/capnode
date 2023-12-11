@@ -19,7 +19,6 @@ const customError_1 = require("../models/customError");
 const quickbooksClient_1 = __importDefault(require("../quickbooksClient/quickbooksClient"));
 const repositories_1 = require("../repositories");
 const quickbooksServices_1 = __importDefault(require("./quickbooksServices"));
-const configurationRepository_1 = __importDefault(require("../repositories/configurationRepository"));
 class EmployeeServices {
     getEmployees(employeeData) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -75,7 +74,7 @@ class EmployeeServices {
         });
     }
     // Will be called on sync now button
-    syncEmployeesByLastSync(companyId, payPeriodId) {
+    syncEmployeesByLastSync(companyId) {
         var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k;
         return __awaiter(this, void 0, void 0, function* () {
             try {
@@ -112,11 +111,20 @@ class EmployeeServices {
                 // If new records found
                 const employeeArr = [];
                 if (((_b = (_a = newEmployees === null || newEmployees === void 0 ? void 0 : newEmployees.QueryResponse) === null || _a === void 0 ? void 0 : _a.Employee) === null || _b === void 0 ? void 0 : _b.length) > 0) {
-                    const sectionWithFields = yield configurationRepository_1.default.getConfigurationField(companyId, payPeriodId);
-                    const sectionFields = sectionWithFields.reduce((accumulator, section) => {
-                        accumulator.push(...section.fields);
-                        return accumulator;
-                    }, []);
+                    // const sectionWithFields =
+                    // 	await configurationRepository.getConfigurationField(companyId, payPeriodId);
+                    // const sectionFields = sectionWithFields.reduce(
+                    // 	(accumulator: any, section) => {
+                    // 		accumulator.push(...section.fields);
+                    // 		return accumulator;
+                    // 	},
+                    // 	[]
+                    // );
+                    const listOfFields = yield prisma_1.prisma.field.findMany({
+                        where: {
+                            companyId
+                        }
+                    });
                     for (let i = 0; i < ((_d = (_c = newEmployees === null || newEmployees === void 0 ? void 0 : newEmployees.QueryResponse) === null || _c === void 0 ? void 0 : _c.Employee) === null || _d === void 0 ? void 0 : _d.length); i++) {
                         const employee = (_e = newEmployees === null || newEmployees === void 0 ? void 0 : newEmployees.QueryResponse) === null || _e === void 0 ? void 0 : _e.Employee[i];
                         const employeeData = {
@@ -127,8 +135,9 @@ class EmployeeServices {
                             active: employee === null || employee === void 0 ? void 0 : employee.Active,
                             companyId: companyId,
                         };
+                        // listOfFields[0].payPeriodId
                         // Update or create employee in db
-                        const result = yield repositories_1.employeeRepository.updateOrCreateEmployee(employee === null || employee === void 0 ? void 0 : employee.Id, companyId, employeeData, sectionFields);
+                        const result = yield repositories_1.employeeRepository.updateOrCreateEmployee(employee === null || employee === void 0 ? void 0 : employee.Id, companyId, employeeData, listOfFields);
                         employeeArr.push(result);
                     }
                     // employeeArr = await Promise.all(
