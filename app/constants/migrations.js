@@ -19,5 +19,6 @@ exports.migrations = [
     'updateConfigurationJson',
     'addSyncLogsPermissions',
     'migrateConfiguration',
-    'migrateTaxAndFringeSection'
+    'migrateTaxAndFringeSection',
+    'configSectionMigrationFix'
 ];
