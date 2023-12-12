@@ -369,6 +369,15 @@ class JournalService {
             if (!validatePayPeriod) {
                 throw new customError_1.CustomError(400, 'Invalid pay period');
             }
+            const qboNoExists = yield prisma_1.prisma.journal.findFirst({
+                where: {
+                    companyId: data.companyId,
+                    qboJournalNo: data.qboJournalNo
+                }
+            });
+            if (qboNoExists) {
+                throw new customError_1.CustomError(400, "Journal with same journal number already exists");
+            }
             let amount = '0';
             const findExistingJournal = yield prisma_1.prisma.journal.findFirst({
                 where: {

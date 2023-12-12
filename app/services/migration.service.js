@@ -12,7 +12,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.migrationService = exports.migrateConfiguration = void 0;
+exports.migrationService = exports.migrateTaxAndFringeSection = exports.migrateConfiguration = void 0;
 const moment_1 = __importDefault(require("moment"));
 const prisma_1 = require("../client/prisma");
 const logger_1 = require("../utils/logger");
@@ -613,7 +613,183 @@ function migrateConfiguration() {
     });
 }
 exports.migrateConfiguration = migrateConfiguration;
+function migrateTaxAndFringeSection() {
+    return __awaiter(this, void 0, void 0, function* () {
+        const companies = yield prisma_1.prisma.company.findMany({});
+        for (const company of companies) {
+            const payPeriods = yield prisma_1.prisma.payPeriod.findMany({
+                where: {
+                    companyId: company.id
+                }
+            });
+            const employees = yield prisma_1.prisma.employee.findMany({
+                where: {
+                    companyId: company.id,
+                }
+            });
+            for (const payPeriod of payPeriods) {
+                const configuration = yield prisma_1.prisma.configuration.findFirst({
+                    where: {
+                        companyId: company.id,
+                        payPeriodId: payPeriod.id
+                    }
+                });
+                if (configuration && configuration.settings) {
+                    const settings = configuration.settings;
+                    const newConfigurationSettings = Object.assign({}, settings);
+                    const configurationSections = yield prisma_1.prisma.configurationSection.findMany({
+                        where: {
+                            companyId: company.id,
+                            no: {
+                                in: [2, 3]
+                            },
+                            payPeriodId: payPeriod.id
+                        }
+                    });
+                    if (configurationSections && configurationSections.length) {
+                        const configurationSection2 = configurationSections.find((e) => e.no === 2);
+                        const configurationSection3 = configurationSections.find((e) => e.no === 3);
+                        if (configurationSection2 && configurationSection3) {
+                            const configurationSection2Fields = yield prisma_1.prisma.field.findMany({
+                                where: {
+                                    companyId: company.id,
+                                    configurationSectionId: configurationSection2.id,
+                                    payPeriodId: payPeriod.id,
+                                    jsonId: {
+                                        not: 't1'
+                                    }
+                                }
+                            });
+                            const section2FieldsCount = configurationSection2Fields.length;
+                            const configurationSection3fields = yield prisma_1.prisma.field.findMany({
+                                where: {
+                                    companyId: company.id,
+                                    configurationSectionId: configurationSection3.id,
+                                    payPeriodId: payPeriod.id,
+                                    jsonId: {
+                                        not: 't1'
+                                    }
+                                },
+                                orderBy: {
+                                    jsonId: 'asc'
+                                }
+                            });
+                            let section2FieldsCountIncrement = section2FieldsCount;
+                            for (const section3Field of configurationSection3fields) {
+                                section2FieldsCountIncrement = section2FieldsCountIncrement + 1;
+                                yield prisma_1.prisma.field.update({
+                                    where: {
+                                        id: section3Field.id
+                                    },
+                                    data: {
+                                        jsonId: `f${section2FieldsCountIncrement}`,
+                                        configurationSectionId: configurationSection2.id
+                                    }
+                                });
+                                newConfigurationSettings['2'].fields[`f${section2FieldsCountIncrement}`] = newConfigurationSettings['2'].fields[section3Field.jsonId];
+                            }
+                            newConfigurationSettings['2'].capMappingTitle = 'Payroll Taxes & Fringe Benefits';
+                            newConfigurationSettings['2'].placeHolder = 'Select Payroll Taxes & Fringe Expense';
+                            newConfigurationSettings['2'].errorMessage = 'Please Select Payroll Taxes & Fringe Expense';
+                            newConfigurationSettings['2'].toolTip = 'Payroll Taxes & Fringe Benefits: These are the Payroll expense accounts or Fringe Benefits, if the user add new account here, it will be added as new column in Cost allocation';
+                            yield prisma_1.prisma.field.updateMany({
+                                where: {
+                                    configurationSectionId: configurationSection3.id,
+                                    companyId: company.id,
+                                    payPeriodId: payPeriod.id,
+                                    jsonId: 't1'
+                                },
+                                data: {
+                                    isActive: false,
+                                    name: 'Total Other Expanses'
+                                }
+                            });
+                            yield prisma_1.prisma.field.updateMany({
+                                where: {
+                                    configurationSectionId: configurationSection2.id,
+                                    companyId: company.id,
+                                    payPeriodId: payPeriod.id,
+                                    jsonId: 't1'
+                                },
+                                data: {
+                                    name: 'Total Payroll Taxes & Fringe Benefits'
+                                }
+                            });
+                            newConfigurationSettings['3'].fields = {};
+                            newConfigurationSettings['3'].capMappingTitle = 'Other Expenses';
+                            newConfigurationSettings['3'].placeHolder = 'Select Other Expenses';
+                            newConfigurationSettings['3'].errorMessage = 'Please Select Other Expenses';
+                            newConfigurationSettings['3'].toolTip = 'Other Expense Accounts:  These are the Other expense accounts, if the user add a new account here, it will be added as new columns in Cost allocation';
+                            for (const employee of employees) {
+                                const employeeTotalField = yield prisma_1.prisma.employeeCostField.findFirst({
+                                    where: {
+                                        field: {
+                                            configurationSectionId: configurationSection2.id,
+                                            jsonId: 't1',
+                                            payPeriodId: payPeriod.id
+                                        },
+                                        employeeId: employee.id,
+                                        payPeriodId: payPeriod.id
+                                    }
+                                });
+                                const allSection2Fields = yield prisma_1.prisma.employeeCostField.findMany({
+                                    where: {
+                                        field: {
+                                            configurationSectionId: configurationSection2.id,
+                                            jsonId: {
+                                                not: 't1'
+                                            },
+                                            isActive: true,
+                                            payPeriodId: payPeriod.id
+                                        },
+                                        employeeId: employee.id,
+                                        payPeriodId: payPeriod.id
+                                    }
+                                });
+                                const employeeCostValue = yield prisma_1.prisma.employeeCostValue.findMany({
+                                    where: {
+                                        employeeFieldId: {
+                                            in: allSection2Fields.map((e) => { return e.id; })
+                                        },
+                                        payPeriodId: payPeriod.id
+                                    }
+                                });
+                                let total = 0;
+                                employeeCostValue.forEach((empValue) => {
+                                    total = total + Number(empValue.value);
+                                });
+                                total = Number(total.toFixed(configuration.decimalToFixedAmount || 2));
+                                if (employeeTotalField) {
+                                    yield prisma_1.prisma.employeeCostValue.updateMany({
+                                        where: {
+                                            employeeFieldId: employeeTotalField === null || employeeTotalField === void 0 ? void 0 : employeeTotalField.id,
+                                            employeeId: employee.id,
+                                            payPeriodId: payPeriod.id
+                                        },
+                                        data: {
+                                            value: String(total)
+                                        }
+                                    });
+                                }
+                            }
+                        }
+                    }
+                    yield prisma_1.prisma.configuration.update({
+                        where: {
+                            id: configuration.id
+                        },
+                        data: {
+                            settings: newConfigurationSettings
+                        }
+                    });
+                }
+            }
+        }
+    });
+}
+exports.migrateTaxAndFringeSection = migrateTaxAndFringeSection;
 exports.migrationService = {
+    migrateTaxAndFringeSection,
     migrateConfiguration,
     addSyncLogsPermissions,
     updateConfigurationJson,

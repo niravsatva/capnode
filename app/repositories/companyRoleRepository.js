@@ -230,5 +230,28 @@ class CompanyRoleRepository {
             }
         });
     }
+    // Get user with role
+    getUserWithRole(companyRoleData) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const { userId, companies } = companyRoleData;
+            let isActiveInAnyCompany = false;
+            for (let i = 0; i < companies.length; i++) {
+                const company = companies[i];
+                const companyRoleData = yield prisma_1.prisma.companyRole.findMany({
+                    where: {
+                        userId,
+                        companyId: company.companyId,
+                        roleId: company.role.id,
+                        status: true,
+                    },
+                });
+                if (companyRoleData && companyRoleData.length > 0) {
+                    isActiveInAnyCompany = true;
+                    break;
+                }
+            }
+            return isActiveInAnyCompany;
+        });
+    }
 }
 exports.default = new CompanyRoleRepository();

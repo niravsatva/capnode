@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.DetailType = exports.currencyValues = exports.supportedAccountTypes = exports.supportedQBOCurrencies = exports.sectionPreLive = exports.sections = exports.DefaultConfigurationSettings = exports.DefaultAdminPermissions = exports.DefaultPermissions = void 0;
+exports.DetailType = exports.currencyValues = exports.supportedAccountTypes = exports.supportedQBOCurrencies = exports.sectionPreLive = exports.sectionWiseTotalFieldName = exports.sections = exports.DefaultConfigurationSettings = exports.DefaultAdminPermissions = exports.DefaultPermissions = void 0;
 exports.DefaultPermissions = [
     { permissionName: 'Dashboard', sortId: 1 },
     { permissionName: 'Employee Cost', sortId: 2 },
@@ -244,20 +244,8 @@ exports.DefaultConfigurationSettings = {
                 isEditing: false,
                 isActive: true
             },
-        },
-        addMore: true,
-        toolTip: 'Payroll Taxes Expense: These are the Payroll expense accounts, if the user add new account here, it will be added as new column in Cost allocation',
-        placeHolder: 'Select Payroll Taxes Expense',
-        errorMessage: 'Please Select Payroll Taxes Expense',
-        qbMappingValue: '',
-        capMappingTitle: 'Payroll Tax Expense',
-    },
-    '3': {
-        id: '3',
-        type: 'qbCoa',
-        fields: {
-            f1: {
-                id: 'f1',
+            f2: {
+                id: 'f2',
                 label: 'Health Insurance',
                 value: null,
                 ratesLimited: false,
@@ -268,11 +256,22 @@ exports.DefaultConfigurationSettings = {
             },
         },
         addMore: true,
-        toolTip: 'Salary Expense Accounts:  These are the Salary expense accounts, if the user add a new account here, it will be added as new columns in Cost allocation',
-        placeHolder: 'Select Fringe Expense',
-        errorMessage: 'Please Select Fringe Expense',
+        toolTip: 'Payroll Taxes & Fringe Benefits: These are the Payroll expense accounts or Fringe Benefits, if the user add new account here, it will be added as new column in Cost allocation',
+        placeHolder: 'Select Payroll Taxes & Fringe Expense',
+        errorMessage: 'Please Select Payroll Taxes & Fringe Expense',
         qbMappingValue: '',
-        capMappingTitle: 'Fringe expense',
+        capMappingTitle: 'Payroll Taxes & Fringe Benefits',
+    },
+    '3': {
+        id: '3',
+        type: 'qbCoa',
+        fields: {},
+        addMore: true,
+        toolTip: 'Other Expense Accounts:  These are the Other expense accounts, if the user add a new account here, it will be added as new columns in Cost allocation',
+        placeHolder: 'Select Other Expense',
+        errorMessage: 'Please Select Other Expense',
+        qbMappingValue: '',
+        capMappingTitle: 'Other Expenses',
     },
     '4': {
         id: '4',
@@ -358,7 +357,7 @@ exports.sections = [
         ],
     },
     {
-        sectionName: 'Payroll Tax Expense',
+        sectionName: 'Payroll Taxes & Fringe Benefits',
         no: 2,
         fields: [
             {
@@ -367,29 +366,28 @@ exports.sections = [
                 jsonId: 'f1',
             },
             {
-                name: `Total Payroll Taxes`,
+                name: 'Health Insurance',
+                type: 'Monthly',
+                jsonId: 'f2',
+            },
+            {
+                name: `Total Payroll Taxes & Fringe Benefits`,
                 type: 'Monthly',
                 jsonId: 't1',
             },
         ],
     },
     {
-        sectionName: 'Fringe expense',
+        sectionName: 'Other Expenses',
         no: 3,
-        fields: [
-            {
-                name: 'Health Insurance',
-                type: 'Monthly',
-                jsonId: 'f1',
-            },
-            {
-                name: `Total Fringe`,
-                type: 'Monthly',
-                jsonId: 't1',
-            },
-        ],
+        fields: [],
     },
 ];
+exports.sectionWiseTotalFieldName = {
+    1: 'Total Salary',
+    2: 'Total Payroll Taxes & Fringe Benefits',
+    3: 'Total Other Expanses'
+};
 //Note: Do not use this const
 exports.sectionPreLive = [
     {

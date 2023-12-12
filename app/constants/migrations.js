@@ -18,5 +18,6 @@ exports.migrations = [
     'syncMissingField',
     'updateConfigurationJson',
     'addSyncLogsPermissions',
-    'migrateConfiguration'
+    'migrateConfiguration',
+    'migrateTaxAndFringeSection'
 ];

@@ -12,6 +12,8 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+const prisma_1 = require("../client/prisma");
+const data_1 = require("../constants/data");
 const customError_1 = require("../models/customError");
 const repositories_1 = require("../repositories");
 const configurationRepository_1 = __importDefault(require("../repositories/configurationRepository"));
@@ -50,6 +52,36 @@ class ConfigurationService {
                 // 	companyId: companyId,
                 // });
                 yield repositories_1.employeeCostRepository.createNewEmployeeCostAndField(employeeList, createdField === null || createdField === void 0 ? void 0 : createdField.id, companyId, payPeriodId);
+                const findTotalField = yield prisma_1.prisma.field.findFirst({
+                    where: {
+                        companyId,
+                        configurationSectionId: sectionId,
+                        jsonId: 't1',
+                        payPeriodId
+                    }
+                });
+                if (!findTotalField) {
+                    const sectionData = yield prisma_1.prisma.configurationSection.findFirst({
+                        where: {
+                            id: sectionId,
+                            companyId,
+                            payPeriodId
+                        }
+                    });
+                    if (sectionData) {
+                        const createTotalField = yield prisma_1.prisma.field.create({
+                            data: {
+                                companyId,
+                                payPeriodId,
+                                configurationSectionId: sectionId,
+                                jsonId: 't1',
+                                name: data_1.sectionWiseTotalFieldName[sectionData.no],
+                                type: 'Monthly'
+                            }
+                        });
+                        yield repositories_1.employeeCostRepository.createNewEmployeeCostAndField(employeeList, createTotalField === null || createTotalField === void 0 ? void 0 : createTotalField.id, companyId, payPeriodId);
+                    }
+                }
                 return createdField;
             }
             catch (error) {

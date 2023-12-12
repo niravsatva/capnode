@@ -27,7 +27,7 @@ class ConfigurationRepository {
                         settings: data_1.DefaultConfigurationSettings,
                         indirectExpenseRate: 0,
                         payrollMethod: 'Percentage',
-                        companyId: companyId
+                        companyId: companyId,
                     },
                 });
                 return configuration;
@@ -44,7 +44,7 @@ class ConfigurationRepository {
                 const configuration = yield prisma_1.prisma.configuration.findFirst({
                     where: {
                         companyId: companyId,
-                        payPeriodId: payPeriodId
+                        payPeriodId: payPeriodId,
                     },
                 });
                 return configuration;
@@ -62,8 +62,8 @@ class ConfigurationRepository {
                     where: {
                         companyId_payPeriodId: {
                             companyId: companyId,
-                            payPeriodId: payPeriodId
-                        }
+                            payPeriodId: payPeriodId,
+                        },
                     },
                     data: data,
                 });
@@ -71,17 +71,17 @@ class ConfigurationRepository {
                 const configurationSectionData = yield prisma_1.prisma.configurationSection.findMany({
                     where: {
                         companyId,
-                        payPeriodId
+                        payPeriodId,
                     },
                     select: {
                         id: true,
-                        no: true
-                    }
+                        no: true,
+                    },
                 });
                 for (const key in settings) {
                     const section = configurationSectionData.find((e) => e.no === Number(key));
-                    for (const fieldKey in settings[key].fields) {
-                        if (section) {
+                    if (section) {
+                        for (const fieldKey in settings[key].fields) {
                             const fieldData = settings[key].fields[fieldKey];
                             if (fieldData && section) {
                                 yield prisma_1.prisma.field.updateMany({
@@ -93,8 +93,30 @@ class ConfigurationRepository {
                                     },
                                     data: {
                                         name: fieldData.label,
-                                        isActive: fieldData.isActive
-                                    }
+                                        isActive: fieldData.isActive,
+                                    },
+                                });
+                            }
+                        }
+                        const fieldKeys = Object.keys(settings[key].fields);
+                        if (fieldKeys && fieldKeys.length) {
+                            const isAllInactive = [];
+                            fieldKeys.forEach((fieldKey) => {
+                                if (!settings[key].fields[fieldKey].isActive) {
+                                    isAllInactive.push(fieldKey);
+                                }
+                            });
+                            if (isAllInactive.length === fieldKeys.length) {
+                                yield prisma_1.prisma.field.updateMany({
+                                    where: {
+                                        companyId,
+                                        payPeriodId,
+                                        jsonId: 't1',
+                                        configurationSectionId: section.id,
+                                    },
+                                    data: {
+                                        isActive: false,
+                                    },
                                 });
                             }
                         }
@@ -111,18 +133,18 @@ class ConfigurationRepository {
                         if (singleConfigurationSection.no !== 0) {
                             let total = 0;
                             singleEmployeeData.employeeCostField.forEach((singleEmployeeCostField) => {
-                                if (singleEmployeeCostField.field
-                                    .configurationSectionId ===
+                                if (singleEmployeeCostField.field.configurationSectionId ===
                                     singleConfigurationSection.id &&
                                     singleEmployeeCostField.field.jsonId !== 't1') {
                                     total += Number(singleEmployeeCostField.costValue[0].value);
                                 }
                             });
-                            const fieldToUpdate = singleEmployeeData.employeeCostField.find((singleEmployeeCostField) => singleEmployeeCostField.field
-                                .configurationSectionId ===
+                            const fieldToUpdate = singleEmployeeData.employeeCostField.find((singleEmployeeCostField) => singleEmployeeCostField.field.configurationSectionId ===
                                 singleConfigurationSection.id &&
                                 singleEmployeeCostField.field.jsonId === 't1');
-                            yield employeeCostRepository_1.default.updateMonthlyCost(fieldToUpdate.costValue[0].id, total.toFixed(2));
+                            if (fieldToUpdate) {
+                                yield employeeCostRepository_1.default.updateMonthlyCost(fieldToUpdate.costValue[0].id, total.toFixed(2));
+                            }
                         }
                     }));
                 })

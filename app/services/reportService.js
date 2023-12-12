@@ -501,7 +501,7 @@ class ReportService {
             });
             const grandTotalRow = costAllocationRepository_1.default.getGrandTotalRowCostAllocation(finalData);
             if (grandTotalRow) {
-                finalData.push(grandTotalRow);
+                finalData.push(Object.assign(Object.assign({}, grandTotalRow), { id: (0, uuid_1.v4)() }));
             }
             return { content: finalData, currentPayPeriodId: isSystemPayPeriod ? payPeriodId : null };
         });

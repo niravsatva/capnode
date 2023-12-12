@@ -77,8 +77,8 @@ class AuthController {
                     const companyData = yield prisma_1.prisma.companyRole.findFirst({
                         where: {
                             userId: isExist.id,
-                            roleId: companyAdminRole.id
-                        }
+                            roleId: companyAdminRole.id,
+                        },
                     });
                     if (companyData && companyData.companyId) {
                         yield repositories_1.subscriptionRepository.updateOrCreateSubscriptionByCompanyId(companyData.companyId, userSubscription);
@@ -173,7 +173,7 @@ class AuthController {
     }
     // Fetch Profile
     fetchProfile(req, res, next) {
-        var _a, _b, _c, _d;
+        var _a, _b, _c, _d, _e;
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 const profile = yield repositories_1.userRepository.getById(req.user.id);
@@ -193,9 +193,20 @@ class AuthController {
                 else {
                     profileData = Object.assign(Object.assign({}, profile), { isFirstCompanyAdmin: false });
                 }
+                // Check if user is active in any of the company
+                if ((profile === null || profile === void 0 ? void 0 : profile.companies) && ((_c = profile.companies) === null || _c === void 0 ? void 0 : _c.length) > 0) {
+                    const isActiveInAnyCompany = yield repositories_1.companyRoleRepository.getUserWithRole({
+                        userId: profile.id,
+                        companies: profile.companies,
+                    });
+                    profileData['isActiveInAnyCompany'] = isActiveInAnyCompany;
+                }
+                else {
+                    profileData['isActiveInAnyCompany'] = false;
+                }
                 const userByEmail = yield repositories_1.userRepository.getByEmail(profileData === null || profileData === void 0 ? void 0 : profileData.email);
-                if (((_c = userByEmail === null || userByEmail === void 0 ? void 0 : userByEmail.companies) === null || _c === void 0 ? void 0 : _c.length) > 0) {
-                    const isValidForLoginWithRole = (_d = userByEmail === null || userByEmail === void 0 ? void 0 : userByEmail.companies) === null || _d === void 0 ? void 0 : _d.some((singleCompany) => {
+                if (((_d = userByEmail === null || userByEmail === void 0 ? void 0 : userByEmail.companies) === null || _d === void 0 ? void 0 : _d.length) > 0) {
+                    const isValidForLoginWithRole = (_e = userByEmail === null || userByEmail === void 0 ? void 0 : userByEmail.companies) === null || _e === void 0 ? void 0 : _e.some((singleCompany) => {
                         var _a;
                         return (_a = singleCompany === null || singleCompany === void 0 ? void 0 : singleCompany.role) === null || _a === void 0 ? void 0 : _a.status;
                     });
