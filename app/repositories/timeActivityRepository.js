@@ -270,14 +270,19 @@ class TimeActivityRepository {
                         delete data.classId;
                     }
                     if (employee.active) {
-                        const updated = yield prisma_1.prisma.timeActivities.updateMany({
+                        yield prisma_1.prisma.timeActivities.updateMany({
                             where: {
                                 timeActivityId: timeActivityId,
                                 companyId: companyId,
                             },
                             data: data,
                         });
-                        updatedTimeActivities = updated[0];
+                        updatedTimeActivities = yield prisma_1.prisma.timeActivities.findFirst({
+                            where: {
+                                timeActivityId: timeActivityId,
+                                companyId: companyId,
+                            }
+                        });
                     }
                 }
                 else {
@@ -314,6 +319,7 @@ class TimeActivityRepository {
                         });
                     }
                 }
+                console.log(updatedTimeActivities);
                 return updatedTimeActivities;
             }
             catch (err) {

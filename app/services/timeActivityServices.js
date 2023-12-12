@@ -23,6 +23,7 @@ const quickbooksServices_1 = __importDefault(require("./quickbooksServices"));
 const payPeriodRepository_1 = __importDefault(require("../repositories/payPeriodRepository"));
 const dayjs_1 = __importDefault(require("dayjs"));
 const logger_1 = require("../utils/logger");
+const utils_1 = require("../utils/utils");
 class TimeActivityService {
     // Get all time activities
     getAllTimeActivitiesServices(timeActivityData) {
@@ -252,7 +253,7 @@ class TimeActivityService {
         });
     }
     syncTimeActivities(companyId) {
-        var _a, _b, _c, _d, _e;
+        var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m;
         return __awaiter(this, void 0, void 0, function* () {
             const companyDetails = yield repositories_1.companyRepository.getDetails(companyId);
             if (!companyDetails) {
@@ -271,24 +272,44 @@ class TimeActivityService {
                 if (timeActivities &&
                     ((_b = (_a = timeActivities === null || timeActivities === void 0 ? void 0 : timeActivities.QueryResponse) === null || _a === void 0 ? void 0 : _a.TimeActivity) === null || _b === void 0 ? void 0 : _b.length) > 0) {
                     // Filtered vendors, fetching employees only
-                    const filteredEmployees = (_d = (_c = timeActivities === null || timeActivities === void 0 ? void 0 : timeActivities.QueryResponse) === null || _c === void 0 ? void 0 : _c.TimeActivity) === null || _d === void 0 ? void 0 : _d.filter((timeActivity) => timeActivity === null || timeActivity === void 0 ? void 0 : timeActivity.EmployeeRef);
-                    yield Promise.all(filteredEmployees === null || filteredEmployees === void 0 ? void 0 : filteredEmployees.map((timeActivity) => __awaiter(this, void 0, void 0, function* () {
-                        var _f, _g, _h, _j, _k, _l, _m;
+                    const filteredTimeActivities = (_d = (_c = timeActivities === null || timeActivities === void 0 ? void 0 : timeActivities.QueryResponse) === null || _c === void 0 ? void 0 : _c.TimeActivity) === null || _d === void 0 ? void 0 : _d.filter((timeActivity) => timeActivity === null || timeActivity === void 0 ? void 0 : timeActivity.EmployeeRef);
+                    for (const timeActivity of filteredTimeActivities) {
                         const data = {
                             timeActivityId: timeActivity === null || timeActivity === void 0 ? void 0 : timeActivity.Id,
-                            classId: ((_f = timeActivity === null || timeActivity === void 0 ? void 0 : timeActivity.ClassRef) === null || _f === void 0 ? void 0 : _f.value) || null,
-                            className: ((_g = timeActivity === null || timeActivity === void 0 ? void 0 : timeActivity.ClassRef) === null || _g === void 0 ? void 0 : _g.name) || null,
-                            customerId: ((_h = timeActivity === null || timeActivity === void 0 ? void 0 : timeActivity.CustomerRef) === null || _h === void 0 ? void 0 : _h.value) || null,
-                            customerName: ((_j = timeActivity === null || timeActivity === void 0 ? void 0 : timeActivity.CustomerRef) === null || _j === void 0 ? void 0 : _j.name) || null,
-                            hours: ((_k = timeActivity === null || timeActivity === void 0 ? void 0 : timeActivity.Hours) === null || _k === void 0 ? void 0 : _k.toString()) || '0',
-                            minute: ((_l = timeActivity === null || timeActivity === void 0 ? void 0 : timeActivity.Minutes) === null || _l === void 0 ? void 0 : _l.toString()) || '0',
+                            classId: ((_e = timeActivity === null || timeActivity === void 0 ? void 0 : timeActivity.ClassRef) === null || _e === void 0 ? void 0 : _e.value) || null,
+                            className: ((_f = timeActivity === null || timeActivity === void 0 ? void 0 : timeActivity.ClassRef) === null || _f === void 0 ? void 0 : _f.name) || null,
+                            customerId: ((_g = timeActivity === null || timeActivity === void 0 ? void 0 : timeActivity.CustomerRef) === null || _g === void 0 ? void 0 : _g.value) || null,
+                            customerName: ((_h = timeActivity === null || timeActivity === void 0 ? void 0 : timeActivity.CustomerRef) === null || _h === void 0 ? void 0 : _h.name) || null,
+                            hours: ((_j = timeActivity === null || timeActivity === void 0 ? void 0 : timeActivity.Hours) === null || _j === void 0 ? void 0 : _j.toString()) || '0',
+                            minute: ((_k = timeActivity === null || timeActivity === void 0 ? void 0 : timeActivity.Minutes) === null || _k === void 0 ? void 0 : _k.toString()) || '0',
                             activityDate: timeActivity === null || timeActivity === void 0 ? void 0 : timeActivity.TxnDate,
-                            employeeId: (_m = timeActivity === null || timeActivity === void 0 ? void 0 : timeActivity.EmployeeRef) === null || _m === void 0 ? void 0 : _m.value,
+                            employeeId: (_l = timeActivity === null || timeActivity === void 0 ? void 0 : timeActivity.EmployeeRef) === null || _l === void 0 ? void 0 : _l.value,
                         };
                         // update or create time activity
                         return yield timeActivityRepository_1.default.updateOrCreateTimeActivity(timeActivity === null || timeActivity === void 0 ? void 0 : timeActivity.Id, companyId, data);
-                    })));
-                    return (_e = timeActivities === null || timeActivities === void 0 ? void 0 : timeActivities.QueryResponse) === null || _e === void 0 ? void 0 : _e.TimeActivity;
+                    }
+                    // await Promise.all(
+                    // 	filteredTimeActivities?.map(async (timeActivity: any) => {
+                    // 		const data: any = {
+                    // 			timeActivityId: timeActivity?.Id,
+                    // 			classId: timeActivity?.ClassRef?.value || null,
+                    // 			className: timeActivity?.ClassRef?.name || null,
+                    // 			customerId: timeActivity?.CustomerRef?.value || null,
+                    // 			customerName: timeActivity?.CustomerRef?.name || null,
+                    // 			hours: timeActivity?.Hours?.toString() || '0',
+                    // 			minute: timeActivity?.Minutes?.toString() || '0',
+                    // 			activityDate: timeActivity?.TxnDate,
+                    // 			employeeId: timeActivity?.EmployeeRef?.value,
+                    // 		};
+                    // 		// update or create time activity
+                    // 		const data2 = await timeActivityRepository.updateOrCreateTimeActivity(
+                    // 			timeActivity?.Id,
+                    // 			companyId,
+                    // 			data
+                    // 		);
+                    // 	})
+                    // );
+                    return (_m = timeActivities === null || timeActivities === void 0 ? void 0 : timeActivities.QueryResponse) === null || _m === void 0 ? void 0 : _m.TimeActivity;
                     // console.log('My time activities: ', timeActivities);
                 }
                 else {
@@ -447,6 +468,15 @@ class TimeActivityService {
                     ((_b = (_a = newTimeActivities === null || newTimeActivities === void 0 ? void 0 : newTimeActivities.QueryResponse) === null || _a === void 0 ? void 0 : _a.TimeActivity) === null || _b === void 0 ? void 0 : _b.length) > 0) {
                     // Filtered vendors, fetching employees only
                     const filteredEmployees = (_d = (_c = newTimeActivities === null || newTimeActivities === void 0 ? void 0 : newTimeActivities.QueryResponse) === null || _c === void 0 ? void 0 : _c.TimeActivity) === null || _d === void 0 ? void 0 : _d.filter((timeActivity) => timeActivity === null || timeActivity === void 0 ? void 0 : timeActivity.EmployeeRef);
+                    const customRules = yield prisma_1.prisma.customRules.findMany({
+                        where: {
+                            companyId,
+                            isActive: true
+                        },
+                        orderBy: {
+                            priority: 'asc'
+                        }
+                    });
                     for (let i = 0; i < filteredEmployees.length; i++) {
                         const timeActivity = filteredEmployees[i];
                         let hours = '0';
@@ -494,6 +524,12 @@ class TimeActivityService {
                         try {
                             // Update or create timeActivity in db
                             const result = yield timeActivityRepository_1.default.updateOrCreateTimeActivity(timeActivity === null || timeActivity === void 0 ? void 0 : timeActivity.Id, companyId, timeActivityData);
+                            if (result && result.id && customRules && customRules.length) {
+                                const ruleData = this.matchCustomRule(result, customRules);
+                                if (ruleData) {
+                                    yield this.createSplitActivitiesBasedOnRuleMatch(result, ruleData);
+                                }
+                            }
                             timeActivityArr.push(result);
                         }
                         catch (err) {
@@ -583,6 +619,130 @@ class TimeActivityService {
                 throw err;
             }
         });
+    }
+    matchCustomRule(timeActivity, customRules) {
+        let matchedRule = null;
+        for (const rule of customRules) {
+            if (rule.isActive) {
+                if ((0, utils_1.hasText)(rule.criteria.employeeId) && (0, utils_1.hasText)(rule.criteria.classId) && (0, utils_1.hasText)(rule.criteria.customerId)) {
+                    if (rule.criteria.operator1 === 'AND' && rule.criteria.operator2 === 'AND') {
+                        if ((rule.criteria.employeeId === timeActivity.employeeId && rule.criteria.customerId === timeActivity.customerId) &&
+                            (rule.criteria.customerId === timeActivity.customerId && rule.criteria.classId === timeActivity.classId)) {
+                            matchedRule = rule;
+                            break;
+                        }
+                    }
+                    if (rule.criteria.operator1 === 'OR' && rule.criteria.operator2 === 'OR') {
+                        if ((rule.criteria.employeeId === timeActivity.employeeId || rule.criteria.customerId === timeActivity.customerId) &&
+                            (rule.criteria.customerId === timeActivity.customerId || rule.criteria.classId === timeActivity.classId)) {
+                            matchedRule = rule;
+                            break;
+                        }
+                    }
+                    if (rule.criteria.operator1 === 'AND' && rule.criteria.operator2 === 'OR') {
+                        if ((rule.criteria.employeeId === timeActivity.employeeId && rule.criteria.customerId === timeActivity.customerId) &&
+                            (rule.criteria.customerId === timeActivity.customerId || rule.criteria.classId === timeActivity.classId)) {
+                            matchedRule = rule;
+                            break;
+                        }
+                    }
+                    if (rule.criteria.operator1 === 'OR' && rule.criteria.operator2 === 'AND') {
+                        if ((rule.criteria.employeeId === timeActivity.employeeId || rule.criteria.customerId === timeActivity.customerId) &&
+                            (rule.criteria.customerId === timeActivity.customerId && rule.criteria.classId === timeActivity.classId)) {
+                            matchedRule = rule;
+                            break;
+                        }
+                    }
+                }
+                if ((0, utils_1.hasText)(rule.criteria.employeeId) && (0, utils_1.hasText)(rule.criteria.classId) && !(0, utils_1.hasText)(rule.criteria.customerId)) {
+                    if (rule.criteria.operator2 === 'AND' && (rule.criteria.employeeId === timeActivity.employeeId && rule.criteria.classId == timeActivity.classId)) {
+                        matchedRule = rule;
+                        break;
+                    }
+                    if (rule.criteria.operator2 === 'OR' && (rule.criteria.employeeId === timeActivity.employeeId || rule.criteria.classId == timeActivity.classId)) {
+                        matchedRule = rule;
+                        break;
+                    }
+                }
+                if ((0, utils_1.hasText)(rule.criteria.employeeId) && !(0, utils_1.hasText)(rule.criteria.classId) && (0, utils_1.hasText)(rule.criteria.customerId)) {
+                    if (rule.criteria.operator1 === 'AND' && (rule.criteria.employeeId === timeActivity.employeeId && rule.criteria.classId === timeActivity.classId)) {
+                        matchedRule = rule;
+                        break;
+                    }
+                    if (rule.criteria.operator1 === 'OR' && (rule.criteria.employeeId === timeActivity.employeeId || rule.criteria.customerId === timeActivity.customerId)) {
+                        matchedRule = rule;
+                        break;
+                    }
+                }
+                if ((0, utils_1.hasText)(rule.criteria.employeeId) && !(0, utils_1.hasText)(rule.criteria.customerId) && !(0, utils_1.hasText)(rule.criteria.classId)) {
+                    if (rule.criteria.employeeId === timeActivity.employeeId) {
+                        matchedRule = rule;
+                        break;
+                    }
+                }
+            }
+        }
+        return matchedRule;
+    }
+    createSplitActivitiesBasedOnRuleMatch(timeActivity, ruleData) {
+        var _a;
+        return __awaiter(this, void 0, void 0, function* () {
+            const hoursMinutesData = this.divideTimeAsPerPercentage(Number(timeActivity.hours), Number(timeActivity.minute), ruleData.actions);
+            if (timeActivity.id) {
+                yield prisma_1.prisma.splitTimeActivities.deleteMany({
+                    where: {
+                        timeActivityId: timeActivity.id
+                    }
+                });
+            }
+            for (let index = 0; index < ((_a = ruleData === null || ruleData === void 0 ? void 0 : ruleData.actions) === null || _a === void 0 ? void 0 : _a.length); index++) {
+                const action = ruleData === null || ruleData === void 0 ? void 0 : ruleData.actions[index];
+                const actualTimeLog = this.minToHours(hoursMinutesData[index]);
+                yield prisma_1.prisma.splitTimeActivities.create({
+                    data: {
+                        timeActivity: { connect: { id: timeActivity.id } },
+                        classId: (action === null || action === void 0 ? void 0 : action.classId) || (timeActivity === null || timeActivity === void 0 ? void 0 : timeActivity.classId),
+                        className: (action === null || action === void 0 ? void 0 : action.className) || (timeActivity === null || timeActivity === void 0 ? void 0 : timeActivity.className),
+                        customerId: (action === null || action === void 0 ? void 0 : action.customerId) || (timeActivity === null || timeActivity === void 0 ? void 0 : timeActivity.customerId),
+                        customerName: (action === null || action === void 0 ? void 0 : action.customerName) || (timeActivity === null || timeActivity === void 0 ? void 0 : timeActivity.customerName),
+                        hours: actualTimeLog.split(':')[0],
+                        minute: actualTimeLog.split(':')[1],
+                        activityDate: timeActivity === null || timeActivity === void 0 ? void 0 : timeActivity.activityDate,
+                        employee: { connect: { id: timeActivity === null || timeActivity === void 0 ? void 0 : timeActivity.employeeId } },
+                        isAutoSplit: true,
+                        isClassReadOnly: (0, utils_1.hasText)(action.classId),
+                        isCustomerReadOnly: (0, utils_1.hasText)(action.customerId),
+                        customRuleId: ruleData === null || ruleData === void 0 ? void 0 : ruleData.id,
+                    }
+                });
+            }
+        });
+    }
+    divideTimeAsPerPercentage(hours, minutes, actions) {
+        const minutesContribute = {};
+        // Convert hours and minutes to total minutes
+        const totalMinutes = hours * 60 + minutes;
+        let totalMinutesContributed = 0;
+        for (let i = 0; i < actions.length; i++) {
+            const action = actions[i];
+            minutesContribute[i] = Math.round((totalMinutes * Number(action.hours)) / 100);
+            totalMinutesContributed = totalMinutesContributed + minutesContribute[i];
+        }
+        const diff = totalMinutes - totalMinutesContributed;
+        if (diff && diff > 0) {
+            minutesContribute[actions.length - 1] = minutesContribute[actions.length - 1] + diff;
+        }
+        else if (diff && diff < 0) {
+            minutesContribute[actions.length - 1] = minutesContribute[actions.length - 1] - Math.abs(diff);
+        }
+        return minutesContribute;
+    }
+    minToHours(totalMinutes) {
+        const totalHours = Math.floor(totalMinutes / 60);
+        const remainingMinutes = totalMinutes % 60;
+        return `${totalHours.toString().padStart(2, '0')}:${remainingMinutes
+            .toString()
+            .padStart(2, '0')}`;
     }
     // Update hours for time activity in DB
     updateTimeActivity(timeActivityData) {

@@ -836,6 +836,9 @@ function configSectionMigrationFix() {
                                 if (jsonField.id === 'f1') {
                                     jsonField.deletable = false;
                                 }
+                                else {
+                                    jsonField.deletable = true;
+                                }
                                 newConfigurationSettings['2'].fields[section2Field.jsonId] = Object.assign(Object.assign({}, jsonField), { id: section2Field.jsonId });
                             }
                         }

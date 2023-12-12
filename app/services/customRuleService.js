@@ -11,6 +11,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 const prisma_1 = require("../client/prisma");
 const customError_1 = require("../models/customError");
+const utils_1 = require("../utils/utils");
 class CustomRuleService {
     getCustomRuleList(query) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -61,6 +62,23 @@ class CustomRuleService {
             }
             data.updatedBy = userId;
             data.createdBy = userId;
+            const searchQuery = {
+                name: data.name,
+                companyId: data.companyId,
+                id: {
+                    not: id
+                }
+            };
+            if (!id) {
+                delete searchQuery.id;
+            }
+            const checkExistsRule = yield prisma_1.prisma.customRules.findFirst({
+                where: searchQuery
+            });
+            if (checkExistsRule && checkExistsRule.id) {
+                throw new customError_1.CustomError(400, 'Custom rule already exists with same name');
+            }
+            this.validateCriteriaJson(data.criteria);
             if (id) {
                 data.updatedBy = userId;
                 return yield prisma_1.prisma.customRules.update({
@@ -79,6 +97,42 @@ class CustomRuleService {
                 data: Object.assign(Object.assign({}, data), { priority: allRules.length + 1 })
             });
         });
+    }
+    validateCriteriaJson(criteria) {
+        const operators = ['AND', 'OR'];
+        if (!(0, utils_1.hasText)(criteria.employeeId)) {
+            throw new customError_1.CustomError(400, 'Invalid rule criteria');
+        }
+        if (operators.includes(criteria.operator1) && operators.includes(criteria.operator2)) {
+            if (!(0, utils_1.hasText)(criteria.classId) || !(0, utils_1.hasText)(criteria.customerId)) {
+                throw new customError_1.CustomError(400, 'Invalid rule criteria');
+            }
+        }
+        if (operators.includes(criteria.operator1)) {
+            if (!(0, utils_1.hasText)(criteria.customerId)) {
+                throw new customError_1.CustomError(400, 'Invalid rule criteria');
+            }
+        }
+        if (operators.includes(criteria.operator2)) {
+            if (!(0, utils_1.hasText)(criteria.classId)) {
+                throw new customError_1.CustomError(400, 'Invalid rule criteria');
+            }
+        }
+        if ((0, utils_1.hasText)(criteria.employeeId) && (0, utils_1.hasText)(criteria.customerId) && (0, utils_1.hasText)(criteria.classId)) {
+            if (!operators.includes(criteria.operator1) && !operators.includes(criteria.operator2)) {
+                throw new customError_1.CustomError(400, 'Invalid rule criteria');
+            }
+        }
+        if ((0, utils_1.hasText)(criteria.employeeId) && !(0, utils_1.hasText)(criteria.customerId) && (0, utils_1.hasText)(criteria.classId)) {
+            if (!operators.includes(criteria.operator2)) {
+                throw new customError_1.CustomError(400, 'Invalid rule criteria');
+            }
+        }
+        if ((0, utils_1.hasText)(criteria.employeeId) && (0, utils_1.hasText)(criteria.customerId) && !(0, utils_1.hasText)(criteria.classId)) {
+            if (!operators.includes(criteria.operator1)) {
+                throw new customError_1.CustomError(400, 'Invalid rule criteria');
+            }
+        }
     }
     getCustomRuleById(id, companyId) {
         return __awaiter(this, void 0, void 0, function* () {
