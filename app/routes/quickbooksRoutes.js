@@ -12,6 +12,10 @@ const router = express_1.default.Router();
 router.get('/authurl', authMiddleware_1.isAuthenticated, controllers_1.quickbooksController.getQuickbooksAuthUri);
 // Quickbooks Callback
 router.post('/callback', authMiddleware_1.isAuthenticated, controllers_1.quickbooksController.quickbooksCallback);
+// Get Quickbooks SSO Auth URL
+router.get('/sso-authurl', controllers_1.quickbooksController.getQuickbooksSSOAuthUri);
+// Get Quickbooks SSO Auth URL
+router.post('/sso-callback', controllers_1.quickbooksController.quickbooksSSOCallback);
 // Disconnect company
 router.post('/disconnect', authMiddleware_1.isAuthenticated, controllers_1.quickbooksController.quickbooksDisconnect);
 // Update status

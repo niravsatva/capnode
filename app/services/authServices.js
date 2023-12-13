@@ -75,11 +75,13 @@ class AuthServices {
                 });
                 const superAdminSubscription = yield prisma_1.prisma.subscription.findFirst({
                     where: {
-                        userId: user.id
-                    }
+                        userId: user.id,
+                    },
                 });
                 console.log(superAdminSubscription);
-                if (superAdminSubscription && (!superAdminSubscription.status || superAdminSubscription.status != 'live')) {
+                if (superAdminSubscription &&
+                    (!superAdminSubscription.status ||
+                        superAdminSubscription.status != 'live')) {
                     throw new customError_1.CustomError(400, 'You do not have any active subscription currently');
                 }
                 if (!isValidSubscription) {
@@ -100,6 +102,69 @@ class AuthServices {
             catch (err) {
                 throw err;
             }
+        });
+    }
+    ssoLogin(user, machineId) {
+        var _a, _b, _c;
+        return __awaiter(this, void 0, void 0, function* () {
+            const isValidForLogin = (_a = user === null || user === void 0 ? void 0 : user.companies) === null || _a === void 0 ? void 0 : _a.some((singleCompany) => {
+                var _a, _b;
+                const permissions = (_b = (_a = singleCompany === null || singleCompany === void 0 ? void 0 : singleCompany.role) === null || _a === void 0 ? void 0 : _a.permissions) === null || _b === void 0 ? void 0 : _b.filter((item) => (item === null || item === void 0 ? void 0 : item.all) === true ||
+                    (item === null || item === void 0 ? void 0 : item.view) === true ||
+                    (item === null || item === void 0 ? void 0 : item.edit) === true ||
+                    (item === null || item === void 0 ? void 0 : item.delete) === true ||
+                    (item === null || item === void 0 ? void 0 : item.add) === true);
+                if ((permissions === null || permissions === void 0 ? void 0 : permissions.length) === 0) {
+                    return false;
+                }
+                else {
+                    return true;
+                }
+            });
+            const isValidForLoginWithRole = (_b = user === null || user === void 0 ? void 0 : user.companies) === null || _b === void 0 ? void 0 : _b.some((singleCompany) => {
+                var _a;
+                return (_a = singleCompany === null || singleCompany === void 0 ? void 0 : singleCompany.role) === null || _a === void 0 ? void 0 : _a.status;
+            });
+            const isValidSubscription = (_c = user === null || user === void 0 ? void 0 : user.companies) === null || _c === void 0 ? void 0 : _c.some((singleCompany) => {
+                var _a;
+                const subScription = (_a = singleCompany === null || singleCompany === void 0 ? void 0 : singleCompany.company) === null || _a === void 0 ? void 0 : _a.Subscription;
+                if (subScription && subScription.length) {
+                    if (!subScription[0].status || subScription[0].status != 'live') {
+                        return false;
+                    }
+                }
+                return true;
+            });
+            const superAdminSubscription = yield prisma_1.prisma.subscription.findFirst({
+                where: {
+                    userId: user.id,
+                },
+            });
+            if (superAdminSubscription &&
+                (!superAdminSubscription.status ||
+                    superAdminSubscription.status != 'live')) {
+                throw new customError_1.CustomError(400, 'You do not have any active subscription currently');
+            }
+            if (!isValidSubscription) {
+                throw new customError_1.CustomError(400, 'You do not have any active subscription currently');
+            }
+            if (!isValidForLogin) {
+                throw new customError_1.CustomError(401, 'You are not authorized to access the system please contact your administrator.');
+            }
+            if (!isValidForLoginWithRole) {
+                throw new customError_1.CustomError(401, 'You are not authorized to access the system please contact your administrator.');
+            }
+            //   Credentials Valid
+            const accessToken = (0, tokenHelper_1.generateAccessToken)({
+                id: user === null || user === void 0 ? void 0 : user.id,
+                email: user.email,
+            });
+            const refreshToken = (0, tokenHelper_1.generateRefreshToken)({
+                id: user === null || user === void 0 ? void 0 : user.id,
+                email: user.email,
+            });
+            yield tokenRepository_1.default.create(user === null || user === void 0 ? void 0 : user.id, accessToken, refreshToken, machineId);
+            return { accessToken, refreshToken, user };
         });
     }
     register(firstName, lastName, email, customerId, subscriptionData) {

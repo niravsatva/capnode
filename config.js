@@ -37,6 +37,8 @@ function config(Env) {
         quickbooksClientSecret: Env === null || Env === void 0 ? void 0 : Env.QUICKBOOKS_CLIENT_SECRET,
         quickbooksEnvironment: Env === null || Env === void 0 ? void 0 : Env.QUICKBOOKS_ENVIRONMENT,
         quickbooksRedirectUri: Env === null || Env === void 0 ? void 0 : Env.QUICKBOOKS_REDIRECT_URI,
+        quickbooksSSORedirectUri: Env === null || Env === void 0 ? void 0 : Env.QUICKBOOKS_SSO_REDIRECT_URI,
+        quickbooksUserInfoUri: Env === null || Env === void 0 ? void 0 : Env.QUICKBOOKS_USERINFO_ENDPOINT,
         quickbooksScopes: Env === null || Env === void 0 ? void 0 : Env.QUICKBOOKS_SCOPES,
         quickbooksTokenRevokeEndpoint: Env === null || Env === void 0 ? void 0 : Env.QUICKBOOKS_TOKEN_REVOKE_ENDPOINT,
         employeeSyncLambdaEndpoint: Env === null || Env === void 0 ? void 0 : Env.EMPLOYEE_SYNC_LAMBDA_ENDPOINT,

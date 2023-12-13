@@ -25,6 +25,15 @@ const authClient = new OAuthClient({
         : 'production',
     redirectUri: config_1.default === null || config_1.default === void 0 ? void 0 : config_1.default.quickbooksRedirectUri,
 });
+// const ssoAuthClient = new OAuthClient({
+// 	clientId: config?.quickbooksClientId,
+// 	clientSecret: config?.quickbooksClientSecret,
+// 	environment:
+// 		config?.quickbooksEnvironment?.toLowerCase() === 'sandbox'
+// 			? 'sandbox'
+// 			: 'production',
+// 	redirectUri: config?.quickbooksSSORedirectUri,
+// });
 class QuickbooksAuthClient {
     authorizeUri(stateValue) {
         var _a;
@@ -45,6 +54,7 @@ class QuickbooksAuthClient {
     createAuthToken(url) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
+                console.log('URL: ', url);
                 const authToken = yield authClient.createToken(url);
                 return authToken.token;
             }

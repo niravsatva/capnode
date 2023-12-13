@@ -34,23 +34,23 @@ class CustomRuleService {
                                 mode: 'insensitive',
                             },
                         },
-                    ]
+                    ],
                 };
             }
             let filterCondition = {};
             if (query.status) {
                 filterCondition = {
-                    isActive: query.status === 'Active'
+                    isActive: query.status === 'Active',
                 };
             }
             const content = yield prisma_1.prisma.customRules.findMany({
                 where: Object.assign(Object.assign({ companyId: query.companyId }, filterCondition), searchCondition),
                 orderBy: {
-                    priority: 'asc'
+                    priority: 'asc',
                 },
             });
             const count = yield prisma_1.prisma.customRules.count({
-                where: Object.assign(Object.assign({ companyId: query.companyId }, filterCondition), searchCondition)
+                where: Object.assign(Object.assign({ companyId: query.companyId }, filterCondition), searchCondition),
             });
             return { content, count };
         });
@@ -66,14 +66,14 @@ class CustomRuleService {
                 name: data.name,
                 companyId: data.companyId,
                 id: {
-                    not: id
-                }
+                    not: id,
+                },
             };
             if (!id) {
                 delete searchQuery.id;
             }
             const checkExistsRule = yield prisma_1.prisma.customRules.findFirst({
-                where: searchQuery
+                where: searchQuery,
             });
             if (checkExistsRule && checkExistsRule.id) {
                 throw new customError_1.CustomError(400, 'Custom rule already exists with same name');
@@ -83,18 +83,18 @@ class CustomRuleService {
                 data.updatedBy = userId;
                 return yield prisma_1.prisma.customRules.update({
                     where: {
-                        id
+                        id,
                     },
-                    data
+                    data,
                 });
             }
             const allRules = yield prisma_1.prisma.customRules.findMany({
                 where: {
-                    companyId: data.companyId
-                }
+                    companyId: data.companyId,
+                },
             });
             return prisma_1.prisma.customRules.create({
-                data: Object.assign(Object.assign({}, data), { priority: allRules.length + 1 })
+                data: Object.assign(Object.assign({}, data), { priority: allRules.length + 1 }),
             });
         });
     }
@@ -103,7 +103,8 @@ class CustomRuleService {
         if (!(0, utils_1.hasText)(criteria.employeeId)) {
             throw new customError_1.CustomError(400, 'Invalid rule criteria');
         }
-        if (operators.includes(criteria.operator1) && operators.includes(criteria.operator2)) {
+        if (operators.includes(criteria.operator1) &&
+            operators.includes(criteria.operator2)) {
             if (!(0, utils_1.hasText)(criteria.classId) || !(0, utils_1.hasText)(criteria.customerId)) {
                 throw new customError_1.CustomError(400, 'Invalid rule criteria');
             }
@@ -118,17 +119,24 @@ class CustomRuleService {
                 throw new customError_1.CustomError(400, 'Invalid rule criteria');
             }
         }
-        if ((0, utils_1.hasText)(criteria.employeeId) && (0, utils_1.hasText)(criteria.customerId) && (0, utils_1.hasText)(criteria.classId)) {
-            if (!operators.includes(criteria.operator1) && !operators.includes(criteria.operator2)) {
+        if ((0, utils_1.hasText)(criteria.employeeId) &&
+            (0, utils_1.hasText)(criteria.customerId) &&
+            (0, utils_1.hasText)(criteria.classId)) {
+            if (!operators.includes(criteria.operator1) &&
+                !operators.includes(criteria.operator2)) {
                 throw new customError_1.CustomError(400, 'Invalid rule criteria');
             }
         }
-        if ((0, utils_1.hasText)(criteria.employeeId) && !(0, utils_1.hasText)(criteria.customerId) && (0, utils_1.hasText)(criteria.classId)) {
+        if ((0, utils_1.hasText)(criteria.employeeId) &&
+            !(0, utils_1.hasText)(criteria.customerId) &&
+            (0, utils_1.hasText)(criteria.classId)) {
             if (!operators.includes(criteria.operator2)) {
                 throw new customError_1.CustomError(400, 'Invalid rule criteria');
             }
         }
-        if ((0, utils_1.hasText)(criteria.employeeId) && (0, utils_1.hasText)(criteria.customerId) && !(0, utils_1.hasText)(criteria.classId)) {
+        if ((0, utils_1.hasText)(criteria.employeeId) &&
+            (0, utils_1.hasText)(criteria.customerId) &&
+            !(0, utils_1.hasText)(criteria.classId)) {
             if (!operators.includes(criteria.operator1)) {
                 throw new customError_1.CustomError(400, 'Invalid rule criteria');
             }
@@ -139,8 +147,8 @@ class CustomRuleService {
             const data = yield prisma_1.prisma.customRules.findFirst({
                 where: {
                     id,
-                    companyId
-                }
+                    companyId,
+                },
             });
             if (!data) {
                 throw new customError_1.CustomError(400, 'Invalid Id');
@@ -150,11 +158,29 @@ class CustomRuleService {
     }
     deleteCustomRuleById(id, companyId) {
         return __awaiter(this, void 0, void 0, function* () {
-            return prisma_1.prisma.customRules.deleteMany({
+            const rule = yield prisma_1.prisma.customRules.findUniqueOrThrow({
+                where: {
+                    id: id,
+                },
+            });
+            yield prisma_1.prisma.customRules.deleteMany({
                 where: {
                     id,
-                    companyId
-                }
+                    companyId,
+                },
+            });
+            yield prisma_1.prisma.customRules.updateMany({
+                where: {
+                    companyId,
+                    priority: {
+                        gt: rule.priority,
+                    },
+                },
+                data: {
+                    priority: {
+                        decrement: 1,
+                    },
+                },
             });
         });
     }
@@ -167,11 +193,11 @@ class CustomRuleService {
                 yield prisma_1.prisma.customRules.updateMany({
                     where: {
                         id: rule.id,
-                        companyId
+                        companyId,
                     },
                     data: {
-                        priority: Number(rule.priority)
-                    }
+                        priority: Number(rule.priority),
+                    },
                 });
             })));
         });

@@ -17,6 +17,7 @@ const config_1 = __importDefault(require("../../config"));
 const data_1 = require("../constants/data");
 const prisma_1 = require("../client/prisma");
 const enum_1 = require("../enum");
+const axios_1 = __importDefault(require("axios"));
 /* eslint-disable @typescript-eslint/no-var-requires */
 const QuickBooks = require('node-quickbooks');
 class QuickbooksClient {
@@ -35,6 +36,18 @@ class QuickbooksClient {
                     });
                 });
             });
+        });
+    }
+    GetUserinfo(accessToken) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const response = yield axios_1.default.get(config_1.default.quickbooksUserInfoUri, {
+                headers: {
+                    Authorization: 'Bearer ' + accessToken,
+                    Accept: 'application/json',
+                    'Content-Type': 'application/json',
+                },
+            });
+            return response.data;
         });
     }
     getEmployees(accessToken, realmId, refreshToken) {
