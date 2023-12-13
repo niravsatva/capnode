@@ -21,6 +21,7 @@ const customError_1 = require("../models/customError");
 const tokenRepository_1 = __importDefault(require("../repositories/tokenRepository"));
 const userRepository_1 = __importDefault(require("../repositories/userRepository"));
 const repositories_1 = require("../repositories");
+const prisma_1 = require("../client/prisma");
 class AuthServices {
     login(email, password, machineId) {
         var _a, _b, _c;
@@ -72,6 +73,15 @@ class AuthServices {
                     }
                     return true;
                 });
+                const superAdminSubscription = yield prisma_1.prisma.subscription.findFirst({
+                    where: {
+                        userId: user.id
+                    }
+                });
+                console.log(superAdminSubscription);
+                if (superAdminSubscription && (!superAdminSubscription.status || superAdminSubscription.status != 'live')) {
+                    throw new customError_1.CustomError(400, 'You do not have any active subscription currently');
+                }
                 if (!isValidSubscription) {
                     throw new customError_1.CustomError(400, 'You do not have any active subscription currently');
                 }
