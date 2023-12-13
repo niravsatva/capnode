@@ -348,23 +348,21 @@ class QuickbooksController {
                         });
                     }
                     else {
-                        const adminRole = yield prisma_1.prisma.role.findFirst({
-                            where: {
-                                roleName: 'Company Admin',
-                            },
-                        });
-                        const companyRoleData = yield prisma_1.prisma.companyRole.findFirst({
+                        // const adminRole: any = await prisma.role.findFirst({
+                        // 	where: {
+                        // 		roleName: 'Company Admin',
+                        // 	},
+                        // });
+                        const companyRoleData = yield prisma_1.prisma.companyRole.findMany({
                             where: {
                                 userId: user.id,
-                                roleId: adminRole.id,
                             },
+                            include: {
+                                company: true
+                            }
                         });
-                        const companyData = yield prisma_1.prisma.company.findUnique({
-                            where: {
-                                id: companyRoleData === null || companyRoleData === void 0 ? void 0 : companyRoleData.companyId,
-                            },
-                        });
-                        if ((companyData === null || companyData === void 0 ? void 0 : companyData.tenantID) !== authToken.realmId) {
+                        // companyData?.tenantID !== authToken.realmId
+                        if (!companyRoleData.some((cRole) => { var _a; return ((_a = cRole.company) === null || _a === void 0 ? void 0 : _a.tenantID) === authToken.realmId; })) {
                             throw new customError_1.CustomError(400, 'This company is not connected to your account');
                         }
                         const { accessToken, refreshToken, user: userData, } = yield authServices_1.default.ssoLogin(user, machineId);
