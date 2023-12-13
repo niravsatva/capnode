@@ -20,5 +20,6 @@ exports.migrations = [
     'addSyncLogsPermissions',
     'migrateConfiguration',
     'migrateTaxAndFringeSection',
-    'configSectionMigrationFix'
+    'configSectionMigrationFix',
+    'section2FieldsStatus'
 ];

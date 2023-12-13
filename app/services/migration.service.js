@@ -12,7 +12,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.migrationService = exports.configSectionMigrationFix = exports.migrateTaxAndFringeSection = exports.migrateConfiguration = void 0;
+exports.migrationService = exports.section2FieldsStatus = exports.configSectionMigrationFix = exports.migrateTaxAndFringeSection = exports.migrateConfiguration = void 0;
 const moment_1 = __importDefault(require("moment"));
 const prisma_1 = require("../client/prisma");
 const logger_1 = require("../utils/logger");
@@ -857,7 +857,46 @@ function configSectionMigrationFix() {
     });
 }
 exports.configSectionMigrationFix = configSectionMigrationFix;
+function section2FieldsStatus() {
+    return __awaiter(this, void 0, void 0, function* () {
+        const companies = yield prisma_1.prisma.company.findMany();
+        for (const company of companies) {
+            const payPeriods = yield prisma_1.prisma.payPeriod.findMany({
+                where: {
+                    companyId: company.id
+                }
+            });
+            for (const payPeriod of payPeriods) {
+                const configuration = yield prisma_1.prisma.configuration.findFirst({
+                    where: {
+                        payPeriodId: payPeriod.id,
+                        companyId: company.id
+                    }
+                });
+                if (configuration) {
+                    const settings = configuration.settings;
+                    const newConfigurationSettings = Object.assign({}, settings);
+                    Object.keys(settings['2'].fields).forEach((fieldKey) => {
+                        if (fieldKey != 'f1') {
+                            newConfigurationSettings['2'].fields[fieldKey].deletable = true;
+                        }
+                    });
+                    yield prisma_1.prisma.configuration.update({
+                        where: {
+                            id: configuration.id
+                        },
+                        data: {
+                            settings: newConfigurationSettings
+                        }
+                    });
+                }
+            }
+        }
+    });
+}
+exports.section2FieldsStatus = section2FieldsStatus;
 exports.migrationService = {
+    section2FieldsStatus,
     configSectionMigrationFix,
     migrateTaxAndFringeSection,
     migrateConfiguration,
