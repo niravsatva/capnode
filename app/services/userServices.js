@@ -157,10 +157,11 @@ class UserServices {
     inviteUser(invitedBy, invitedByEmail, email, role, company, phone, firstName, lastName) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
+                const _email = email.toLowerCase();
                 const adminUser = yield repositories_1.userRepository.getById(invitedBy);
                 const finalName = adminUser.firstName + ' ' + adminUser.lastName;
                 // Find user by Email
-                const user = yield repositories_1.userRepository.getByEmail(email);
+                const user = yield repositories_1.userRepository.getByEmail(_email);
                 // Check if role exists
                 const roleExist = yield repositories_1.roleRepository.getDetails(role);
                 if (!roleExist) {
@@ -186,7 +187,7 @@ class UserServices {
                     // Send mail to generate new password
                     const mailOptions = {
                         from: config_1.default.smtpEmail,
-                        to: email,
+                        to: _email,
                         subject: 'Invitation to join CostAllocation Pro portal',
                         html: emailContent,
                         // text: `Please use the following token to reset your password: ${forgotPasswordToken}`,
@@ -224,14 +225,14 @@ class UserServices {
                     }
                     // Reset Password Token Generate
                     const resetPasswordToken = yield (0, tokenHelper_1.generateForgotPasswordToken)({
-                        email: email,
+                        email: _email,
                         role: role,
                     });
                     // Expires in 1 hour
                     const resetPasswordTokenExpiresAt = (Date.now() + (config_1.default === null || config_1.default === void 0 ? void 0 : config_1.default.registerUrlExpireTime)).toString();
                     // Create new user with forgot password token and verified false
                     const createdUser = yield repositories_1.userRepository.create({
-                        email: email,
+                        email: _email,
                         forgotPasswordToken: resetPasswordToken,
                         forgotPasswordTokenExpiresAt: resetPasswordTokenExpiresAt,
                         phone: phone,
@@ -263,7 +264,7 @@ class UserServices {
                     // Send mail to generate new password
                     const mailOptions = {
                         from: config_1.default.smtpEmail,
-                        to: email,
+                        to: _email,
                         subject: 'Invitation to join CostAllocation Pro company',
                         html: emailContent,
                         // text: `Please use the following token to reset your password: ${forgotPasswordToken}`,
