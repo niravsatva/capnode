@@ -126,6 +126,7 @@ class UserController {
                 // const emails = await adminEmails.map((item) => item?.user?.email);
                 const companyDetails = yield repositories_1.companyRepository.getDetails(company);
                 const userDetails = yield userRepository_1.default.getById(user);
+                console.log("User details: ",userDetails)
                 // let userName: string;
                 // if (userDetails?.firstName && userDetails?.lastName) {
                 // 	userName = userDetails?.firstName + ' ' + userDetails?.lastName;
