@@ -122,12 +122,10 @@ class UserController {
                     throw new customError_1.CustomError(403, 'You are not authorized');
                 }
                 const adminEmails = yield userRepository_1.default.getAllAdminEmails(company);
-                console.log("Admin emails: ",adminEmails)
-                // const emails = await adminEmails.map((item) => item?.user?.email);
+                 // const emails = await adminEmails.map((item) => item?.user?.email);
                 const companyDetails = yield repositories_1.companyRepository.getDetails(company);
                 const userDetails = yield userRepository_1.default.getById(user);
-                console.log("User details: ",userDetails)
-                // let userName: string;
+                 // let userName: string;
                 // if (userDetails?.firstName && userDetails?.lastName) {
                 // 	userName = userDetails?.firstName + ' ' + userDetails?.lastName;
                 // } else {
