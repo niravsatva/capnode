@@ -29,6 +29,17 @@ class JournalController {
             }
         });
     }
+    getLatestJournalNo(req, res, next) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                const data = yield journalServices_1.default.getLatestJournalNo(req.query.companyId);
+                return (0, defaultResponseHelper_1.DefaultResponse)(res, 200, '', data);
+            }
+            catch (error) {
+                next(error);
+            }
+        });
+    }
     getJournalFromQBO(req, res, next) {
         return __awaiter(this, void 0, void 0, function* () {
             try {

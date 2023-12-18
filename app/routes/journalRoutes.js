@@ -14,6 +14,8 @@ router.get('/entries', authMiddleware_1.isAuthenticated, controllers_1.journalCo
 router.post('/create', authMiddleware_1.isAuthenticated, validators_1.journalValidator, controllers_1.journalController.createJournal);
 //Get all journals
 router.get('/', authMiddleware_1.isAuthenticated, controllers_1.journalController.getAllJournals);
+//Get latest journal no
+router.get('/latest-no', authMiddleware_1.isAuthenticated, controllers_1.journalController.getLatestJournalNo);
 //Get Journal By PayPeriod
 router.get('/by-payPeriod', authMiddleware_1.isAuthenticated, controllers_1.journalController.getJournalByPayPeriod);
 exports.default = router;

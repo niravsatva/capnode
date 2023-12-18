@@ -604,5 +604,22 @@ class JournalService {
             return response;
         });
     }
+    getLatestJournalNo(companyId) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const allJournals = yield prisma_1.prisma.journal.findMany({
+                where: {
+                    companyId
+                },
+                orderBy: {
+                    date: 'desc'
+                }
+            });
+            let latestNo = 1;
+            if (allJournals && allJournals.length) {
+                latestNo = allJournals[0].qboJournalNo + 1;
+            }
+            return { latestNo };
+        });
+    }
 }
 exports.default = new JournalService();
