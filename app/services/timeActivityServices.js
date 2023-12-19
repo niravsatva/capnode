@@ -357,11 +357,11 @@ class TimeActivityService {
                             hours = timeActivity === null || timeActivity === void 0 ? void 0 : timeActivity.Hours;
                             minutes = timeActivity === null || timeActivity === void 0 ? void 0 : timeActivity.Minutes;
                         }
-                        else {
+                        else if ((0, utils_1.hasText)(timeActivity === null || timeActivity === void 0 ? void 0 : timeActivity.StartTime) && (0, utils_1.hasText)(timeActivity === null || timeActivity === void 0 ? void 0 : timeActivity.EndTime)) {
                             const start = new Date(timeActivity === null || timeActivity === void 0 ? void 0 : timeActivity.StartTime);
                             const end = new Date(timeActivity === null || timeActivity === void 0 ? void 0 : timeActivity.EndTime);
-                            const breakHours = timeActivity === null || timeActivity === void 0 ? void 0 : timeActivity.BreakHours; // Example break hours
-                            const breakMinutes = timeActivity === null || timeActivity === void 0 ? void 0 : timeActivity.BreakMinutes; // Example break minutes
+                            const breakHours = (timeActivity === null || timeActivity === void 0 ? void 0 : timeActivity.BreakHours) || 0; // Example break hours
+                            const breakMinutes = (timeActivity === null || timeActivity === void 0 ? void 0 : timeActivity.BreakMinutes) || 0; // Example break minutes
                             // Calculate the total time duration in milliseconds
                             let totalTimeInMillis = end - start;
                             // If the start date is greater than end date
