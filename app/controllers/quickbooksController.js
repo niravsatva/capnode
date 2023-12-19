@@ -279,7 +279,6 @@ class QuickbooksController {
         var _a, _b, _c;
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                console.log('Innnnnnnnnnnnnnnn');
                 // Fetch URL
                 const url = String((_a = req === null || req === void 0 ? void 0 : req.body) === null || _a === void 0 ? void 0 : _a.url);
                 const currentUrl = new URL((_b = req === null || req === void 0 ? void 0 : req.body) === null || _b === void 0 ? void 0 : _b.url);

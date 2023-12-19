@@ -626,56 +626,56 @@ class TimeActivityService {
             if (rule.isActive) {
                 if ((0, utils_1.hasText)(rule.criteria.employeeId) && (0, utils_1.hasText)(rule.criteria.classId) && (0, utils_1.hasText)(rule.criteria.customerId)) {
                     if (rule.criteria.operator1 === 'AND' && rule.criteria.operator2 === 'AND') {
-                        if ((rule.criteria.employeeId === timeActivity.employeeId && rule.criteria.customerId === timeActivity.customerId) &&
-                            (rule.criteria.customerId === timeActivity.customerId && rule.criteria.classId === timeActivity.classId)) {
+                        if ((this.matchCriteria(rule.criteria.employeeId, timeActivity.employeeId) && this.matchCriteria(rule.criteria.customerId, timeActivity.customerId)) &&
+                            (this.matchCriteria(rule.criteria.customerId, timeActivity.customerId) && this.matchCriteria(rule.criteria.classId, timeActivity.classId))) {
                             matchedRule = rule;
                             break;
                         }
                     }
                     if (rule.criteria.operator1 === 'OR' && rule.criteria.operator2 === 'OR') {
-                        if ((rule.criteria.employeeId === timeActivity.employeeId || rule.criteria.customerId === timeActivity.customerId) &&
-                            (rule.criteria.customerId === timeActivity.customerId || rule.criteria.classId === timeActivity.classId)) {
+                        if ((this.matchCriteria(rule.criteria.employeeId, timeActivity.employeeId) || this.matchCriteria(rule.criteria.customerId, timeActivity.customerId)) &&
+                            (this.matchCriteria(rule.criteria.customerId, timeActivity.customerId) || this.matchCriteria(rule.criteria.classId, timeActivity.classId))) {
                             matchedRule = rule;
                             break;
                         }
                     }
                     if (rule.criteria.operator1 === 'AND' && rule.criteria.operator2 === 'OR') {
-                        if ((rule.criteria.employeeId === timeActivity.employeeId && rule.criteria.customerId === timeActivity.customerId) &&
-                            (rule.criteria.customerId === timeActivity.customerId || rule.criteria.classId === timeActivity.classId)) {
+                        if ((this.matchCriteria(rule.criteria.employeeId, timeActivity.employeeId) && this.matchCriteria(rule.criteria.customerId, timeActivity.customerId)) &&
+                            (this.matchCriteria(rule.criteria.customerId, timeActivity.customerId) || this.matchCriteria(rule.criteria.classId, timeActivity.classId))) {
                             matchedRule = rule;
                             break;
                         }
                     }
                     if (rule.criteria.operator1 === 'OR' && rule.criteria.operator2 === 'AND') {
-                        if ((rule.criteria.employeeId === timeActivity.employeeId || rule.criteria.customerId === timeActivity.customerId) &&
-                            (rule.criteria.customerId === timeActivity.customerId && rule.criteria.classId === timeActivity.classId)) {
+                        if ((this.matchCriteria(rule.criteria.employeeId, timeActivity.employeeId) || this.matchCriteria(rule.criteria.customerId, timeActivity.customerId)) &&
+                            (this.matchCriteria(rule.criteria.customerId, timeActivity.customerId) && this.matchCriteria(rule.criteria.classId, timeActivity.classId))) {
                             matchedRule = rule;
                             break;
                         }
                     }
                 }
                 if ((0, utils_1.hasText)(rule.criteria.employeeId) && (0, utils_1.hasText)(rule.criteria.classId) && !(0, utils_1.hasText)(rule.criteria.customerId)) {
-                    if (rule.criteria.operator2 === 'AND' && (rule.criteria.employeeId === timeActivity.employeeId && rule.criteria.classId == timeActivity.classId)) {
+                    if (rule.criteria.operator2 === 'AND' && (this.matchCriteria(rule.criteria.employeeId, timeActivity.employeeId) && this.matchCriteria(rule.criteria.classId, timeActivity.classId))) {
                         matchedRule = rule;
                         break;
                     }
-                    if (rule.criteria.operator2 === 'OR' && (rule.criteria.employeeId === timeActivity.employeeId || rule.criteria.classId == timeActivity.classId)) {
+                    if (rule.criteria.operator2 === 'OR' && (this.matchCriteria(rule.criteria.employeeId, timeActivity.employeeId) || this.matchCriteria(rule.criteria.classId, timeActivity.classId))) {
                         matchedRule = rule;
                         break;
                     }
                 }
                 if ((0, utils_1.hasText)(rule.criteria.employeeId) && !(0, utils_1.hasText)(rule.criteria.classId) && (0, utils_1.hasText)(rule.criteria.customerId)) {
-                    if (rule.criteria.operator1 === 'AND' && (rule.criteria.employeeId === timeActivity.employeeId && rule.criteria.classId === timeActivity.classId)) {
+                    if (rule.criteria.operator1 === 'AND' && (this.matchCriteria(rule.criteria.employeeId, timeActivity.employeeId) && this.matchCriteria(rule.criteria.classId, timeActivity.classId))) {
                         matchedRule = rule;
                         break;
                     }
-                    if (rule.criteria.operator1 === 'OR' && (rule.criteria.employeeId === timeActivity.employeeId || rule.criteria.customerId === timeActivity.customerId)) {
+                    if (rule.criteria.operator1 === 'OR' && (this.matchCriteria(rule.criteria.employeeId, timeActivity.employeeId) || this.matchCriteria(rule.criteria.customerId, timeActivity.customerId))) {
                         matchedRule = rule;
                         break;
                     }
                 }
                 if ((0, utils_1.hasText)(rule.criteria.employeeId) && !(0, utils_1.hasText)(rule.criteria.customerId) && !(0, utils_1.hasText)(rule.criteria.classId)) {
-                    if (rule.criteria.employeeId === timeActivity.employeeId) {
+                    if (this.matchCriteria(rule.criteria.employeeId, timeActivity.employeeId)) {
                         matchedRule = rule;
                         break;
                     }
@@ -683,6 +683,15 @@ class TimeActivityService {
             }
         }
         return matchedRule;
+    }
+    matchCriteria(criteria, value) {
+        if (criteria === 'ANY') {
+            return (0, utils_1.hasText)(value);
+        }
+        if (!(0, utils_1.hasText)(criteria)) {
+            return !(0, utils_1.hasText)(value);
+        }
+        return criteria === value;
     }
     createSplitActivitiesBasedOnRuleMatch(timeActivity, ruleData) {
         var _a;

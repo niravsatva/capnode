@@ -244,16 +244,6 @@ exports.DefaultConfigurationSettings = {
                 isEditing: false,
                 isActive: true
             },
-            f2: {
-                id: 'f2',
-                label: 'Health Insurance',
-                value: null,
-                ratesLimited: false,
-                editable: true,
-                deletable: false,
-                isEditing: false,
-                isActive: true
-            },
         },
         addMore: true,
         toolTip: 'Payroll Taxes & Fringe Benefits: These are the Payroll expense accounts or Fringe Benefits, if the user add new account here, it will be added as new column in Cost allocation',
@@ -364,11 +354,6 @@ exports.sections = [
                 name: 'Employer Payroll Taxes',
                 type: 'Monthly',
                 jsonId: 'f1',
-            },
-            {
-                name: 'Health Insurance',
-                type: 'Monthly',
-                jsonId: 'f2',
             },
             {
                 name: `Total Payroll Taxes & Fringe Benefits`,

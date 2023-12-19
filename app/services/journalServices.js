@@ -611,7 +611,7 @@ class JournalService {
                     companyId
                 },
                 orderBy: {
-                    date: 'desc'
+                    qboJournalNo: 'desc'
                 }
             });
             let latestNo = 1;
