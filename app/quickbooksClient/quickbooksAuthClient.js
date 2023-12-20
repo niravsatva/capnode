@@ -11,7 +11,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
-var _a;
+var _a, _b;
 Object.defineProperty(exports, "__esModule", { value: true });
 const config_1 = __importDefault(require("../../config"));
 const axios_1 = __importDefault(require("axios"));
@@ -25,15 +25,14 @@ const authClient = new OAuthClient({
         : 'production',
     redirectUri: config_1.default === null || config_1.default === void 0 ? void 0 : config_1.default.quickbooksRedirectUri,
 });
-// const ssoAuthClient = new OAuthClient({
-// 	clientId: config?.quickbooksClientId,
-// 	clientSecret: config?.quickbooksClientSecret,
-// 	environment:
-// 		config?.quickbooksEnvironment?.toLowerCase() === 'sandbox'
-// 			? 'sandbox'
-// 			: 'production',
-// 	redirectUri: config?.quickbooksSSORedirectUri,
-// });
+const ssoAuthClient = new OAuthClient({
+    clientId: config_1.default === null || config_1.default === void 0 ? void 0 : config_1.default.quickbooksClientId,
+    clientSecret: config_1.default === null || config_1.default === void 0 ? void 0 : config_1.default.quickbooksClientSecret,
+    environment: ((_b = config_1.default === null || config_1.default === void 0 ? void 0 : config_1.default.quickbooksEnvironment) === null || _b === void 0 ? void 0 : _b.toLowerCase()) === 'sandbox'
+        ? 'sandbox'
+        : 'production',
+    redirectUri: config_1.default === null || config_1.default === void 0 ? void 0 : config_1.default.quickbooksRedirectUri,
+});
 class QuickbooksAuthClient {
     authorizeUri(stateValue) {
         var _a;
@@ -102,11 +101,56 @@ class QuickbooksAuthClient {
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 let authUri = '';
-                authUri = authClient.authorizeUri({
+                authUri = ssoAuthClient.authorizeUri({
                     scope: (_a = config_1.default === null || config_1.default === void 0 ? void 0 : config_1.default.quickbooksSSOScopes) === null || _a === void 0 ? void 0 : _a.split(','),
                     state: stateValue,
                 });
                 return authUri;
+            }
+            catch (err) {
+                throw err;
+            }
+        });
+    }
+    ssoCreateAuthToken(url) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                const authToken = yield ssoAuthClient.createToken(url);
+                return authToken.token;
+            }
+            catch (err) {
+                throw err;
+            }
+        });
+    }
+    ssoRevokeToken(refreshToken) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                const clientAuthorization = Buffer.from(config_1.default.quickbooksClientId + ':' + config_1.default.quickbooksClientSecret, 'utf-8').toString('base64');
+                yield axios_1.default
+                    .post(config_1.default === null || config_1.default === void 0 ? void 0 : config_1.default.quickbooksTokenRevokeEndpoint, {
+                    token: refreshToken,
+                }, {
+                    headers: {
+                        Accept: 'application/json',
+                        Authorization: `Basic ${clientAuthorization}`,
+                        'Content-Type': 'application/json',
+                    },
+                })
+                    .catch((err) => {
+                    throw err;
+                });
+            }
+            catch (err) {
+                throw err;
+            }
+        });
+    }
+    ssoRefreshToken(refreshToken) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                const authResponse = yield ssoAuthClient.refreshUsingToken(refreshToken);
+                return authResponse;
             }
             catch (err) {
                 throw err;

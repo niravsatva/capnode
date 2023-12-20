@@ -284,7 +284,7 @@ class QuickbooksController {
                 const url = String((_a = req === null || req === void 0 ? void 0 : req.body) === null || _a === void 0 ? void 0 : _a.url);
                 const currentUrl = new URL((_b = req === null || req === void 0 ? void 0 : req.body) === null || _b === void 0 ? void 0 : _b.url);
                 const machineId = (_c = req.body) === null || _c === void 0 ? void 0 : _c.machineId;
-                const authToken = yield quickbooksAuthClient_1.default.createAuthToken(url);
+                const authToken = yield quickbooksAuthClient_1.default.ssoCreateAuthToken(url);
                 const qboUserInfo = yield quickbooksClient_1.default.GetUserinfo(authToken.access_token);
                 // Check if user is already in User table
                 const user = yield repositories_1.userRepository.getByEmail(qboUserInfo.email);
