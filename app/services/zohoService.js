@@ -91,9 +91,9 @@ class ZohoService {
                     'Content-Type': 'application/x-www-form-urlencoded'
                 },
                 data: {
-                    'refresh_token': '1000.8fe7a7835b23b4f099674b52b598ee30.312c554a79432cd9d78864870f8f1f34',
-                    'client_id': '1000.RGPV61FGSU333G38TWEMO0KH5QL9CE',
-                    'client_secret': 'fe510da403f5d6fb83139b49a4414303970baabffe',
+                    'refresh_token': findTokenDetails.refreshToken,
+                    'client_id': process.env.ZOHO_CLIENT_ID,
+                    'client_secret': process.env.ZOHO_CLIENT_SECRET,
                     'redirect_uri': 'http://www.zoho.com/subscriptions',
                     'grant_type': 'refresh_token'
                 }
