@@ -97,5 +97,21 @@ class QuickbooksAuthClient {
             }
         });
     }
+    ssoAuthorizeUri(stateValue) {
+        var _a;
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                let authUri = '';
+                authUri = authClient.authorizeUri({
+                    scope: (_a = config_1.default === null || config_1.default === void 0 ? void 0 : config_1.default.quickbooksSSOScopes) === null || _a === void 0 ? void 0 : _a.split(','),
+                    state: stateValue,
+                });
+                return authUri;
+            }
+            catch (err) {
+                throw err;
+            }
+        });
+    }
 }
 exports.default = new QuickbooksAuthClient();

@@ -264,7 +264,8 @@ class QuickbooksController {
     getQuickbooksSSOAuthUri(req, res, next) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                const qboAuthorizeUrl = yield quickbooksAuthClient_1.default.authorizeUri('');
+                const qboAuthorizeUrl = yield quickbooksAuthClient_1.default.ssoAuthorizeUri('');
+                // const qboAuthorizeUrl = await quickbooksAuthClient.authorizeUri('');
                 console.log('ABO : ', qboAuthorizeUrl);
                 return (0, defaultResponseHelper_1.DefaultResponse)(res, 200, 'Quickbooks AuthUri retrieved successfully', qboAuthorizeUrl);
             }
@@ -288,94 +289,132 @@ class QuickbooksController {
                 // Check if user is already in User table
                 const user = yield repositories_1.userRepository.getByEmail(qboUserInfo.email);
                 if (user) {
-                    const userWithNullCompany = yield repositories_1.companyRoleRepository.getRecordWithNullCompanyId(user.id);
-                    if (userWithNullCompany.length > 0) {
-                        const superAdminSubscription = yield prisma_1.prisma.subscription.findFirst({
-                            where: {
-                                userId: user.id,
-                            },
-                        });
-                        console.log(superAdminSubscription);
-                        if (superAdminSubscription &&
-                            (!superAdminSubscription.status ||
-                                superAdminSubscription.status != 'live')) {
-                            throw new customError_1.CustomError(400, 'You do not have any active subscription currently');
-                        }
-                        const qboCompanyInfo = yield quickbooksClient_1.default.getCompanyInfo(authToken.access_token, authToken.realmId, authToken.refresh_token);
-                        if (qboCompanyInfo['Country'] !== 'US') {
-                            const error = new customError_1.CustomError(400, 'Only US company can be connected!');
-                            throw error;
-                        }
-                        const isAlreadyConnected = yield repositories_1.companyRepository.getCompanyByTenantId(authToken.realmId);
-                        if (isAlreadyConnected) {
-                            const error = new customError_1.CustomError(400, 'Company is already connected');
-                            throw error;
-                        }
-                        const data = {
-                            tenantID: authToken.realmId,
-                            tenantName: qboCompanyInfo === null || qboCompanyInfo === void 0 ? void 0 : qboCompanyInfo.CompanyName,
-                            accessToken: authToken.access_token,
-                            refreshToken: authToken.refresh_token,
-                            accessTokenUTCDate: new Date(),
-                            isConnected: true,
-                            fiscalYear: qboCompanyInfo === null || qboCompanyInfo === void 0 ? void 0 : qboCompanyInfo.FiscalYearStartMonth,
-                        };
-                        const finalCompanyDetails = yield repositories_1.companyRepository.create(data);
-                        yield (repositories_1.companyRepository === null || repositories_1.companyRepository === void 0 ? void 0 : repositories_1.companyRepository.connectCompany(user.id, finalCompanyDetails === null || finalCompanyDetails === void 0 ? void 0 : finalCompanyDetails.id));
-                        const syncData = yield employeeServices_1.default.syncEmployeeFirstTime({
-                            accessToken: authToken === null || authToken === void 0 ? void 0 : authToken.access_token,
-                            refreshToken: authToken === null || authToken === void 0 ? void 0 : authToken.refresh_token,
-                            tenantId: authToken === null || authToken === void 0 ? void 0 : authToken.realmId,
-                            companyId: finalCompanyDetails === null || finalCompanyDetails === void 0 ? void 0 : finalCompanyDetails.id,
-                        });
-                        timeActivityServices_1.default.lambdaSyncFunction({
-                            accessToken: authToken === null || authToken === void 0 ? void 0 : authToken.access_token,
-                            refreshToken: authToken === null || authToken === void 0 ? void 0 : authToken.refresh_token,
-                            tenantId: authToken === null || authToken === void 0 ? void 0 : authToken.realmId,
-                            companyId: finalCompanyDetails === null || finalCompanyDetails === void 0 ? void 0 : finalCompanyDetails.id,
-                        });
-                        const { accessToken, refreshToken, user: userData, } = yield authServices_1.default.ssoLogin(user, machineId);
-                        return (0, defaultResponseHelper_1.DefaultResponse)(res, 200, 'User logged in successfully', {
-                            id: user.id,
-                            email: user.email,
-                            firstName: user === null || user === void 0 ? void 0 : user.firstName,
-                            lastName: user === null || user === void 0 ? void 0 : user.lastName,
-                            phone: user === null || user === void 0 ? void 0 : user.phone,
-                            status: user === null || user === void 0 ? void 0 : user.status,
-                            accessToken,
-                            refreshToken,
-                        });
-                    }
-                    else {
-                        // const adminRole: any = await prisma.role.findFirst({
-                        // 	where: {
-                        // 		roleName: 'Company Admin',
-                        // 	},
-                        // });
-                        const companyRoleData = yield prisma_1.prisma.companyRole.findMany({
-                            where: {
-                                userId: user.id,
-                            },
-                            include: {
-                                company: true
-                            }
-                        });
-                        // companyData?.tenantID !== authToken.realmId
-                        if (!companyRoleData.some((cRole) => { var _a; return ((_a = cRole.company) === null || _a === void 0 ? void 0 : _a.tenantID) === authToken.realmId; })) {
-                            throw new customError_1.CustomError(400, 'This company is not connected to your account');
-                        }
-                        const { accessToken, refreshToken, user: userData, } = yield authServices_1.default.ssoLogin(user, machineId);
-                        return (0, defaultResponseHelper_1.DefaultResponse)(res, 200, 'User logged in successfully', {
-                            id: user.id,
-                            email: user.email,
-                            firstName: user === null || user === void 0 ? void 0 : user.firstName,
-                            lastName: user === null || user === void 0 ? void 0 : user.lastName,
-                            phone: user === null || user === void 0 ? void 0 : user.phone,
-                            status: user === null || user === void 0 ? void 0 : user.status,
-                            accessToken,
-                            refreshToken,
-                        });
-                    }
+                    const { accessToken, refreshToken, user: userData, } = yield authServices_1.default.ssoLogin(user, machineId);
+                    return (0, defaultResponseHelper_1.DefaultResponse)(res, 200, 'User logged in successfully', {
+                        id: user.id,
+                        email: user.email,
+                        firstName: user === null || user === void 0 ? void 0 : user.firstName,
+                        lastName: user === null || user === void 0 ? void 0 : user.lastName,
+                        phone: user === null || user === void 0 ? void 0 : user.phone,
+                        status: user === null || user === void 0 ? void 0 : user.status,
+                        accessToken,
+                        refreshToken,
+                    });
+                    // const userWithNullCompany =
+                    // 	await companyRoleRepository.getRecordWithNullCompanyId(user.id);
+                    // if (userWithNullCompany.length > 0) {
+                    // 	const superAdminSubscription = await prisma.subscription.findFirst({
+                    // 		where: {
+                    // 			userId: user.id,
+                    // 		},
+                    // 	});
+                    // 	console.log(superAdminSubscription);
+                    // 	if (
+                    // 		superAdminSubscription &&
+                    // 		(!superAdminSubscription.status ||
+                    // 			superAdminSubscription.status != 'live')
+                    // 	) {
+                    // 		throw new CustomError(
+                    // 			400,
+                    // 			'You do not have any active subscription currently'
+                    // 		);
+                    // 	}
+                    // 	const qboCompanyInfo = await quickbooksClient.getCompanyInfo(
+                    // 		authToken.access_token,
+                    // 		authToken.realmId,
+                    // 		authToken.refresh_token
+                    // 	);
+                    // 	if (qboCompanyInfo['Country'] !== 'US') {
+                    // 		const error = new CustomError(
+                    // 			400,
+                    // 			'Only US company can be connected!'
+                    // 		);
+                    // 		throw error;
+                    // 	}
+                    // 	const isAlreadyConnected =
+                    // 		await companyRepository.getCompanyByTenantId(authToken.realmId);
+                    // 	if (isAlreadyConnected) {
+                    // 		const error = new CustomError(400, 'Company is already connected');
+                    // 		throw error;
+                    // 	}
+                    // 	const data = {
+                    // 		tenantID: authToken.realmId,
+                    // 		tenantName: qboCompanyInfo?.CompanyName,
+                    // 		accessToken: authToken.access_token,
+                    // 		refreshToken: authToken.refresh_token,
+                    // 		accessTokenUTCDate: new Date(),
+                    // 		isConnected: true,
+                    // 		fiscalYear: qboCompanyInfo?.FiscalYearStartMonth,
+                    // 	};
+                    // 	const finalCompanyDetails = await companyRepository.create(data);
+                    // 	await companyRepository?.connectCompany(
+                    // 		user.id,
+                    // 		finalCompanyDetails?.id
+                    // 	);
+                    // 	const syncData = await employeeServices.syncEmployeeFirstTime({
+                    // 		accessToken: authToken?.access_token,
+                    // 		refreshToken: authToken?.refresh_token,
+                    // 		tenantId: authToken?.realmId,
+                    // 		companyId: finalCompanyDetails?.id,
+                    // 	});
+                    // 	timeActivityServices.lambdaSyncFunction({
+                    // 		accessToken: authToken?.access_token,
+                    // 		refreshToken: authToken?.refresh_token,
+                    // 		tenantId: authToken?.realmId,
+                    // 		companyId: finalCompanyDetails?.id,
+                    // 	});
+                    // 	const {
+                    // 		accessToken,
+                    // 		refreshToken,
+                    // 		user: userData,
+                    // 	} = await authServices.ssoLogin(user, machineId);
+                    // 	return DefaultResponse(res, 200, 'User logged in successfully', {
+                    // 		id: user.id,
+                    // 		email: user.email,
+                    // 		firstName: user?.firstName,
+                    // 		lastName: user?.lastName,
+                    // 		phone: user?.phone,
+                    // 		status: user?.status,
+                    // 		accessToken,
+                    // 		refreshToken,
+                    // 	});
+                    // } else {
+                    // 	// const adminRole: any = await prisma.role.findFirst({
+                    // 	// 	where: {
+                    // 	// 		roleName: 'Company Admin',
+                    // 	// 	},
+                    // 	// });
+                    // 	const companyRoleData = await prisma.companyRole.findMany({
+                    // 		where: {
+                    // 			userId: user.id,
+                    // 		},
+                    // 		include:  {
+                    // 			company: true
+                    // 		}
+                    // 	});
+                    // 	// companyData?.tenantID !== authToken.realmId
+                    // 	if (!companyRoleData.some((cRole) => cRole.company?.tenantID === authToken.realmId)) {
+                    // 		throw new CustomError(
+                    // 			400,
+                    // 			'This company is not connected to your account'
+                    // 		);
+                    // 	}
+                    // 	const {
+                    // 		accessToken,
+                    // 		refreshToken,
+                    // 		user: userData,
+                    // 	} = await authServices.ssoLogin(user, machineId);
+                    // 	return DefaultResponse(res, 200, 'User logged in successfully', {
+                    // 		id: user.id,
+                    // 		email: user.email,
+                    // 		firstName: user?.firstName,
+                    // 		lastName: user?.lastName,
+                    // 		phone: user?.phone,
+                    // 		status: user?.status,
+                    // 		accessToken,
+                    // 		refreshToken,
+                    // 	});
+                    // }
                 }
                 else {
                     throw new customError_1.CustomError(400, 'You need to buy zoho subscription to register in CostAllocation Pro.');
