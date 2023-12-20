@@ -81,7 +81,9 @@ class AuthController {
                         },
                     });
                     if (companyData && companyData.companyId) {
-                        yield repositories_1.subscriptionRepository.updateOrCreateSubscriptionByCompanyId(companyData.companyId, userSubscription);
+                        yield prisma_1.prisma.subscription.create({
+                            data: userSubscription
+                        });
                     }
                     // throw new CustomError(400, 'Email already exists');
                 }

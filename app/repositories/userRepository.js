@@ -213,9 +213,20 @@ class UserRepository {
     getByEmail(email) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                const user = yield prisma_1.prisma.user.findUnique({
+                const user = yield prisma_1.prisma.user.findFirst({
                     where: {
                         email: email,
+                        companies: {
+                            some: {
+                                company: {
+                                    Subscription: {
+                                        some: {
+                                            status: 'live'
+                                        }
+                                    }
+                                }
+                            }
+                        }
                     },
                     select: {
                         id: true,
@@ -246,7 +257,11 @@ class UserRepository {
                                         isConnected: true,
                                         status: true,
                                         fiscalYear: true,
-                                        Subscription: true,
+                                        Subscription: {
+                                            where: {
+                                                status: 'live'
+                                            }
+                                        },
                                     },
                                 },
                                 role: {

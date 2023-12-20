@@ -151,23 +151,6 @@ class CompanyRepository {
                 if (subscriptionData) {
                     yield subscriptionRepository_1.default.updateSubscription(subscriptionData.id, { companyId });
                 }
-                else {
-                    const useSubscriptionData = yield subscriptionRepository_1.default.findSubscriptionByUserId(userId);
-                    if (useSubscriptionData) {
-                        yield subscriptionRepository_1.default.createSubscription({
-                            companyId,
-                            zohoSubscriptionId: useSubscriptionData.zohoSubscriptionId,
-                            zohoProductId: useSubscriptionData.zohoProductId,
-                            zohoSubscriptionPlan: useSubscriptionData.zohoSubscriptionPlan,
-                            createdTime: useSubscriptionData.createdTime,
-                            status: useSubscriptionData.status,
-                            addons: useSubscriptionData.addons,
-                            expiresAt: useSubscriptionData.expiresAt,
-                            zohoCustomerId: useSubscriptionData.zohoCustomerId,
-                            userId: useSubscriptionData.userId,
-                        });
-                    }
-                }
                 return company;
             }
             catch (err) {

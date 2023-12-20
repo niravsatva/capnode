@@ -24,7 +24,7 @@ class SubscriptionController {
                     throw new customError_1.CustomError(400, 'Company Id is required');
                 }
                 const data = yield subscriptionService_1.default.getSubscriptionDetails({
-                    userId: req.user.userId,
+                    userId: req.user.id,
                     companyId: req.query.companyId
                 });
                 return (0, defaultResponseHelper_1.DefaultResponse)(res, 200, 'Subscription fetched successfully', data);

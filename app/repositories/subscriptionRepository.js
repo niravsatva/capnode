@@ -68,11 +68,19 @@ class SubscriptionRepository {
             });
         });
     }
-    getSubscriptionDetailsByCompanyId(companyId) {
+    getSubscriptionDetailsByCompanyIdOrUserId(companyId, userId) {
         return __awaiter(this, void 0, void 0, function* () {
-            return prisma_1.prisma.subscription.findFirst({
+            console.log(companyId, userId);
+            return prisma_1.prisma.subscription.findMany({
                 where: {
-                    companyId
+                    OR: [
+                        {
+                            companyId
+                        },
+                        {
+                            userId
+                        }
+                    ]
                 }
             });
         });

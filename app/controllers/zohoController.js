@@ -44,6 +44,7 @@ const crypto = __importStar(require("crypto"));
 const util_1 = require("util");
 const config_1 = __importDefault(require("../../config"));
 const utils_1 = require("../utils/utils");
+const zohoService_1 = __importDefault(require("../services/zohoService"));
 const samlp = require('samlp');
 const readFileAsync = (0, util_1.promisify)(fs.readFile);
 class ZohoController {
@@ -71,6 +72,47 @@ class ZohoController {
             }
             catch (err) {
                 next(err);
+            }
+        });
+    }
+    callback(req, res, next) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                return res.json({
+                    result: true
+                });
+            }
+            catch (error) {
+                next(error);
+            }
+        });
+    }
+    getToken(req, res, next) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                const data = yield zohoService_1.default.generateToken(req.body.url);
+                return (0, defaultResponseHelper_1.DefaultResponse)(res, 200, 'Success', {
+                    result: data
+                });
+            }
+            catch (error) {
+                next(error);
+            }
+        });
+    }
+    createHostedPage(req, res, next) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                if (!(0, utils_1.hasText)(req.query.companyId)) {
+                    throw new customError_1.CustomError(400, 'CompanyId is required');
+                }
+                const data = yield zohoService_1.default.createHostedPage(req.query.companyId);
+                return (0, defaultResponseHelper_1.DefaultResponse)(res, 200, 'Success', {
+                    hostedUrl: data
+                });
+            }
+            catch (error) {
+                next(error);
             }
         });
     }

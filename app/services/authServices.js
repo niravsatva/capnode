@@ -78,7 +78,6 @@ class AuthServices {
                         userId: user.id,
                     },
                 });
-                console.log(superAdminSubscription);
                 if (superAdminSubscription &&
                     (!superAdminSubscription.status ||
                         superAdminSubscription.status != 'live')) {

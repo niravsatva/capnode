@@ -24,7 +24,7 @@ class SubscriptionService {
             if (!companyRole) {
                 throw new customError_1.CustomError(400, 'You are not authorized to access details of this company');
             }
-            const subscriptionData = yield repositories_1.subscriptionRepository.getSubscriptionDetailsByCompanyId(query.companyId);
+            const subscriptionData = yield repositories_1.subscriptionRepository.getSubscriptionDetailsByCompanyIdOrUserId(query.companyId, query.userId);
             return subscriptionData;
         });
     }

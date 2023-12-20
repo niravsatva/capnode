@@ -450,6 +450,16 @@ model CustomRules {
   updatedBy      String?
 }
 
+model ZohoDetails {
+  id           String   @unique @default(uuid())
+  accessToken  String
+  refreshToken String
+  scope        String
+  apiDomain    String
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
 enum PayrollMethods {
   Hours
   Percentage
