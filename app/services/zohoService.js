@@ -48,7 +48,6 @@ class ZohoService {
     }
     createHostedPage(companyId) {
         return __awaiter(this, void 0, void 0, function* () {
-            console.log(companyId);
             const subscriptionData = yield prisma_1.prisma.subscription.findFirst({
                 where: {
                     companyId
@@ -57,6 +56,7 @@ class ZohoService {
             if (!subscriptionData) {
                 throw new customError_1.CustomError(400, 'No previous subscription found');
             }
+            yield this.refreshToken();
             const findTokenDetails = yield prisma_1.prisma.zohoDetails.findFirst();
             if (!findTokenDetails) {
                 throw new customError_1.CustomError(400, 'Token details not found');
@@ -76,6 +76,36 @@ class ZohoService {
                 }
             });
             return createHostedPayMentPage.data.hostedpage.url;
+        });
+    }
+    refreshToken() {
+        return __awaiter(this, void 0, void 0, function* () {
+            const findTokenDetails = yield prisma_1.prisma.zohoDetails.findFirst();
+            if (!findTokenDetails) {
+                throw new customError_1.CustomError(400, 'Token details not found');
+            }
+            const res = yield (0, axios_1.default)({
+                url: 'https://accounts.zoho.com/oauth/v2/token',
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded'
+                },
+                data: {
+                    'refresh_token': '1000.8fe7a7835b23b4f099674b52b598ee30.312c554a79432cd9d78864870f8f1f34',
+                    'client_id': '1000.RGPV61FGSU333G38TWEMO0KH5QL9CE',
+                    'client_secret': 'fe510da403f5d6fb83139b49a4414303970baabffe',
+                    'redirect_uri': 'http://www.zoho.com/subscriptions',
+                    'grant_type': 'refresh_token'
+                }
+            });
+            yield prisma_1.prisma.zohoDetails.update({
+                where: {
+                    id: findTokenDetails.id
+                },
+                data: {
+                    accessToken: res.data.access_token
+                }
+            });
         });
     }
 }

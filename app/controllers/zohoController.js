@@ -87,6 +87,19 @@ class ZohoController {
             }
         });
     }
+    refreshToken(req, res, next) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                const data = yield zohoService_1.default.refreshToken();
+                return (0, defaultResponseHelper_1.DefaultResponse)(res, 200, 'Success', {
+                    result: data
+                });
+            }
+            catch (error) {
+                next(error);
+            }
+        });
+    }
     getToken(req, res, next) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
