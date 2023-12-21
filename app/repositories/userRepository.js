@@ -246,6 +246,7 @@ class UserRepository {
                                         isConnected: true,
                                         status: true,
                                         fiscalYear: true,
+                                        createdAt: true,
                                         Subscription: true,
                                     },
                                 },

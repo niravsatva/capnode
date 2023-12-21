@@ -127,8 +127,14 @@ class QuickbooksController {
                     // Check if the same company is already connected
                     const isAlreadyConnected = yield repositories_1.companyRepository.getCompanyByTenantId(authToken.realmId);
                     if (isAlreadyConnected) {
-                        const error = new customError_1.CustomError(400, 'Company is already connected');
-                        throw error;
+                        const getSubscriptionDetails = yield prisma_1.prisma.subscription.findFirst({
+                            where: {
+                                companyId: isAlreadyConnected.id
+                            }
+                        });
+                        if (getSubscriptionDetails && getSubscriptionDetails.status === 'live') {
+                            throw new customError_1.CustomError(400, 'Company is already connected');
+                        }
                     }
                     const data = {
                         tenantID: authToken.realmId,

@@ -49,6 +49,7 @@ class SubscriptionService {
                     },
                     data: {
                         isConnected: false,
+                        status: false
                     }
                 });
             }
@@ -69,6 +70,33 @@ class SubscriptionService {
                     expiresAt: data.expires_at,
                 }
             });
+        });
+    }
+    reactiveSubscription(data) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const subscriptionData = yield repositories_1.subscriptionRepository.getSubscriptionDetailsByZohoSubscriptionId(data.subscription_id);
+            if (!subscriptionData) {
+                throw new customError_1.CustomError(400, 'Subscription not found');
+            }
+            yield prisma_1.prisma.subscription.updateMany({
+                where: {
+                    zohoSubscriptionId: data.subscription_id
+                },
+                data: {
+                    status: data.status,
+                    expiresAt: data.expires_at,
+                }
+            });
+            if (subscriptionData.companyId) {
+                yield prisma_1.prisma.company.update({
+                    where: {
+                        id: subscriptionData.companyId
+                    },
+                    data: {
+                        status: true
+                    }
+                });
+            }
         });
     }
     expireSubscription(data) {
