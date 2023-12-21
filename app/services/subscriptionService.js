@@ -42,6 +42,16 @@ class SubscriptionService {
                     status: data.status
                 }
             });
+            if (subscriptionData.companyId) {
+                yield prisma_1.prisma.company.update({
+                    where: {
+                        id: subscriptionData.companyId
+                    },
+                    data: {
+                        isConnected: false,
+                    }
+                });
+            }
         });
     }
     renewSubscription(data) {
