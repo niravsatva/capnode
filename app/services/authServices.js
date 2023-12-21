@@ -33,6 +33,7 @@ class AuthServices {
                     const error = new customError_1.CustomError(401, 'Invalid credentials');
                     throw error;
                 }
+                user.companies = user === null || user === void 0 ? void 0 : user.companies.filter((e) => { var _a; return (_a = e.company) === null || _a === void 0 ? void 0 : _a.Subscription.every((x) => x.status === 'live'); });
                 // Check if user is verified
                 if (!(user === null || user === void 0 ? void 0 : user.isVerified)) {
                     const error = new customError_1.CustomError(401, 'User is not verified');
@@ -78,18 +79,31 @@ class AuthServices {
                         userId: user.id,
                     },
                 });
+                const superAdminRole = yield prisma_1.prisma.role.findFirst({
+                    where: {
+                        roleName: 'Company Admin',
+                        status: true,
+                        isCompanyAdmin: true
+                    }
+                });
+                const superAdminRoleCompany = yield prisma_1.prisma.companyRole.findFirst({
+                    where: {
+                        userId: user.id,
+                        roleId: superAdminRole === null || superAdminRole === void 0 ? void 0 : superAdminRole.id
+                    }
+                });
                 if (superAdminSubscription &&
                     (!superAdminSubscription.status ||
                         superAdminSubscription.status != 'live')) {
                     throw new customError_1.CustomError(400, 'You do not have any active subscription currently');
                 }
-                if (!isValidSubscription) {
+                if (!isValidSubscription && !superAdminSubscription) {
                     throw new customError_1.CustomError(400, 'You do not have any active subscription currently');
                 }
-                if (!isValidForLogin) {
+                if (!isValidForLogin && !superAdminRoleCompany) {
                     throw new customError_1.CustomError(401, 'You are not authorized to access the system please contact your administrator.');
                 }
-                if (!isValidForLoginWithRole) {
+                if (!isValidForLoginWithRole && !superAdminRoleCompany) {
                     throw new customError_1.CustomError(401, 'You are not authorized to access the system please contact your administrator.');
                 }
                 //   Credentials Valid

@@ -216,17 +216,6 @@ class UserRepository {
                 const user = yield prisma_1.prisma.user.findFirst({
                     where: {
                         email: email,
-                        companies: {
-                            some: {
-                                company: {
-                                    Subscription: {
-                                        some: {
-                                            status: 'live'
-                                        }
-                                    }
-                                }
-                            }
-                        }
                     },
                     select: {
                         id: true,
@@ -257,11 +246,7 @@ class UserRepository {
                                         isConnected: true,
                                         status: true,
                                         fiscalYear: true,
-                                        Subscription: {
-                                            where: {
-                                                status: 'live'
-                                            }
-                                        },
+                                        Subscription: true,
                                     },
                                 },
                                 role: {

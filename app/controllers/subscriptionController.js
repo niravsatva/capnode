@@ -48,5 +48,33 @@ class SubscriptionController {
             }
         });
     }
+    renewSubscription(req, res, next) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                const { data } = req.body;
+                if (data) {
+                    yield subscriptionService_1.default.renewSubscription(data.subscription);
+                }
+                return (0, defaultResponseHelper_1.DefaultResponse)(res, 200, 'Subscription canceled successfully', { success: true });
+            }
+            catch (error) {
+                next(error);
+            }
+        });
+    }
+    expireSubscription(req, res, next) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                const { data } = req.body;
+                if (data) {
+                    yield subscriptionService_1.default.renewSubscription(data.subscription);
+                }
+                return (0, defaultResponseHelper_1.DefaultResponse)(res, 200, 'Subscription canceled successfully', { success: true });
+            }
+            catch (error) {
+                next(error);
+            }
+        });
+    }
 }
 exports.default = new SubscriptionController();

@@ -9,4 +9,6 @@ const authMiddleware_1 = require("../middlewares/authMiddleware");
 const subscriptionRoutes = express_1.default.Router();
 subscriptionRoutes.get('/logged-in', authMiddleware_1.isAuthenticated, subscriptionController_1.default.getLoggedInCompanySubscriptionDetails);
 subscriptionRoutes.post('/cancel', subscriptionController_1.default.cancelSubscription);
+subscriptionRoutes.post('/renew', subscriptionController_1.default.renewSubscription);
+subscriptionRoutes.post('/expired', subscriptionController_1.default.expireSubscription);
 exports.default = subscriptionRoutes;

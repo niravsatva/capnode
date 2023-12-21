@@ -179,6 +179,7 @@ class AuthController {
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 const profile = yield repositories_1.userRepository.getById(req.user.id);
+                profile.companies = profile === null || profile === void 0 ? void 0 : profile.companies.filter((e) => { var _a; return (_a = e.company) === null || _a === void 0 ? void 0 : _a.Subscription.every((x) => x.status === 'live'); });
                 // If the user has bought a subscription then there is no company or role assigned to that user
                 const user = yield repositories_1.companyRoleRepository.getRecordWithNullCompanyId(req.user.id);
                 let profileData;
