@@ -56,7 +56,7 @@ class ZohoService {
             if (!subscriptionData) {
                 throw new customError_1.CustomError(400, 'No previous subscription found');
             }
-            // await this.refreshToken();
+            yield this.refreshToken();
             const findTokenDetails = yield prisma_1.prisma.zohoDetails.findFirst();
             if (!findTokenDetails) {
                 throw new customError_1.CustomError(400, 'Token details not found');
