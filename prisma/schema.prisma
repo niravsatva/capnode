@@ -309,10 +309,10 @@ model TimeActivities {
 
 model SplitTimeActivities {
   id                 String          @id @default(uuid())
-  classId            String
-  className          String
-  customerId         String
-  customerName       String
+  classId            String?
+  className          String?
+  customerId         String?
+  customerName       String?
   hours              String
   minute             String
   employeeId         String
