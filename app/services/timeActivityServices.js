@@ -665,7 +665,7 @@ class TimeActivityService {
                     }
                 }
                 if ((0, utils_1.hasText)(rule.criteria.employeeId) && !(0, utils_1.hasText)(rule.criteria.classId) && (0, utils_1.hasText)(rule.criteria.customerId)) {
-                    if (rule.criteria.operator1 === 'AND' && (this.matchCriteria(rule.criteria.employeeId, timeActivity.employeeId) && this.matchCriteria(rule.criteria.classId, timeActivity.classId))) {
+                    if (rule.criteria.operator1 === 'AND' && (this.matchCriteria(rule.criteria.employeeId, timeActivity.employeeId) && this.matchCriteria(rule.criteria.customerId, timeActivity.customerId))) {
                         matchedRule = rule;
                         break;
                     }
@@ -725,6 +725,7 @@ class TimeActivityService {
                     }
                 });
             }
+            return hoursMinutesData;
         });
     }
     divideTimeAsPerPercentage(hours, minutes, actions) {

@@ -139,6 +139,11 @@ class TimeSheetServices {
             // 	);
             timeSheetData['timeActivities'] =
                 timeActivities.timeActivitiesWithHours.filter((singleActivity) => {
+                    if (singleActivity.SplitTimeActivities && singleActivity.SplitTimeActivities.length) {
+                        if (singleActivity.SplitTimeActivities.every((e) => e.classId && e.customerId)) {
+                            return singleActivity.id;
+                        }
+                    }
                     if (singleActivity.classId && singleActivity.customerId) {
                         return singleActivity.id;
                     }
