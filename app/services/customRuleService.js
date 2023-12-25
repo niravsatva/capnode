@@ -103,44 +103,50 @@ class CustomRuleService {
         if (!(0, utils_1.hasText)(criteria.employeeId)) {
             throw new customError_1.CustomError(400, 'Invalid rule criteria');
         }
-        if (operators.includes(criteria.operator1) &&
-            operators.includes(criteria.operator2)) {
-            if (!(0, utils_1.hasText)(criteria.classId) || !(0, utils_1.hasText)(criteria.customerId)) {
-                throw new customError_1.CustomError(400, 'Invalid rule criteria');
-            }
+        if (!operators.includes(criteria.operator1) ||
+            !operators.includes(criteria.operator2)) {
+            throw new customError_1.CustomError(400, 'Invalid rule criteria');
         }
-        if (operators.includes(criteria.operator1)) {
-            if (!(0, utils_1.hasText)(criteria.customerId)) {
-                throw new customError_1.CustomError(400, 'Invalid rule criteria');
-            }
-        }
-        if (operators.includes(criteria.operator2)) {
-            if (!(0, utils_1.hasText)(criteria.classId)) {
-                throw new customError_1.CustomError(400, 'Invalid rule criteria');
-            }
-        }
-        if ((0, utils_1.hasText)(criteria.employeeId) &&
-            (0, utils_1.hasText)(criteria.customerId) &&
-            (0, utils_1.hasText)(criteria.classId)) {
-            if (!operators.includes(criteria.operator1) &&
-                !operators.includes(criteria.operator2)) {
-                throw new customError_1.CustomError(400, 'Invalid rule criteria');
-            }
-        }
-        if ((0, utils_1.hasText)(criteria.employeeId) &&
-            !(0, utils_1.hasText)(criteria.customerId) &&
-            (0, utils_1.hasText)(criteria.classId)) {
-            if (!operators.includes(criteria.operator2)) {
-                throw new customError_1.CustomError(400, 'Invalid rule criteria');
-            }
-        }
-        if ((0, utils_1.hasText)(criteria.employeeId) &&
-            (0, utils_1.hasText)(criteria.customerId) &&
-            !(0, utils_1.hasText)(criteria.classId)) {
-            if (!operators.includes(criteria.operator1)) {
-                throw new customError_1.CustomError(400, 'Invalid rule criteria');
-            }
-        }
+        // if (operators.includes(criteria.operator1)) {
+        // 	if (!hasText(criteria.customerId)) {
+        // 		throw new CustomError(400, 'Invalid rule criteria');
+        // 	}
+        // }
+        // if (operators.includes(criteria.operator2)) {
+        // 	if (!hasText(criteria.classId)) {
+        // 		throw new CustomError(400, 'Invalid rule criteria');
+        // 	}
+        // }
+        // if (
+        // 	hasText(criteria.employeeId) &&
+        // 	hasText(criteria.customerId) &&
+        // 	hasText(criteria.classId)
+        // ) {
+        // 	if (
+        // 		!operators.includes(criteria.operator1) &&
+        // 		!operators.includes(criteria.operator2)
+        // 	) {
+        // 		throw new CustomError(400, 'Invalid rule criteria');
+        // 	}
+        // }
+        // if (
+        // 	hasText(criteria.employeeId) &&
+        // 	!hasText(criteria.customerId) &&
+        // 	hasText(criteria.classId)
+        // ) {
+        // 	if (!operators.includes(criteria.operator2)) {
+        // 		throw new CustomError(400, 'Invalid rule criteria');
+        // 	}
+        // }
+        // if (
+        // 	hasText(criteria.employeeId) &&
+        // 	hasText(criteria.customerId) &&
+        // 	!hasText(criteria.classId)
+        // ) {
+        // 	if (!operators.includes(criteria.operator1)) {
+        // 		throw new CustomError(400, 'Invalid rule criteria');
+        // 	}
+        // }
     }
     getCustomRuleById(id, companyId) {
         return __awaiter(this, void 0, void 0, function* () {
