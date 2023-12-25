@@ -399,5 +399,16 @@ class TimeActivityController {
             }
         });
     }
+    applyCustomRules(req, res, next) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                yield timeActivityServices_1.default.applyCustomRules(req.query.payPeriodId, req.query.companyId);
+                return (0, defaultResponseHelper_1.DefaultResponse)(res, 200, 'Rules applied successfully');
+            }
+            catch (error) {
+                next(error);
+            }
+        });
+    }
 }
 exports.default = new TimeActivityController();

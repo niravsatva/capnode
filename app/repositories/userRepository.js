@@ -199,6 +199,11 @@ class UserRepository {
                                     },
                                 },
                             },
+                            orderBy: {
+                                company: {
+                                    createdAt: 'desc'
+                                }
+                            }
                         },
                     },
                 });

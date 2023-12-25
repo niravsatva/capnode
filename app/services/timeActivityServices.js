@@ -29,23 +29,6 @@ class TimeActivityService {
     getAllTimeActivitiesServices(timeActivityData) {
         return __awaiter(this, void 0, void 0, function* () {
             const { companyId, search, sort, page, limit, type, classId, customerId, employeeId, isOverHours, payPeriodId, year, closingDate, } = timeActivityData;
-            // let yearFilter = {};
-            // if (year) {
-            // 	yearFilter = {
-            // 		AND: [
-            // 			{
-            // 				activityDate: {
-            // 					gte: new Date(`${Number(year)}-01-01T00:00:00Z`), // Start of the year
-            // 				},
-            // 			},
-            // 			{
-            // 				activityDate: {
-            // 					lt: new Date(`${Number(year) + 1}-01-01T00:00:00Z`), // Start of the next year
-            // 				},
-            // 			},
-            // 		],
-            // 	};
-            // }
             let dateFilters = {};
             if (payPeriodId) {
                 // Get pay period details
@@ -110,15 +93,6 @@ class TimeActivityService {
                     AND: filteredData,
                 }
                 : {};
-            // const dateFilters =
-            // 	startDate && endDate
-            // 		? {
-            // 				activityDate: {
-            // 					gte: startDate,
-            // 					lte: endDate,
-            // 				},
-            // 		  }
-            // 		: {};
             // Conditions for searching
             const searchCondition = search
                 ? {
@@ -174,30 +148,6 @@ class TimeActivityService {
             if (!companyDetails) {
                 throw new customError_1.CustomError(404, 'Company not found');
             }
-            // CODE FOR HANDLING OVER HOURS AND UNDER HOURS
-            // Update total hours for each time activities
-            // const allTimeActivities = await timeActivityRepository.getAllTimeActivities(
-            // 	{
-            // 		companyId: companyId,
-            // 	}
-            // );
-            // const allTimeActivityHoursUpdate =
-            // 	await this.calculateTimeActivitiesWithHours(allTimeActivities);
-            // // Update over hour records
-            // await Promise.all(
-            // 	allTimeActivityHoursUpdate?.map(async (singleActivity: any) => {
-            // 		// if (singleActivity?.isOver) {
-            // 		await overHoursRepository.updateOverHoursByYear(
-            // 			singleActivity?.companyId,
-            // 			singleActivity?.employeeId,
-            // 			new Date(singleActivity?.activityDate).getFullYear(),
-            // 			singleActivity?.overHours,
-            // 			singleActivity?.overMinutes,
-            // 			singleActivity?.isOver
-            // 		);
-            // 		// }
-            // 	})
-            // );
             let timeActivitiesWithHours;
             if (isOverHours) {
                 const timeActivities = {
@@ -250,6 +200,55 @@ class TimeActivityService {
             });
             return { timeActivitiesWithHours, timeActivitiesCount };
             // return { timeActivitiesWithHours, timeActivitiesCount, timeActivities };
+        });
+    }
+    applyCustomRules(payPeriodId, companyId) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const payPeriodData = yield payPeriodRepository_1.default.getDetails(payPeriodId, companyId);
+            if (!payPeriodData) {
+                throw new customError_1.CustomError(404, 'Pay period not found');
+            }
+            const payPeriodStartDate = payPeriodData === null || payPeriodData === void 0 ? void 0 : payPeriodData.startDate;
+            const payPeriodEndDate = payPeriodData === null || payPeriodData === void 0 ? void 0 : payPeriodData.endDate;
+            let startDate;
+            let endDate;
+            if (payPeriodStartDate && payPeriodEndDate) {
+                // Format start date
+                startDate = payPeriodStartDate.setUTCHours(0, 0, 0, 0);
+                // startDate = newStart.toISOString();
+                // Format end date
+                endDate = payPeriodEndDate.setUTCHours(23, 59, 59, 999);
+                // endDate = newEnd.toISOString();
+            }
+            if (!startDate || !endDate) {
+                throw new customError_1.CustomError(400, 'Dates not found');
+            }
+            const activities = yield prisma_1.prisma.timeActivities.findMany({
+                where: {
+                    companyId,
+                    activityDate: {
+                        gte: new Date(startDate),
+                        lte: new Date(endDate),
+                    }
+                }
+            });
+            const customRules = yield prisma_1.prisma.customRules.findMany({
+                where: {
+                    companyId,
+                    isActive: true
+                },
+                orderBy: {
+                    priority: 'asc'
+                }
+            });
+            if (activities && activities.length && customRules.length) {
+                for (const activity of activities) {
+                    const ruleData = this.matchCustomRule(activity, customRules);
+                    if (ruleData) {
+                        yield this.createSplitActivitiesBasedOnRuleMatch(activity, ruleData);
+                    }
+                }
+            }
         });
     }
     syncTimeActivities(companyId) {

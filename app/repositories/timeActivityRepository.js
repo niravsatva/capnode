@@ -41,8 +41,8 @@ class TimeActivityRepository {
                                 customRuleId: true,
                             },
                             orderBy: {
-                                hours: 'desc'
-                            }
+                                hours: 'desc',
+                            },
                         },
                         timeSheet: {
                             include: {
@@ -261,7 +261,7 @@ class TimeActivityRepository {
                         companyId: companyId,
                         // employee: { connect: { id: employee?.id } },
                         // company: { connect: { id: companyId } },
-                        activityDate: new Date(timeActivityData === null || timeActivityData === void 0 ? void 0 : timeActivityData.activityDate),
+                        activityDate: new Date(timeActivityData === null || timeActivityData === void 0 ? void 0 : timeActivityData.activityDate).toDateString(),
                     };
                     if (!data.className) {
                         delete data.className;
@@ -281,7 +281,7 @@ class TimeActivityRepository {
                             where: {
                                 timeActivityId: timeActivityId,
                                 companyId: companyId,
-                            }
+                            },
                         });
                     }
                 }
@@ -305,7 +305,7 @@ class TimeActivityRepository {
                         minute: timeActivityData === null || timeActivityData === void 0 ? void 0 : timeActivityData.minute,
                         employee: { connect: { id: employee === null || employee === void 0 ? void 0 : employee.id } },
                         company: { connect: { id: companyId } },
-                        activityDate: new Date(timeActivityData === null || timeActivityData === void 0 ? void 0 : timeActivityData.activityDate),
+                        activityDate: new Date(timeActivityData === null || timeActivityData === void 0 ? void 0 : timeActivityData.activityDate).toDateString(),
                     };
                     if (!data.classId) {
                         delete data.classId;
@@ -386,7 +386,7 @@ class TimeActivityRepository {
                     timeActivityId: timeActivityData === null || timeActivityData === void 0 ? void 0 : timeActivityData.timeActivityId,
                     hours: timeActivityData === null || timeActivityData === void 0 ? void 0 : timeActivityData.hours,
                     minute: timeActivityData === null || timeActivityData === void 0 ? void 0 : timeActivityData.minute,
-                    activityDate: new Date(timeActivityData === null || timeActivityData === void 0 ? void 0 : timeActivityData.activityDate),
+                    activityDate: new Date(timeActivityData === null || timeActivityData === void 0 ? void 0 : timeActivityData.activityDate).toDateString(),
                     company: { connect: { id: timeActivityData === null || timeActivityData === void 0 ? void 0 : timeActivityData.companyId } },
                     classId: timeActivityData === null || timeActivityData === void 0 ? void 0 : timeActivityData.classId,
                     className: timeActivityData === null || timeActivityData === void 0 ? void 0 : timeActivityData.className,
@@ -439,7 +439,7 @@ class TimeActivityRepository {
                     // timeActivityId: timeActivityData?.timeActivityId,
                     hours: timeActivityData === null || timeActivityData === void 0 ? void 0 : timeActivityData.hours,
                     minute: timeActivityData === null || timeActivityData === void 0 ? void 0 : timeActivityData.minute,
-                    activityDate: new Date(timeActivityData === null || timeActivityData === void 0 ? void 0 : timeActivityData.activityDate),
+                    activityDate: new Date(timeActivityData === null || timeActivityData === void 0 ? void 0 : timeActivityData.activityDate).toISOString(),
                     company: { connect: { id: timeActivityData === null || timeActivityData === void 0 ? void 0 : timeActivityData.companyId } },
                     classId: timeActivityData === null || timeActivityData === void 0 ? void 0 : timeActivityData.classId,
                     className: timeActivityData === null || timeActivityData === void 0 ? void 0 : timeActivityData.className,

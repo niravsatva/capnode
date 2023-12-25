@@ -25,4 +25,7 @@ router.get('/export', authMiddleware_1.isAuthenticated,
 controllers_1.timeActivityController.exportTimeActivity);
 // Export time activity
 router.post('/exportpdf', authMiddleware_1.isAuthenticated, controllers_1.timeActivityController.exportTimeActivityPdf);
+router.get('/apply-custom-rules', authMiddleware_1.isAuthenticated, 
+// timeActivityController.exportTimeActivityExcel
+controllers_1.timeActivityController.applyCustomRules);
 exports.default = router;
