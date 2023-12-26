@@ -8,7 +8,11 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
+const moment_1 = __importDefault(require("moment"));
 const prisma_1 = require("../client/prisma");
 const customError_1 = require("../models/customError");
 const logger_1 = require("../utils/logger");
@@ -261,7 +265,7 @@ class TimeActivityRepository {
                         companyId: companyId,
                         // employee: { connect: { id: employee?.id } },
                         // company: { connect: { id: companyId } },
-                        activityDate: new Date(timeActivityData === null || timeActivityData === void 0 ? void 0 : timeActivityData.activityDate).toDateString(),
+                        activityDate: (0, moment_1.default)(timeActivityData === null || timeActivityData === void 0 ? void 0 : timeActivityData.activityDate, 'YYYY-MM-DD').toISOString(),
                     };
                     if (!data.className) {
                         delete data.className;
@@ -305,7 +309,7 @@ class TimeActivityRepository {
                         minute: timeActivityData === null || timeActivityData === void 0 ? void 0 : timeActivityData.minute,
                         employee: { connect: { id: employee === null || employee === void 0 ? void 0 : employee.id } },
                         company: { connect: { id: companyId } },
-                        activityDate: new Date(timeActivityData === null || timeActivityData === void 0 ? void 0 : timeActivityData.activityDate).toDateString(),
+                        activityDate: (0, moment_1.default)(timeActivityData === null || timeActivityData === void 0 ? void 0 : timeActivityData.activityDate, 'YYYY-MM-DD').toISOString(),
                     };
                     if (!data.classId) {
                         delete data.classId;
@@ -319,7 +323,6 @@ class TimeActivityRepository {
                         });
                     }
                 }
-                console.log(updatedTimeActivities);
                 return updatedTimeActivities;
             }
             catch (err) {
@@ -386,7 +389,7 @@ class TimeActivityRepository {
                     timeActivityId: timeActivityData === null || timeActivityData === void 0 ? void 0 : timeActivityData.timeActivityId,
                     hours: timeActivityData === null || timeActivityData === void 0 ? void 0 : timeActivityData.hours,
                     minute: timeActivityData === null || timeActivityData === void 0 ? void 0 : timeActivityData.minute,
-                    activityDate: new Date(timeActivityData === null || timeActivityData === void 0 ? void 0 : timeActivityData.activityDate).toDateString(),
+                    activityDate: (0, moment_1.default)(timeActivityData === null || timeActivityData === void 0 ? void 0 : timeActivityData.activityDate, 'YYYY-MM-DD').toISOString(),
                     company: { connect: { id: timeActivityData === null || timeActivityData === void 0 ? void 0 : timeActivityData.companyId } },
                     classId: timeActivityData === null || timeActivityData === void 0 ? void 0 : timeActivityData.classId,
                     className: timeActivityData === null || timeActivityData === void 0 ? void 0 : timeActivityData.className,
@@ -428,6 +431,7 @@ class TimeActivityRepository {
     // Create a new time activity
     createTimeActivity(timeActivityData) {
         return __awaiter(this, void 0, void 0, function* () {
+            console.log(timeActivityData);
             try {
                 let employee = null;
                 if (timeActivityData === null || timeActivityData === void 0 ? void 0 : timeActivityData.employeeId) {
