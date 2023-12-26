@@ -349,12 +349,12 @@ class TimeActivityService {
                             (timeActivity === null || timeActivity === void 0 ? void 0 : timeActivity.Hours) !== undefined &&
                             (timeActivity === null || timeActivity === void 0 ? void 0 : timeActivity.Minutes) !== null &&
                             (timeActivity === null || timeActivity === void 0 ? void 0 : timeActivity.Minutes) !== undefined) {
-                            hours = timeActivity === null || timeActivity === void 0 ? void 0 : timeActivity.Hours;
-                            minutes = timeActivity === null || timeActivity === void 0 ? void 0 : timeActivity.Minutes;
+                            hours = timeActivity === null || timeActivity === void 0 ? void 0 : timeActivity.Hours.toString().padStart(2, '0');
+                            minutes = timeActivity === null || timeActivity === void 0 ? void 0 : timeActivity.Minutes.toString().padStart(2, '0');
                         }
                         else if ((timeActivity === null || timeActivity === void 0 ? void 0 : timeActivity.Hours) == 0 && (timeActivity === null || timeActivity === void 0 ? void 0 : timeActivity.Minutes) == 0) {
-                            hours = timeActivity === null || timeActivity === void 0 ? void 0 : timeActivity.Hours;
-                            minutes = timeActivity === null || timeActivity === void 0 ? void 0 : timeActivity.Minutes;
+                            hours = timeActivity === null || timeActivity === void 0 ? void 0 : timeActivity.Hours.toString().padStart(2, '0');
+                            minutes = timeActivity === null || timeActivity === void 0 ? void 0 : timeActivity.Minutes.toString().padStart(2, '0');
                         }
                         else if ((0, utils_1.hasText)(timeActivity === null || timeActivity === void 0 ? void 0 : timeActivity.StartTime) && (0, utils_1.hasText)(timeActivity === null || timeActivity === void 0 ? void 0 : timeActivity.EndTime)) {
                             const start = new Date(timeActivity === null || timeActivity === void 0 ? void 0 : timeActivity.StartTime);
@@ -484,12 +484,12 @@ class TimeActivityService {
                             (timeActivity === null || timeActivity === void 0 ? void 0 : timeActivity.Hours) !== undefined &&
                             (timeActivity === null || timeActivity === void 0 ? void 0 : timeActivity.Minutes) !== null &&
                             (timeActivity === null || timeActivity === void 0 ? void 0 : timeActivity.Minutes) !== undefined) {
-                            hours = timeActivity === null || timeActivity === void 0 ? void 0 : timeActivity.Hours;
-                            minutes = timeActivity === null || timeActivity === void 0 ? void 0 : timeActivity.Minutes;
+                            hours = timeActivity === null || timeActivity === void 0 ? void 0 : timeActivity.Hours.toString().padStart(2, '0');
+                            minutes = timeActivity === null || timeActivity === void 0 ? void 0 : timeActivity.Minutes.toString().padStart(2, '0');
                         }
                         else if ((timeActivity === null || timeActivity === void 0 ? void 0 : timeActivity.Hours) == 0 && (timeActivity === null || timeActivity === void 0 ? void 0 : timeActivity.Minutes) == 0) {
-                            hours = timeActivity === null || timeActivity === void 0 ? void 0 : timeActivity.Hours;
-                            minutes = timeActivity === null || timeActivity === void 0 ? void 0 : timeActivity.Minutes;
+                            hours = timeActivity === null || timeActivity === void 0 ? void 0 : timeActivity.Hours.toString().padStart(2, '0');
+                            minutes = timeActivity === null || timeActivity === void 0 ? void 0 : timeActivity.Minutes.toString().padStart(2, '0');
                         }
                         else {
                             const start = new Date(timeActivity === null || timeActivity === void 0 ? void 0 : timeActivity.StartTime);
