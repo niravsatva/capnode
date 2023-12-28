@@ -28,7 +28,9 @@ class TimeActivityService {
     // Get all time activities
     getAllTimeActivitiesServices(timeActivityData) {
         return __awaiter(this, void 0, void 0, function* () {
-            const { companyId, search, sort, page, limit, type, classId, customerId, employeeId, isOverHours, payPeriodId, year, closingDate, } = timeActivityData;
+            const { companyId, search, sort, page, limit, type, classId, customerId, employeeId, isOverHours, payPeriodId, 
+            // eslint-disable-next-line @typescript-eslint/no-unused-vars
+            year, closingDate, } = timeActivityData;
             let dateFilters = {};
             if (payPeriodId) {
                 // Get pay period details
@@ -42,17 +44,17 @@ class TimeActivityService {
                 let endDate;
                 if (payPeriodStartDate && payPeriodEndDate) {
                     // Format start date
-                    startDate = payPeriodStartDate.setUTCHours(0, 0, 0, 0);
+                    startDate = (0, moment_timezone_1.default)(payPeriodStartDate).startOf('date').toISOString();
                     // startDate = newStart.toISOString();
                     // Format end date
-                    endDate = payPeriodEndDate.setUTCHours(23, 59, 59, 999);
+                    endDate = (0, moment_timezone_1.default)(payPeriodEndDate).endOf('date').toISOString();
                     // endDate = newEnd.toISOString();
                 }
                 if (startDate && endDate) {
                     dateFilters = {
                         activityDate: {
-                            gte: new Date(startDate),
-                            lte: new Date(endDate),
+                            gte: startDate,
+                            lte: endDate,
                         },
                     };
                 }
@@ -77,17 +79,20 @@ class TimeActivityService {
                     },
                 });
             }
-            if (year) {
-                filteredData.push({
-                    activityDate: {
-                        gte: new Date(`${Number(year)}-01-01T00:00:00Z`), // Start of the year
-                    },
-                }, {
-                    activityDate: {
-                        lt: new Date(`${Number(year) + 1}-01-01T00:00:00Z`), // Start of the next year
-                    },
-                });
-            }
+            // if (year) {
+            // 	filteredData.push(
+            // 		{
+            // 			activityDate: {
+            // 				gte: new Date(`${Number(year)}-01-01T00:00:00Z`), // Start of the year
+            // 			},
+            // 		},
+            // 		{
+            // 			activityDate: {
+            // 				lt: new Date(`${Number(year) + 1}-01-01T00:00:00Z`), // Start of the next year
+            // 			},
+            // 		}
+            // 	);
+            // }
             const filterConditions = (filteredData === null || filteredData === void 0 ? void 0 : filteredData.length) > 0
                 ? {
                     AND: filteredData,
@@ -214,10 +219,10 @@ class TimeActivityService {
             let endDate;
             if (payPeriodStartDate && payPeriodEndDate) {
                 // Format start date
-                startDate = payPeriodStartDate.setUTCHours(0, 0, 0, 0);
+                startDate = (0, moment_timezone_1.default)(payPeriodStartDate).startOf('date').toISOString();
                 // startDate = newStart.toISOString();
                 // Format end date
-                endDate = payPeriodEndDate.setUTCHours(23, 59, 59, 999);
+                endDate = (0, moment_timezone_1.default)(payPeriodEndDate).endOf('date').toISOString();
                 // endDate = newEnd.toISOString();
             }
             if (!startDate || !endDate) {
@@ -830,13 +835,11 @@ class TimeActivityService {
                 let endDate = '';
                 if (payPeriodStartDate && payPeriodEndDate) {
                     // Format start date
-                    const newStart = new Date(payPeriodStartDate);
-                    newStart.setUTCHours(0, 0, 0, 0);
-                    startDate = newStart.toISOString();
+                    startDate = (0, moment_timezone_1.default)(payPeriodStartDate).startOf('date').toISOString();
+                    // startDate = newStart.toISOString();
                     // Format end date
-                    const newEnd = new Date(payPeriodEndDate);
-                    newEnd.setUTCHours(0, 0, 0, 0);
-                    endDate = newEnd.toISOString();
+                    endDate = (0, moment_timezone_1.default)(payPeriodEndDate).endOf('date').toISOString();
+                    // endDate = newEnd.toISOString();
                 }
                 if (startDate && endDate) {
                     if (startDate === endDate) {

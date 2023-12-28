@@ -265,7 +265,7 @@ class TimeActivityRepository {
                         companyId: companyId,
                         // employee: { connect: { id: employee?.id } },
                         // company: { connect: { id: companyId } },
-                        activityDate: (0, moment_1.default)(timeActivityData === null || timeActivityData === void 0 ? void 0 : timeActivityData.activityDate, 'YYYY-MM-DD').toISOString(),
+                        activityDate: (0, moment_1.default)(timeActivityData === null || timeActivityData === void 0 ? void 0 : timeActivityData.activityDate, 'YYYY-MM-DD').format(),
                     };
                     if (!data.className) {
                         delete data.className;
@@ -309,7 +309,7 @@ class TimeActivityRepository {
                         minute: timeActivityData === null || timeActivityData === void 0 ? void 0 : timeActivityData.minute,
                         employee: { connect: { id: employee === null || employee === void 0 ? void 0 : employee.id } },
                         company: { connect: { id: companyId } },
-                        activityDate: (0, moment_1.default)(timeActivityData === null || timeActivityData === void 0 ? void 0 : timeActivityData.activityDate, 'YYYY-MM-DD').toISOString(),
+                        activityDate: (0, moment_1.default)(timeActivityData === null || timeActivityData === void 0 ? void 0 : timeActivityData.activityDate, 'YYYY-MM-DD').format(),
                     };
                     if (!data.classId) {
                         delete data.classId;
@@ -389,7 +389,7 @@ class TimeActivityRepository {
                     timeActivityId: timeActivityData === null || timeActivityData === void 0 ? void 0 : timeActivityData.timeActivityId,
                     hours: timeActivityData === null || timeActivityData === void 0 ? void 0 : timeActivityData.hours,
                     minute: timeActivityData === null || timeActivityData === void 0 ? void 0 : timeActivityData.minute,
-                    activityDate: (0, moment_1.default)(timeActivityData === null || timeActivityData === void 0 ? void 0 : timeActivityData.activityDate, 'YYYY-MM-DD').toISOString(),
+                    activityDate: (0, moment_1.default)(timeActivityData === null || timeActivityData === void 0 ? void 0 : timeActivityData.activityDate, 'YYYY-MM-DD').format(),
                     company: { connect: { id: timeActivityData === null || timeActivityData === void 0 ? void 0 : timeActivityData.companyId } },
                     classId: timeActivityData === null || timeActivityData === void 0 ? void 0 : timeActivityData.classId,
                     className: timeActivityData === null || timeActivityData === void 0 ? void 0 : timeActivityData.className,
@@ -431,7 +431,6 @@ class TimeActivityRepository {
     // Create a new time activity
     createTimeActivity(timeActivityData) {
         return __awaiter(this, void 0, void 0, function* () {
-            console.log(timeActivityData);
             try {
                 let employee = null;
                 if (timeActivityData === null || timeActivityData === void 0 ? void 0 : timeActivityData.employeeId) {
@@ -443,7 +442,7 @@ class TimeActivityRepository {
                     // timeActivityId: timeActivityData?.timeActivityId,
                     hours: timeActivityData === null || timeActivityData === void 0 ? void 0 : timeActivityData.hours,
                     minute: timeActivityData === null || timeActivityData === void 0 ? void 0 : timeActivityData.minute,
-                    activityDate: new Date(timeActivityData === null || timeActivityData === void 0 ? void 0 : timeActivityData.activityDate).toISOString(),
+                    activityDate: (0, moment_1.default)(timeActivityData === null || timeActivityData === void 0 ? void 0 : timeActivityData.activityDate).format(),
                     company: { connect: { id: timeActivityData === null || timeActivityData === void 0 ? void 0 : timeActivityData.companyId } },
                     classId: timeActivityData === null || timeActivityData === void 0 ? void 0 : timeActivityData.classId,
                     className: timeActivityData === null || timeActivityData === void 0 ? void 0 : timeActivityData.className,
