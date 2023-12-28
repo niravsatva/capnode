@@ -8,7 +8,11 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
+const moment_1 = __importDefault(require("moment"));
 const prisma_1 = require("../client/prisma");
 const customError_1 = require("../models/customError");
 class PayPeriodRepository {
@@ -50,8 +54,8 @@ class PayPeriodRepository {
         return __awaiter(this, void 0, void 0, function* () {
             const payPeriod = yield prisma_1.prisma.payPeriod.create({
                 data: {
-                    startDate: payPeriodData.startDate,
-                    endDate: payPeriodData.endDate,
+                    startDate: (0, moment_1.default)(payPeriodData.startDate).toISOString(),
+                    endDate: (0, moment_1.default)(payPeriodData.endDate).toISOString(),
                     company: { connect: { id: payPeriodData.companyId } },
                 },
             });

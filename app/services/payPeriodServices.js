@@ -102,6 +102,8 @@ class payPeriodServices {
                 throw new customError_1.CustomError(400, 'Dates are already in pay period');
             }
             const payPeriod = yield payPeriodRepository_1.default.create(payPeriodData);
+            console.log(payPeriodData);
+            console.log(payPeriod);
             // Create employee cost value for this pay period
             const employees = yield repositories_1.employeeRepository.getAllEmployeesByCompanyId(companyId);
             if (employees.length === 0) {
