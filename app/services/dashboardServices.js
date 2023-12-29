@@ -203,37 +203,57 @@ class DashboardServices {
                         },
                     ],
                 },
-            });
-            const payPeriodIds = currentYearPayPeriods.map((payPeriod) => {
-                return payPeriod.id;
-            });
-            const journalData = yield prisma_1.prisma.journal.findMany({
-                where: {
-                    companyId,
-                    payPeriodId: {
-                        in: payPeriodIds,
-                    },
-                },
                 include: {
-                    payPeriod: true,
+                    Journal: true
                 },
                 orderBy: {
-                    payPeriod: {
-                        endDate: 'desc',
-                    },
-                },
+                    endDate: 'desc'
+                }
             });
+            // const payPeriodIds = currentYearPayPeriods.map((payPeriod) => {
+            // 	return payPeriod.id;
+            // });
+            // const journalData = await prisma.journal.findMany({
+            // 	where: {
+            // 		companyId,
+            // 		payPeriodId: {
+            // 			in: payPeriodIds,
+            // 		},
+            // 	},
+            // 	include: {
+            // 		payPeriod: true,
+            // 	},
+            // 	orderBy: {
+            // 		payPeriod: {
+            // 			endDate: 'desc',
+            // 		},
+            // 	},
+            // });
             const graphData = [];
-            if (journalData && journalData.length) {
-                journalData.forEach((journal) => {
+            if (currentYearPayPeriods && currentYearPayPeriods.length) {
+                currentYearPayPeriods.forEach((currentYearPayPeriod) => {
+                    var _a, _b;
                     graphData.push({
-                        payPeriodId: journal.payPeriodId,
-                        payPeriodName: `${(0, moment_1.default)(journal.payPeriod.startDate).format('MM/DD/YYYY')} - ${(0, moment_1.default)(journal.payPeriod.endDate).format('MM/DD/YYYY')}`,
-                        amount: journal.amount,
-                        status: journal.status,
+                        payPeriodId: currentYearPayPeriod.id,
+                        payPeriodName: `${(0, moment_1.default)(currentYearPayPeriod.startDate).format('MM/DD/YYYY')} - ${(0, moment_1.default)(currentYearPayPeriod.endDate).format('MM/DD/YYYY')}`,
+                        amount: (_a = currentYearPayPeriod.Journal) === null || _a === void 0 ? void 0 : _a.amount,
+                        status: (_b = currentYearPayPeriod.Journal) === null || _b === void 0 ? void 0 : _b.status,
+                        isJournalPublished: currentYearPayPeriod.isJournalPublished
                     });
                 });
             }
+            // if (journalData && journalData.length) {
+            // 	journalData.forEach((journal) => {
+            // 		graphData.push({
+            // 			payPeriodId: journal.payPeriodId,
+            // 			payPeriodName: `${moment(journal.payPeriod.startDate).format(
+            // 				'MM/DD/YYYY'
+            // 			)} - ${moment(journal.payPeriod.endDate).format('MM/DD/YYYY')}`,
+            // 			amount: journal.amount,
+            // 			status: journal.status,
+            // 		});
+            // 	});
+            // }
             return graphData;
         });
     }

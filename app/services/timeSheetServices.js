@@ -139,7 +139,8 @@ class TimeSheetServices {
             // 	);
             timeSheetData['timeActivities'] =
                 timeActivities.timeActivitiesWithHours.filter((singleActivity) => {
-                    if (singleActivity.SplitTimeActivities && singleActivity.SplitTimeActivities.length) {
+                    if (singleActivity.SplitTimeActivities &&
+                        singleActivity.SplitTimeActivities.length) {
                         if (singleActivity.SplitTimeActivities.every((e) => e.classId && e.customerId)) {
                             return singleActivity.id;
                         }
@@ -331,10 +332,21 @@ class TimeSheetServices {
             const { startDate, endDate } = yield payPeriodRepository_1.default.getDatesByPayPeriod(timeSheetDetails.payPeriodId);
             let approvedHours = 0;
             allTimeLogs.forEach((singleTimeActivity) => {
-                if (!customerIds.includes(singleTimeActivity.customerId)) {
-                    customerIds.push(singleTimeActivity.customerId);
+                if (singleTimeActivity.SplitTimeActivities &&
+                    singleTimeActivity.SplitTimeActivities.length > 0) {
+                    singleTimeActivity.SplitTimeActivities.forEach((timeActivity) => {
+                        if (!customerIds.includes(timeActivity.customerId)) {
+                            customerIds.push(timeActivity.customerId);
+                        }
+                        approvedHours += (0, global_1.getTotalMinutes)(timeActivity.hours, timeActivity.minute);
+                    });
                 }
-                approvedHours += (0, global_1.getTotalMinutes)(singleTimeActivity.hours, singleTimeActivity.minute);
+                else {
+                    if (!customerIds.includes(singleTimeActivity.customerId)) {
+                        customerIds.push(singleTimeActivity.customerId);
+                    }
+                    approvedHours += (0, global_1.getTotalMinutes)(singleTimeActivity.hours, singleTimeActivity.minute);
+                }
             });
             const formattedHours = (0, global_1.minutesToHoursAndMinutes)(approvedHours);
             const uniqueCustomers = [];
@@ -343,9 +355,20 @@ class TimeSheetServices {
                 const customerObject = {};
                 let customerName = '';
                 allTimeLogs.forEach((singleTimeActivity) => {
-                    if (singleTimeActivity.customerId === singleCustomer) {
-                        customerMinutes += (0, global_1.getTotalMinutes)(singleTimeActivity.hours, singleTimeActivity.minute);
-                        customerName = singleTimeActivity.customerName;
+                    if (singleTimeActivity.SplitTimeActivities &&
+                        singleTimeActivity.SplitTimeActivities.length > 0) {
+                        singleTimeActivity.SplitTimeActivities.forEach((timeActivity) => {
+                            if (timeActivity.customerId === singleCustomer) {
+                                customerMinutes += (0, global_1.getTotalMinutes)(timeActivity.hours, timeActivity.minute);
+                                customerName = timeActivity.customerName;
+                            }
+                        });
+                    }
+                    else {
+                        if (singleTimeActivity.customerId === singleCustomer) {
+                            customerMinutes += (0, global_1.getTotalMinutes)(singleTimeActivity.hours, singleTimeActivity.minute);
+                            customerName = singleTimeActivity.customerName;
+                        }
                     }
                 });
                 customerObject['customerName'] = customerName;
@@ -360,7 +383,7 @@ class TimeSheetServices {
                 totalHours: formattedHours.split(':')[0],
                 totalMinutes: formattedHours.split(':')[1],
             };
-            const pdfHTML = (0, timeSheetPdf_1.generatePdf)(pdfData, employeeDetails, uniqueCustomers);
+            const pdfHTML = (0, timeSheetPdf_1.generatePdf)(pdfData, employeeDetails, uniqueCustomers, companyDetails.tenantName);
             const response = yield axios_1.default.post('https://pdf.satvasolutions.com/api/ConvertHtmlToPdf', {
                 FileName: `${employeeDetails === null || employeeDetails === void 0 ? void 0 : employeeDetails.fullName}_${(0, moment_1.default)(pdfData.startDate).format('MM/DD/YYYY')} - ${(0, moment_1.default)(pdfData.endDate).format('MM/DD/YYYY')}.pdf`,
                 HtmlData: [btoa(pdfHTML)],

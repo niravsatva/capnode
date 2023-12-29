@@ -5,10 +5,11 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.generatePdf = void 0;
 const moment_1 = __importDefault(require("moment"));
-const generatePdf = (pdfData, singleEmployee, customers) => {
+const generatePdf = (pdfData, singleEmployee, customers, companyName) => {
     const { allTimeLogs, startDate, endDate, totalHours, totalMinutes } = pdfData;
     const { fullName } = singleEmployee;
     let htmlData = ``;
+    let customerData = ``;
     allTimeLogs === null || allTimeLogs === void 0 ? void 0 : allTimeLogs.forEach((singleTimeLog) => {
         if ((singleTimeLog === null || singleTimeLog === void 0 ? void 0 : singleTimeLog.SplitTimeActivities) &&
             (singleTimeLog === null || singleTimeLog === void 0 ? void 0 : singleTimeLog.SplitTimeActivities.length) > 0) {
@@ -34,7 +35,6 @@ const generatePdf = (pdfData, singleEmployee, customers) => {
                     </tr>`;
         }
     });
-    let customerData = ``;
     customers === null || customers === void 0 ? void 0 : customers.forEach((singleCustomer) => {
         customerData += `<tr>
                         <td>${singleCustomer === null || singleCustomer === void 0 ? void 0 : singleCustomer.customerName}</td>
@@ -74,6 +74,7 @@ const generatePdf = (pdfData, singleEmployee, customers) => {
 			</div>
       <br/> 
       <p>Employee Name: ${fullName}</p>
+      <p>Company Name: ${companyName}</p>
       <p>Pay Period: ${(0, moment_1.default)(startDate).format('MM/DD/YYYY')} - ${(0, moment_1.default)(endDate).format('MM/DD/YYYY')}</p>
       <p>Total Time: ${totalHours} Hours ${totalMinutes} Minutes</p>
 
