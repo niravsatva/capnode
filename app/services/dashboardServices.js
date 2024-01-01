@@ -180,35 +180,26 @@ class DashboardServices {
             return { data, labels, max };
         });
     }
-    getAllJournalsWithPayPeriod(companyId, year) {
+    getAllJournalsWithPayPeriod(companyId) {
         return __awaiter(this, void 0, void 0, function* () {
-            const currentYear = year ? year : new Date().getFullYear();
-            const startDateOfYear = new Date(`${Number(currentYear)}-01-01T00:00:00.000Z`);
-            const endDateOfYear = new Date(`${Number(currentYear) + 1}-01-01T00:00:00.000Z`);
+            // const currentYear = year ? year : new Date().getFullYear();
+            // const startDateOfYear = new Date(
+            // 	`${Number(currentYear)}-01-01T00:00:00.000Z`
+            // );
+            // const endDateOfYear = new Date(
+            // 	`${Number(currentYear) + 1}-01-01T00:00:00.000Z`
+            // );
             const currentYearPayPeriods = yield prisma_1.prisma.payPeriod.findMany({
                 where: {
                     companyId,
-                    OR: [
-                        {
-                            startDate: {
-                                gte: startDateOfYear,
-                                lt: endDateOfYear,
-                            },
-                        },
-                        {
-                            endDate: {
-                                gte: startDateOfYear,
-                                lt: endDateOfYear,
-                            },
-                        },
-                    ],
                 },
                 include: {
                     Journal: true
                 },
                 orderBy: {
                     endDate: 'desc'
-                }
+                },
+                take: 10
             });
             // const payPeriodIds = currentYearPayPeriods.map((payPeriod) => {
             // 	return payPeriod.id;
@@ -238,7 +229,9 @@ class DashboardServices {
                         payPeriodName: `${(0, moment_1.default)(currentYearPayPeriod.startDate).format('MM/DD/YYYY')} - ${(0, moment_1.default)(currentYearPayPeriod.endDate).format('MM/DD/YYYY')}`,
                         amount: (_a = currentYearPayPeriod.Journal) === null || _a === void 0 ? void 0 : _a.amount,
                         status: (_b = currentYearPayPeriod.Journal) === null || _b === void 0 ? void 0 : _b.status,
-                        isJournalPublished: currentYearPayPeriod.isJournalPublished
+                        isJournalPublished: currentYearPayPeriod.isJournalPublished,
+                        payPeriodStartDate: currentYearPayPeriod.startDate,
+                        payPeriodEndDate: currentYearPayPeriod.endDate
                     });
                 });
             }

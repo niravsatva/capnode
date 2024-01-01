@@ -57,7 +57,7 @@ class DashboardController {
                 if (!companyId) {
                     throw new customError_1.CustomError(400, 'Company id is required');
                 }
-                const data = yield dashboardServices_1.default.getAllJournalsWithPayPeriod(companyId, req.query.year);
+                const data = yield dashboardServices_1.default.getAllJournalsWithPayPeriod(companyId);
                 return (0, defaultResponseHelper_1.DefaultResponse)(res, 200, '', data);
             }
             catch (error) {
