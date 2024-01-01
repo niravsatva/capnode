@@ -339,7 +339,18 @@ class TimeActivityService {
             else {
                 // Last sync does not exist - time activity sync for the first time
                 // Find all time activities from quickbooks
+                const date = new Date();
                 const timeActivities = yield quickbooksClient_1.default.getAllTimeActivities(accessToken, tenantId, refreshToken);
+                yield prisma_1.prisma.company.update({
+                    where: {
+                        id: companyId,
+                    },
+                    data: {
+                        timeActivitiesLastSyncDate: (0, moment_timezone_1.default)(date)
+                            .tz('America/Los_Angeles')
+                            .format(),
+                    },
+                });
                 const allClasses = yield quickbooksClient_1.default.getAllClasses(accessToken, tenantId, refreshToken);
                 if (timeActivities &&
                     ((_b = (_a = timeActivities === null || timeActivities === void 0 ? void 0 : timeActivities.QueryResponse) === null || _a === void 0 ? void 0 : _a.TimeActivity) === null || _b === void 0 ? void 0 : _b.length) > 0) {
@@ -409,16 +420,16 @@ class TimeActivityService {
                             logger_1.logger.error(`Time activity syncing error : ${err}`);
                         }
                     }
-                    yield prisma_1.prisma.company.update({
-                        where: {
-                            id: companyId,
-                        },
-                        data: {
-                            timeActivitiesLastSyncDate: (0, moment_timezone_1.default)(new Date())
-                                .tz('America/Los_Angeles')
-                                .format(),
-                        },
-                    });
+                    // await prisma.company.update({
+                    // 	where: {
+                    // 		id: companyId,
+                    // 	},
+                    // 	data: {
+                    // 		timeActivitiesLastSyncDate: moment(new Date())
+                    // 			.tz('America/Los_Angeles')
+                    // 			.format(),
+                    // 	},
+                    // });
                 }
             }
         });

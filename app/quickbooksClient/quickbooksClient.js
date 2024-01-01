@@ -281,7 +281,7 @@ class QuickbooksClient {
                 return timeActivityData;
             }
             catch (error) {
-                let customErrorMessage = 'Error while posting journal in Quickbooks';
+                let customErrorMessage = 'Error while syncing time activities';
                 if (error &&
                     (error === null || error === void 0 ? void 0 : error.Fault) &&
                     ((_e = error.Fault) === null || _e === void 0 ? void 0 : _e.Error) &&
