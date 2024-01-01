@@ -246,14 +246,17 @@ class QuickbooksClient {
             try {
                 const timeActivityData = yield new Promise((resolve, reject) => {
                     const qbo = new QuickBooks(config_1.default.quickbooksClientId, config_1.default.quickbooksClientSecret, accessToken, true, realmId, config_1.default.quickbooksEnvironment == 'sandbox' ? true : false, true, null, '2.0', refreshToken);
-                    qbo.findTimeActivities([
-                        {
+                    const query = [
+                        { field: 'fetchAll', value: true }
+                    ];
+                    if (lastSyncDate) {
+                        query.push({
                             field: 'MetaData.LastUpdatedTime',
                             value: (0, moment_timezone_1.default)(lastSyncDate).tz('America/Los_Angeles').format(),
                             operator: '>=',
-                        },
-                        { field: 'fetchAll', value: true },
-                    ], function (err, timeActivities) {
+                        });
+                    }
+                    qbo.findTimeActivities(query, function (err, timeActivities) {
                         return __awaiter(this, void 0, void 0, function* () {
                             if (err) {
                                 reject(err);
